@@ -1,0 +1,257 @@
+import 'package:easykhairat/home.dart';
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+
+class SignInWidget extends StatefulWidget {
+  const SignInWidget({super.key});
+
+  @override
+  State<SignInWidget> createState() => _SignInWidgetState();
+}
+
+class _SignInWidgetState extends State<SignInWidget> {
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final FocusNode _emailFocusNode = FocusNode();
+  final FocusNode _passwordFocusNode = FocusNode();
+  bool _passwordVisibility = false;
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    _emailFocusNode.dispose();
+    _passwordFocusNode.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        FocusScope.of(context).unfocus();
+      },
+      child: Scaffold(
+        backgroundColor: Colors.white,
+        body: SafeArea(
+          child: Center(
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.max,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Image.asset(
+                      'assets/images/easyKhairatLogo.png',
+                      width: 150.0,
+                      height: 150.0,
+                      fit: BoxFit.fitWidth,
+                    ),
+                    Text(
+                      'Selamat Datang!',
+                      style: GoogleFonts.poppins(
+                        fontSize: 24.0,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    SizedBox(height: 4.0),
+                    Text(
+                      'Gunakan borang di bawah untuk mengakses akaun anda.',
+                      style: GoogleFonts.poppins(
+                        fontSize: 14.0,
+                        color: Colors.grey,
+                      ),
+                    ),
+                    SizedBox(height: 16.0),
+                    TextFormField(
+                      controller: _emailController,
+                      focusNode: _emailFocusNode,
+                      decoration: InputDecoration(
+                        labelText: 'Email Address',
+                        hintText: 'Enter your email here...',
+                        labelStyle: GoogleFonts.poppins(),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(40.0),
+                        ),
+                        filled: true,
+                        fillColor: Colors.grey[200],
+                      ),
+                      keyboardType: TextInputType.emailAddress,
+                    ),
+                    SizedBox(height: 16.0),
+                    TextFormField(
+                      controller: _passwordController,
+                      focusNode: _passwordFocusNode,
+                      obscureText: !_passwordVisibility,
+                      decoration: InputDecoration(
+                        labelText: 'Password',
+                        hintText: 'Enter your password here...',
+                        labelStyle: GoogleFonts.poppins(),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(40.0),
+                        ),
+                        filled: true,
+                        fillColor: Colors.grey[200],
+                        suffixIcon: InkWell(
+                          onTap: () {
+                            setState(() {
+                              _passwordVisibility = !_passwordVisibility;
+                            });
+                          },
+                          child: Icon(
+                            _passwordVisibility
+                                ? Icons.visibility_outlined
+                                : Icons.visibility_off_outlined,
+                            color: Colors.grey,
+                          ),
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 16.0),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        TextButton(
+                          onPressed: () {
+                            // Forgot Password logic
+                          },
+                          child: Text(
+                            'Forgot Password?',
+                            style: GoogleFonts.poppins(
+                              color: Colors.blue,
+                              fontSize: 14.0,
+                            ),
+                          ),
+                        ),
+                        ElevatedButton(
+                          onPressed: () {
+                            // Sign in logic
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.blue,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(40.0),
+                            ),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              vertical: 12.0,
+                              horizontal: 20.0,
+                            ),
+                            child: Text(
+                              'Sign In',
+                              style: GoogleFonts.poppins(
+                                color: Colors.white,
+                                fontSize: 16.0,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 20.0),
+                    Center(
+                      child: Text(
+                        'Or sign in with',
+                        style: GoogleFonts.poppins(
+                          fontSize: 14.0,
+                          color: Colors.grey,
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 16.0),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color: Colors.grey,
+                              width: 2.0,
+                            ), // Border color and width
+                            borderRadius: BorderRadius.circular(
+                              8.0,
+                            ), // Optional: Rounded corners
+                          ),
+                          child: IconButton(
+                            icon: FaIcon(
+                              FontAwesomeIcons.google,
+                              color: Colors.red,
+                            ),
+                            onPressed: () {
+                              // Google sign-in logic
+                            },
+                          ),
+                        ),
+                        SizedBox(width: 20.0),
+                        Container(
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color: Colors.grey,
+                              width: 2.0,
+                            ), // Border color and width
+                            borderRadius: BorderRadius.circular(
+                              8.0,
+                            ), // Optional: Rounded corners
+                          ),
+                          child: IconButton(
+                            icon: FaIcon(
+                              FontAwesomeIcons.apple,
+                              color: Colors.black,
+                            ),
+                            onPressed: () {
+                              // Apple sign-in logic
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 20.0),
+                    Center(
+                      child: TextButton(
+                        onPressed: () {
+                          // Navigate to sign-up
+                        },
+                        child: Text(
+                          'Don\'t have an account? Create one',
+                          style: GoogleFonts.poppins(color: Colors.blue),
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 20.0),
+                    Center(
+                      child: OutlinedButton(
+                        onPressed: () {
+                          // Guest sign-in logic
+                          Get.to(() => HomePageWidget());
+                        },
+                        style: OutlinedButton.styleFrom(
+                          side: BorderSide(color: Colors.grey), // Border color
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(
+                              8.0,
+                            ), // Optional: Rounded corners
+                          ),
+                        ),
+                        child: Text(
+                          'Continue as Guest',
+                          style: GoogleFonts.poppins(color: Colors.grey),
+                        ),
+                      ),
+                    ),
+
+                    SizedBox(height: 16.0),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
