@@ -1,3 +1,4 @@
+import 'package:easykhairat/views/home.dart';
 import 'package:easykhairat/views/signIn.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -37,6 +38,7 @@ class AuthService {
           'Signup Error',
           error.toString(),
           snackPosition: SnackPosition.BOTTOM,
+          snackStyle: SnackStyle.FLOATING,
         );
       }
     }
@@ -55,22 +57,56 @@ class AuthService {
       );
 
       if (response.user != null) {
-        // Fetch user type from 'users' table
-        final userData =
-            await supabase
-                .from('users')
-                .select('user_type')
-                .eq('user_email', email)
-                .single();
+        // Email is confirmed, and login was successful
 
-        String userType = userData['user_type'];
-        print('User Type: $userType');
+        // Fetch user type from 'users' table
+        // final userData =
+        //     await supabase
+        //         .from('users')
+        //         .select('user_type')
+        //         .eq('user_email', email)
+        //         .single();
+
+        // String userType = userData['user_type'];
+        // print('User Type: $userType');
 
         // Redirect based on user type
-        _redirectUser();
+        Get.to(() => HomePageWidget());
       }
-    } catch (error) {
-      print('Sign-in error: $error');
+    } on AuthException catch (e) {
+      if (e.message.contains('Email not confirmed')) {
+        print('Error: Email is not confirmed.');
+        Get.snackbar(
+          'Sign-in Error',
+          'Please confirm your email before signing in.',
+          snackPosition: SnackPosition.BOTTOM,
+          snackStyle: SnackStyle.FLOATING,
+        );
+      } else if (e.message.contains('Invalid login credentials')) {
+        print('Error: Invalid email or password.');
+        Get.snackbar(
+          'Sign-in Error',
+          'Invalid email or password.',
+          snackPosition: SnackPosition.BOTTOM,
+          snackStyle: SnackStyle.FLOATING,
+        );
+      } else {
+        print('Auth error: ${e.message}');
+        Get.snackbar(
+          'Sign-in Error',
+          e.message,
+          snackPosition: SnackPosition.BOTTOM,
+          snackStyle: SnackStyle.FLOATING,
+        );
+      }
+    } catch (e) {
+      print('Unexpected error: $e');
+      Get.snackbar(
+        'Sign-in Error',
+        'Something went wrong. Please try again later.',
+        snackPosition: SnackPosition.BOTTOM,
+        snackStyle: SnackStyle.FLOATING,
+      );
     }
   }
 
@@ -84,6 +120,21 @@ class AuthService {
       Get.to(() => SignInWidget());
     } catch (error) {
       print('Sign-out error: $error');
+    }
+  }
+
+  static Future<void> resendVerificationEmail(String email) async {
+    try {
+      await supabase.auth.resend(
+        type:
+            OtpType
+                .signup, // 'signup' for new users, 'email_change' for email updates
+        email: email,
+      );
+      Get.snackbar('Email Sent', 'A new verification email has been sent.');
+    } catch (error) {
+      print('Resend email error: $error');
+      Get.snackbar('Error', 'Failed to resend verification email.');
     }
   }
 

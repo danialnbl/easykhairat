@@ -1,3 +1,4 @@
+import 'package:easykhairat/controllers/auth_controller.dart';
 import 'package:easykhairat/views/home.dart';
 import 'package:easykhairat/views/signUp.dart';
 import 'package:flutter/material.dart';
@@ -26,6 +27,39 @@ class _SignInWidgetState extends State<SignInWidget> {
     _emailFocusNode.dispose();
     _passwordFocusNode.dispose();
     super.dispose();
+  }
+
+  Future<void> _handleSignin() async {
+    // Check for empty fields
+    if (_emailController.text.trim().isEmpty ||
+        _passwordController.text.trim().isEmpty) {
+      Get.snackbar(
+        'Error',
+        'Please fill in all fields',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red.withOpacity(0.8),
+        colorText: Colors.white,
+      );
+      return;
+    }
+
+    // Call sign up
+    try {
+      await AuthService.signIn(
+        _emailController.text,
+        _passwordController.text,
+        context,
+      );
+      // Navigation happens inside AuthService based on userType
+    } catch (e) {
+      Get.snackbar(
+        'Signup Failed',
+        e.toString(),
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red.withOpacity(0.8),
+        colorText: Colors.white,
+      );
+    }
   }
 
   @override
@@ -130,6 +164,7 @@ class _SignInWidgetState extends State<SignInWidget> {
                         ElevatedButton(
                           onPressed: () {
                             // Sign in logic
+                            _handleSignin();
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.blue,
@@ -153,6 +188,38 @@ class _SignInWidgetState extends State<SignInWidget> {
                           ),
                         ),
                       ],
+                    ),
+                    SizedBox(height: 16.0),
+                    Center(
+                      child: TextButton(
+                        onPressed: () {
+                          // Resend verification email logic
+                          if (_emailController.text != null) {
+                            AuthService.resendVerificationEmail(
+                              _emailController.text,
+                            );
+                            Get.snackbar(
+                              'Email Sent',
+                              'A new verification email has been sent.',
+                              snackPosition: SnackPosition.BOTTOM,
+                              backgroundColor: Colors.green.withOpacity(0.8),
+                              colorText: Colors.white,
+                            );
+                          } else {
+                            Get.snackbar(
+                              'Error',
+                              'Please enter your email address',
+                              snackPosition: SnackPosition.BOTTOM,
+                              backgroundColor: Colors.red.withOpacity(0.8),
+                              colorText: Colors.white,
+                            );
+                          }
+                        },
+                        child: Text(
+                          'Resend verification email',
+                          style: GoogleFonts.poppins(color: Colors.blue),
+                        ),
+                      ),
                     ),
                     SizedBox(height: 20.0),
                     Center(
