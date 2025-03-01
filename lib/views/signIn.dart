@@ -1,4 +1,5 @@
-import 'package:easykhairat/home.dart';
+import 'package:easykhairat/views/home.dart';
+import 'package:easykhairat/views/signUp.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -214,7 +215,7 @@ class _SignInWidgetState extends State<SignInWidget> {
                     Center(
                       child: TextButton(
                         onPressed: () {
-                          // Navigate to sign-up
+                          Get.to(() => SignUpWidget());
                         },
                         child: Text(
                           'Don\'t have an account? Create one',

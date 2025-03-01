@@ -1,5 +1,5 @@
-import 'package:easykhairat/controller/navigation_controller.dart';
-import 'package:easykhairat/settings.dart';
+import 'package:easykhairat/controllers/navigation_controller.dart';
+import 'package:easykhairat/views/settings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
