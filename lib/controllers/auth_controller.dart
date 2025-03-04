@@ -1,5 +1,5 @@
-import 'package:easykhairat/views/home.dart';
-import 'package:easykhairat/views/signIn.dart';
+import 'package:easykhairat/views/user/home.dart';
+import 'package:easykhairat/views/auth/signIn.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:easykhairat/models/userModel.dart' as usermodel;

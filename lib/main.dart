@@ -1,4 +1,4 @@
-import 'package:easykhairat/views/signIn.dart';
+import 'package:easykhairat/views/auth/signIn.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';

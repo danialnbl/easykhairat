@@ -1,8 +1,10 @@
 import 'package:easykhairat/controllers/navigation_controller.dart';
-import 'package:easykhairat/views/settings.dart';
+import 'package:easykhairat/views/user/profile.dart';
+import 'package:easykhairat/views/user/settings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:moon_design/moon_design.dart';
 import 'package:percent_indicator/percent_indicator.dart';
 
 class HomePageWidget extends StatelessWidget {
@@ -30,8 +32,8 @@ class HomePageWidget extends StatelessWidget {
             items: const <BottomNavigationBarItem>[
               BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
               BottomNavigationBarItem(
-                icon: Icon(Icons.person),
-                label: 'Profile',
+                icon: Icon(MoonIcons.files_folder_closed_16_light),
+                label: 'Features',
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.settings),

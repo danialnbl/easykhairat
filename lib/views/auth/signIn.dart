@@ -1,6 +1,6 @@
 import 'package:easykhairat/controllers/auth_controller.dart';
-import 'package:easykhairat/views/home.dart';
-import 'package:easykhairat/views/signUp.dart';
+import 'package:easykhairat/views/user/home.dart';
+import 'package:easykhairat/views/auth/signUp.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -92,14 +92,14 @@ class _SignInWidgetState extends State<SignInWidget> {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    SizedBox(height: 4.0),
-                    Text(
-                      'Gunakan borang di bawah untuk mengakses akaun anda.',
-                      style: GoogleFonts.poppins(
-                        fontSize: 14.0,
-                        color: Colors.grey,
-                      ),
-                    ),
+                    // SizedBox(height: 4.0),
+                    // Text(
+                    //   'Gunakan borang di bawah untuk mengakses akaun anda.',
+                    //   style: GoogleFonts.poppins(
+                    //     fontSize: 14.0,
+                    //     color: Colors.grey,
+                    //   ),
+                    // ),
                     SizedBox(height: 16.0),
                     TextFormField(
                       controller: _emailController,
