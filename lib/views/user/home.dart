@@ -1,5 +1,4 @@
 import 'package:easykhairat/controllers/navigation_controller.dart';
-import 'package:easykhairat/views/user/profile.dart';
 import 'package:easykhairat/views/user/settings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -7,7 +6,12 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:moon_design/moon_design.dart';
 import 'package:percent_indicator/percent_indicator.dart';
 
-class HomePageWidget extends StatelessWidget {
+class HomePageWidget extends StatefulWidget {
+  @override
+  State<HomePageWidget> createState() => _HomePageWidgetState();
+}
+
+class _HomePageWidgetState extends State<HomePageWidget> {
   final NavigationController navController = Get.put(NavigationController());
 
   @override
@@ -15,13 +19,14 @@ class HomePageWidget extends StatelessWidget {
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
-        backgroundColor: Color.fromARGB(100, 241, 244, 248),
+        backgroundColor: const Color.fromARGB(100, 241, 244, 248),
         body: Obx(
           () => IndexedStack(
             index: navController.selectedIndex.value,
             children: [
               _buildDashboard(context),
-              Center(child: Text('Profile Screen')),
+              Center(child: Text('Payment Screen')),
+              Center(child: Text('Receipts Screen')),
               Settings(),
             ],
           ),
@@ -32,8 +37,12 @@ class HomePageWidget extends StatelessWidget {
             items: const <BottomNavigationBarItem>[
               BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
               BottomNavigationBarItem(
-                icon: Icon(MoonIcons.files_folder_closed_16_light),
-                label: 'Features',
+                icon: Icon(MoonIcons.shop_wallet_16_light),
+                label: 'Payment',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(MoonIcons.generic_bet_16_light),
+                label: 'Receipts',
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.settings),
@@ -41,7 +50,9 @@ class HomePageWidget extends StatelessWidget {
               ),
             ],
             currentIndex: navController.selectedIndex.value,
+            unselectedItemColor: MoonColors.light.bulma,
             selectedItemColor: Colors.blue,
+            showUnselectedLabels: true,
             onTap: navController.changeIndex,
           ),
         ),
@@ -119,7 +130,7 @@ class HomePageWidget extends StatelessWidget {
 
   Widget _buildCourseSummaryCard() {
     return Card(
-      color: Color.fromARGB(255, 255, 255, 255),
+      color: const Color.fromARGB(255, 255, 255, 255),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       elevation: 4,
       child: Padding(
@@ -190,7 +201,7 @@ class HomePageWidget extends StatelessWidget {
     return Card(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       elevation: 4,
-      color: Color.fromARGB(255, 255, 255, 255),
+      color: const Color.fromARGB(255, 255, 255, 255),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(

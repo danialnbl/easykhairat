@@ -43,7 +43,6 @@ class _SignInWidgetState extends State<SignInWidget> {
       return;
     }
 
-    // Call sign up
     try {
       await AuthService.signIn(
         _emailController.text,
@@ -258,13 +257,8 @@ class _SignInWidgetState extends State<SignInWidget> {
                         SizedBox(width: 20.0),
                         Container(
                           decoration: BoxDecoration(
-                            border: Border.all(
-                              color: Colors.grey,
-                              width: 2.0,
-                            ), // Border color and width
-                            borderRadius: BorderRadius.circular(
-                              8.0,
-                            ), // Optional: Rounded corners
+                            border: Border.all(color: Colors.grey, width: 2.0),
+                            borderRadius: BorderRadius.circular(8.0),
                           ),
                           child: IconButton(
                             icon: FaIcon(
@@ -300,9 +294,7 @@ class _SignInWidgetState extends State<SignInWidget> {
                         style: OutlinedButton.styleFrom(
                           side: BorderSide(color: Colors.grey), // Border color
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(
-                              8.0,
-                            ), // Optional: Rounded corners
+                            borderRadius: BorderRadius.circular(8.0),
                           ),
                         ),
                         child: Text(

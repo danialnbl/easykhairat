@@ -1,3 +1,4 @@
+import 'package:easykhairat/views/admin/adminHome.dart';
 import 'package:easykhairat/views/user/home.dart';
 import 'package:easykhairat/views/auth/signIn.dart';
 import 'package:flutter/material.dart';
@@ -28,7 +29,7 @@ class AuthService {
         throw Exception('User creation failed');
       } else {
         print('User created successfully');
-        _redirectUser();
+        Get.to(() => SignInWidget());
       }
     } catch (error) {
       print('Signup error: $error');
@@ -60,18 +61,17 @@ class AuthService {
         // Email is confirmed, and login was successful
 
         // Fetch user type from 'users' table
-        // final userData =
-        //     await supabase
-        //         .from('users')
-        //         .select('user_type')
-        //         .eq('user_email', email)
-        //         .single();
+        final userData =
+            await supabase
+                .from('users')
+                .select('user_type')
+                .eq('user_email', email)
+                .single();
 
-        // String userType = userData['user_type'];
-        // print('User Type: $userType');
+        String userType = userData['user_type'];
 
         // Redirect based on user type
-        Get.to(() => HomePageWidget());
+        _redirectUser(userType);
       }
     } on AuthException catch (e) {
       if (e.message.contains('Email not confirmed')) {
@@ -139,7 +139,11 @@ class AuthService {
   }
 
   // Redirect User Based on User Type
-  static void _redirectUser() {
-    Get.to(() => SignInWidget());
+  static void _redirectUser(String userType) {
+    if (userType == 'admin') {
+      Get.to(() => AdminHome());
+    } else {
+      Get.to(() => HomePageWidget());
+    }
   }
 }

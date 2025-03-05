@@ -1,3 +1,4 @@
+import 'package:easykhairat/controllers/user_controller.dart';
 import 'package:easykhairat/views/auth/signIn.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -16,6 +17,8 @@ void main() async {
   supabaseKey = dotenv.env['SUPABASE_KEY']!;
 
   await Supabase.initialize(url: supabaseUrl, anonKey: supabaseKey);
+
+  Get.lazyPut(() => UserController());
 
   runApp(const MyApp());
 }

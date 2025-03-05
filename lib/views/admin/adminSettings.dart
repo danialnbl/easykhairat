@@ -1,19 +1,17 @@
-import 'package:easykhairat/controllers/user_controller.dart';
 import 'package:easykhairat/views/auth/signIn.dart';
-import 'package:easykhairat/views/user/familyProfile.dart';
-import 'package:easykhairat/views/user/profile.dart';
 import 'package:flutter/material.dart';
 import 'package:moon_design/moon_design.dart';
 import 'package:get/get.dart';
+import 'package:easykhairat/controllers/user_controller.dart';
 
-class Settings extends StatefulWidget {
-  const Settings({Key? key}) : super(key: key);
+class AdminSettings extends StatefulWidget {
+  const AdminSettings({Key? key}) : super(key: key);
 
   @override
-  _SettingsState createState() => _SettingsState();
+  _AdminSettingsState createState() => _AdminSettingsState();
 }
 
-class _SettingsState extends State<Settings> {
+class _AdminSettingsState extends State<AdminSettings> {
   bool isDarkMode = false;
 
   @override
@@ -55,16 +53,7 @@ class _SettingsState extends State<Settings> {
                       surfaceColor,
                       textColor,
                       onTap: () {
-                        Get.to(() => ProfilePageWidget());
-                      },
-                    ),
-                    _buildSettingItem(
-                      MoonIcons.generic_users_32_regular,
-                      'Family Profile',
-                      surfaceColor,
-                      textColor,
-                      onTap: () {
-                        Get.to(() => FamilyProfile());
+                        // Get.to(() => ProfilePageWidget());
                       },
                     ),
                     _buildSectionTitle('General', textColor),
