@@ -1,5 +1,6 @@
 import 'package:easykhairat/controllers/navigation_controller.dart';
 import 'package:easykhairat/views/user/settings.dart';
+import 'package:easykhairat/views/user/userPayment.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -25,7 +26,7 @@ class _HomePageWidgetState extends State<HomePageWidget> {
             index: navController.selectedIndex.value,
             children: [
               _buildDashboard(context),
-              Center(child: Text('Payment Screen')),
+              UserPayment(),
               Center(child: Text('Receipts Screen')),
               Settings(),
             ],
