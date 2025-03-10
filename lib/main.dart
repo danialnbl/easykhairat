@@ -18,7 +18,7 @@ void main() async {
 
   await Supabase.initialize(url: supabaseUrl, anonKey: supabaseKey);
 
-  Get.lazyPut(() => UserController());
+  Get.put(UserController());
 
   runApp(const MyApp());
 }

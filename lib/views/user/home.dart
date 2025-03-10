@@ -20,16 +20,18 @@ class _HomePageWidgetState extends State<HomePageWidget> {
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
-        backgroundColor: const Color.fromARGB(100, 241, 244, 248),
-        body: Obx(
-          () => IndexedStack(
-            index: navController.selectedIndex.value,
-            children: [
-              _buildDashboard(context),
-              UserPayment(),
-              Center(child: Text('Receipts Screen')),
-              Settings(),
-            ],
+        backgroundColor: MoonColors.light.gohan,
+        body: SafeArea(
+          child: Obx(
+            () => IndexedStack(
+              index: navController.selectedIndex.value,
+              children: [
+                _buildDashboard(context),
+                UserPayment(),
+                Center(child: Text('Receipts Screen')),
+                Settings(),
+              ],
+            ),
           ),
         ),
         bottomNavigationBar: Obx(

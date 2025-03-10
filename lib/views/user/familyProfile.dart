@@ -12,6 +12,7 @@ class _FamilyProfileState extends State<FamilyProfile> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: MoonColors.light.gohan,
       body: SafeArea(
         child: Column(
           children: [
