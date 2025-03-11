@@ -38,7 +38,6 @@ class _FamilyProfileState extends State<FamilyProfile> {
                   children: [
                     Container(
                       decoration: BoxDecoration(
-                        color: Colors.white,
                         borderRadius: const BorderRadius.vertical(
                           top: Radius.circular(16),
                         ),

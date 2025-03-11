@@ -63,6 +63,7 @@ class _UserPaymentState extends State<UserPayment> {
                               ),
                               const SizedBox(height: 20),
                               Card(
+                                color: MoonColors.light.goku,
                                 elevation: 2,
                                 child: Padding(
                                   padding: const EdgeInsets.all(16),

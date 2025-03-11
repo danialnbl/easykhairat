@@ -14,6 +14,7 @@ class HomePageWidget extends StatefulWidget {
 
 class _HomePageWidgetState extends State<HomePageWidget> {
   final NavigationController navController = Get.put(NavigationController());
+  int selectedDot = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -67,44 +68,52 @@ class _HomePageWidgetState extends State<HomePageWidget> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        Padding(
+          padding: const EdgeInsets.only(left: 16.0, top: 16.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Image.asset(
+                'assets/images/easyKhairatLogo.png',
+                width: 50.0,
+                height: 50.0,
+                fit: BoxFit.fitWidth,
+              ),
+              IconButton(icon: Icon(Icons.notifications), onPressed: () {}),
+            ],
+          ),
+        ),
         Expanded(
           child: SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Padding(
-                  padding: const EdgeInsets.only(left: 16.0, top: 32.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Dashboard',
-                        style: GoogleFonts.roboto(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'Your project status is appearing here.',
-                        style: GoogleFonts.roboto(
-                          fontSize: 16,
-                          color: Colors.grey[700],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const SizedBox(height: 16),
                       Row(
                         children: [
-                          Expanded(child: _buildCourseSummaryCard()),
-                          const SizedBox(width: 16),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'My Khairat Plan',
+                                style: GoogleFonts.roboto(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              Text(
+                                'MyKasih',
+                                style: GoogleFonts.roboto(
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
                         ],
                       ),
                       const SizedBox(height: 16),
@@ -112,11 +121,136 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                         children: [
                           Expanded(
                             child: _buildCard(
-                              title: 'Active Users',
-                              subtitle: 'A small summary of your user base.',
-                              progress: 0.75,
-                              showIndicator: false,
+                              title: 'Total Due',
+                              subtitle: 'Pay before 8 April 2025',
                             ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      Row(
+                        children: [
+                          Text(
+                            'General',
+                            style: GoogleFonts.roboto(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      Column(
+                        children: [
+                          SizedBox(
+                            height:
+                                120, // Ensures the carousel has a proper height
+                            child: MoonCarousel(
+                              itemCount: 4, // Only show 4 items
+                              itemExtent: 110,
+                              loop: false, // Enables infinite scrolling
+                              isCentered: false,
+                              clampMaxExtent: true,
+                              autoPlay:
+                                  false, // Disable autoplay for manual scrolling
+                              itemBuilder: (
+                                BuildContext context,
+                                int itemIndex,
+                                int _,
+                              ) {
+                                // List of preset labels
+                                List<String> labels = [
+                                  "Payment",
+                                  "Receipt",
+                                  "Support",
+                                  "Add Family",
+                                ];
+
+                                return Container(
+                                  decoration: ShapeDecoration(
+                                    color: MoonColors.light.bulma,
+                                    shape: MoonSquircleBorder(
+                                      borderRadius: BorderRadius.circular(
+                                        12,
+                                      ).squircleBorderRadius(context),
+                                    ),
+                                  ),
+                                  child: Center(
+                                    child: Text(
+                                      labels[itemIndex], // No numbers, only text labels
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                        color: MoonColors.light.gohan,
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      Row(
+                        children: [
+                          Text(
+                            'Death Announecements',
+                            style: GoogleFonts.roboto(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      Column(
+                        children: [
+                          SizedBox(
+                            height: 180,
+                            child: OverflowBox(
+                              maxWidth: MediaQuery.of(context).size.width,
+                              child: MoonCarousel(
+                                gap: 32,
+                                itemCount: 2,
+                                itemExtent:
+                                    MediaQuery.of(context).size.width - 32,
+                                physics: const PageScrollPhysics(),
+                                onIndexChanged:
+                                    (int index) =>
+                                        setState(() => selectedDot = index),
+                                itemBuilder:
+                                    (
+                                      BuildContext context,
+                                      int itemIndex,
+                                      int _,
+                                    ) => Container(
+                                      decoration: ShapeDecoration(
+                                        color: MoonColors.light.bulma,
+                                        shape: MoonSquircleBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            12,
+                                          ).squircleBorderRadius(context),
+                                        ),
+                                      ),
+                                      child: Center(
+                                        child: Text(
+                                          "${itemIndex + 1}",
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                            color: MoonColors.light.gohan,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          MoonDotIndicator(
+                            selectedDot: selectedDot,
+                            dotCount: 2,
                           ),
                         ],
                       ),
@@ -195,53 +329,63 @@ class _HomePageWidgetState extends State<HomePageWidget> {
     );
   }
 
-  Widget _buildCard({
-    required String title,
-    required String subtitle,
-    double? progress,
-    bool showIndicator = false,
-  }) {
+  Widget _buildCard({required String title, required String subtitle}) {
     return Card(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       elevation: 4,
-      color: const Color.fromARGB(255, 255, 255, 255),
+      color: MoonColors.light.bulma,
       child: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: Row(
+          crossAxisAlignment:
+              CrossAxisAlignment.center, // Center items vertically
           children: [
-            Text(
-              title,
-              style: GoogleFonts.roboto(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              subtitle,
-              style: GoogleFonts.roboto(fontSize: 16, color: Colors.grey[600]),
-            ),
-            if (showIndicator && progress != null) ...[
-              const SizedBox(height: 16),
-              Center(
-                child: CircularPercentIndicator(
-                  percent: progress,
-                  radius: 50,
-                  lineWidth: 10,
-                  animation: true,
-                  progressColor: Colors.blue,
-                  backgroundColor: Colors.grey[300]!,
-                  center: Text(
-                    '${(progress * 100).toInt()}%',
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
                     style: GoogleFonts.roboto(
-                      fontSize: 18,
+                      fontSize: 20,
                       fontWeight: FontWeight.bold,
+                      color: MoonColors.light.gohan,
                     ),
                   ),
-                ),
+                  const SizedBox(height: 8),
+                  Text(
+                    subtitle,
+                    style: GoogleFonts.roboto(
+                      fontSize: 16,
+                      color: MoonColors.light.gohan,
+                    ),
+                  ),
+                ],
               ),
-            ],
+            ),
+            Center(
+              // Center the button horizontally within the row
+              child: MoonButton(
+                onTap: () {
+                  print("Pay Now button pressed!");
+                  // Add payment functionality here
+                },
+                backgroundColor: MoonColors.light.goku, // Primary button color
+                textColor: MoonColors.light.bulma, // Text color
+                borderRadius: BorderRadius.circular(50), // Rounded corners
+                buttonSize: MoonButtonSize.md, // Medium size button
+                padding: EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 12,
+                ), // Padding
+                label: Text(
+                  "Pay Now",
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+                showBorder: false, // No border
+                showScaleEffect: true, // Adds a click animation effect
+              ),
+            ),
           ],
         ),
       ),
