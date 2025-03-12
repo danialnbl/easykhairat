@@ -449,10 +449,6 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                 textColor: MoonColors.light.bulma, // Text color
                 borderRadius: BorderRadius.circular(50), // Rounded corners
                 buttonSize: MoonButtonSize.md, // Medium size button
-                padding: EdgeInsets.symmetric(
-                  horizontal: 24,
-                  vertical: 12,
-                ), // Padding
                 label: Text(
                   "Pay Now",
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
