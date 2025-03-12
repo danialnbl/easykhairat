@@ -1,3 +1,4 @@
+import 'package:badges/badges.dart' as badges;
 import 'package:easykhairat/controllers/navigation_controller.dart';
 import 'package:easykhairat/views/user/settings.dart';
 import 'package:easykhairat/views/user/userPayment.dart';
@@ -15,6 +16,7 @@ class HomePageWidget extends StatefulWidget {
 class _HomePageWidgetState extends State<HomePageWidget> {
   final NavigationController navController = Get.put(NavigationController());
   int selectedDot = 0;
+  int advertisementDot = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +30,7 @@ class _HomePageWidgetState extends State<HomePageWidget> {
               index: navController.selectedIndex.value,
               children: [
                 _buildDashboard(context),
-                UserPayment(),
+                // UserPayment(),
                 Center(child: Text('Receipts Screen')),
                 Settings(),
               ],
@@ -40,10 +42,10 @@ class _HomePageWidgetState extends State<HomePageWidget> {
             backgroundColor: Colors.white,
             items: const <BottomNavigationBarItem>[
               BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-              BottomNavigationBarItem(
-                icon: Icon(MoonIcons.shop_wallet_16_light),
-                label: 'Payment',
-              ),
+              // BottomNavigationBarItem(
+              //   icon: Icon(MoonIcons.shop_wallet_16_light),
+              //   label: 'Payment',
+              // ),
               BottomNavigationBarItem(
                 icon: Icon(MoonIcons.generic_bet_16_light),
                 label: 'Receipts',
@@ -64,6 +66,8 @@ class _HomePageWidgetState extends State<HomePageWidget> {
     );
   }
 
+  bool show = false;
+
   Widget _buildDashboard(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -79,7 +83,15 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                 height: 50.0,
                 fit: BoxFit.fitWidth,
               ),
-              IconButton(icon: Icon(Icons.notifications), onPressed: () {}),
+              badges.Badge(
+                position: badges.BadgePosition.topEnd(top: 0, end: 5),
+                badgeContent: Text('3', style: TextStyle(color: Colors.white)),
+                child: IconButton(
+                  icon: Icon(Icons.notifications),
+                  onPressed: () {},
+                ),
+              ),
+              // IconButton(icon: Icon(Icons.notifications), onPressed: () {}),
             ],
           ),
         ),
@@ -254,6 +266,70 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                           ),
                         ],
                       ),
+                      const SizedBox(height: 16),
+                      Row(
+                        children: [
+                          Text(
+                            'Advertisements',
+                            style: GoogleFonts.roboto(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      Column(
+                        children: [
+                          SizedBox(
+                            height: 180,
+                            child: OverflowBox(
+                              maxWidth: MediaQuery.of(context).size.width,
+                              child: MoonCarousel(
+                                gap: 32,
+                                itemCount: 2,
+                                itemExtent:
+                                    MediaQuery.of(context).size.width - 32,
+                                physics: const PageScrollPhysics(),
+                                onIndexChanged:
+                                    (int index) => setState(
+                                      () => advertisementDot = index,
+                                    ),
+                                itemBuilder:
+                                    (
+                                      BuildContext context,
+                                      int itemIndex,
+                                      int _,
+                                    ) => Container(
+                                      decoration: ShapeDecoration(
+                                        color: MoonColors.light.bulma,
+                                        shape: MoonSquircleBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            12,
+                                          ).squircleBorderRadius(context),
+                                        ),
+                                      ),
+                                      child: Center(
+                                        child: Text(
+                                          "${itemIndex + 1}",
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                            color: MoonColors.light.gohan,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          MoonDotIndicator(
+                            selectedDot: advertisementDot,
+                            dotCount: 2,
+                          ),
+                        ],
+                      ),
                     ],
                   ),
                 ),
@@ -367,8 +443,7 @@ class _HomePageWidgetState extends State<HomePageWidget> {
               // Center the button horizontally within the row
               child: MoonButton(
                 onTap: () {
-                  print("Pay Now button pressed!");
-                  // Add payment functionality here
+                  Get.to(() => UserPayment());
                 },
                 backgroundColor: MoonColors.light.goku, // Primary button color
                 textColor: MoonColors.light.bulma, // Text color
