@@ -1,4 +1,4 @@
-import 'package:easykhairat/views/admin/adminHome.dart';
+import 'package:easykhairat/views/admin/admin_main.dart';
 import 'package:easykhairat/views/user/home.dart';
 import 'package:easykhairat/views/auth/signIn.dart';
 import 'package:flutter/material.dart';
@@ -141,7 +141,7 @@ class AuthService {
   // Redirect User Based on User Type
   static void _redirectUser(String userType) {
     if (userType == 'admin') {
-      Get.to(() => AdminHome());
+      Get.to(() => AdminMain());
     } else {
       Get.to(() => HomePageWidget());
     }

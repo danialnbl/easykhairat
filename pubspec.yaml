@@ -44,6 +44,7 @@ dependencies:
   moon_design: ^1.1.0
   webview_flutter: ^4.10.0
   badges: ^3.1.2
+  fl_chart: ^0.70.2
 
 dev_dependencies:
   flutter_test:
