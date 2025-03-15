@@ -29,7 +29,7 @@ class AuthService {
         throw Exception('User creation failed');
       } else {
         print('User created successfully');
-        Get.to(() => SignInWidget());
+        Get.to(() => SignInPage());
       }
     } catch (error) {
       print('Signup error: $error');
@@ -117,7 +117,7 @@ class AuthService {
       print('User signed out');
 
       // Redirect to login screen
-      Get.to(() => SignInWidget());
+      Get.to(() => SignInPage());
     } catch (error) {
       print('Sign-out error: $error');
     }

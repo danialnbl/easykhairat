@@ -73,7 +73,7 @@ class _ProfilePageWidgetState extends State<ProfilePageWidget> {
                 label: const Text("Back to login"),
                 onTap: () {
                   Get.to(
-                    () => const SignInWidget(),
+                    () => const SignInPage(),
                   ); // Make sure SignInWidget exists
                 },
               ),

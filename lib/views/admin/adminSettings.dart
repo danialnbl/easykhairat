@@ -70,7 +70,7 @@ class _AdminSettingsState extends State<AdminSettings> {
                       textColor,
                       onTap: () {
                         userController.signOut().then((value) {
-                          Get.offAll(() => SignInWidget());
+                          Get.offAll(() => SignInPage());
                         });
                       },
                     ),

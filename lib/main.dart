@@ -34,7 +34,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
-      home: const SignInWidget(), // Ensure this is correctly implemented
+      home: const SignInPage(), // Ensure this is correctly implemented
     );
   }
 }

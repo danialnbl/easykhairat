@@ -1,5 +1,6 @@
 import 'package:badges/badges.dart' as badges;
 import 'package:easykhairat/controllers/navigation_controller.dart';
+import 'package:easykhairat/views/user/receipts.dart';
 import 'package:easykhairat/views/user/settings.dart';
 import 'package:easykhairat/views/user/userPayment.dart';
 import 'package:flutter/material.dart';
@@ -31,7 +32,7 @@ class _HomePageWidgetState extends State<HomePageWidget> {
               children: [
                 _buildDashboard(context),
                 // UserPayment(),
-                Center(child: Text('Receipts Screen')),
+                Receipts(),
                 Settings(),
               ],
             ),

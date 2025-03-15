@@ -68,12 +68,12 @@ class _SettingsState extends State<Settings> {
                       },
                     ),
                     _buildSectionTitle('General', textColor),
-                    _buildSettingItem(
-                      Icons.account_circle_outlined,
-                      'Edit Profile',
-                      surfaceColor,
-                      textColor,
-                    ),
+                    // _buildSettingItem(
+                    //   Icons.account_circle_outlined,
+                    //   'Edit Profile',
+                    //   surfaceColor,
+                    //   textColor,
+                    // ),
                     _buildSettingItem(
                       MoonIcons.generic_log_out_16_light,
                       'Log Out',
@@ -81,7 +81,7 @@ class _SettingsState extends State<Settings> {
                       textColor,
                       onTap: () {
                         userController.signOut().then((value) {
-                          Get.offAll(() => SignInWidget());
+                          Get.offAll(() => SignInPage());
                         });
                       },
                     ),
