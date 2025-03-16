@@ -51,7 +51,16 @@ class _AdminMainState extends State<AdminMain> {
                       _buildSubNavItem("Tambah Ahli", 2),
                     ],
                   ),
-                  _buildNavItem(MoonIcons.shop_wallet_16_light, "Kewangan", 3),
+                  _buildExpandableNavItem(
+                    MoonIcons.shop_wallet_16_light,
+                    "Kewangan",
+                    3,
+                    [
+                      _buildSubNavItem("Tetapan Yuran", 3),
+                      _buildSubNavItem("Proses Yuran", 4),
+                      _buildSubNavItem("Proses Tuntutan", 4),
+                    ],
+                  ),
                   _buildNavItem(
                     MoonIcons.media_megaphone_16_light,
                     "Pengumuman",
