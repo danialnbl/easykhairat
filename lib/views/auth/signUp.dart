@@ -1,6 +1,5 @@
 import 'package:easykhairat/models/userModel.dart';
 import 'package:easykhairat/controllers/auth_controller.dart';
-import 'package:easykhairat/views/user/home.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';

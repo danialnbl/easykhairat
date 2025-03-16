@@ -64,15 +64,29 @@ class _AdminDashboardState extends State<AdminDashboard> {
           children: [
             Expanded(
               child: _statCard(
-                'Registered Users',
-                '45,320',
+                'Jumlah Ahli Aktif',
+                '49',
                 '+5.25%',
                 Colors.green,
               ),
             ),
             const SizedBox(width: 8),
             Expanded(
-              child: _statCard('Orders', '45,320', '-1.23%', Colors.red),
+              child: _statCard(
+                'Kutipan Yuran Tahun Ini',
+                'RM45,320',
+                '-1.23%',
+                Colors.red,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: _statCard(
+                'Tuntutan Ahli Tahun Ini',
+                'RM50,320',
+                '-1.23%',
+                Colors.red,
+              ),
             ),
           ],
         ),
@@ -128,7 +142,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Revenue',
+              'Pendaftaran Baru Mengikut Tahun',
               style: GoogleFonts.roboto(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,

@@ -17,7 +17,7 @@ class _AdminMainState extends State<AdminMain> {
 
   Widget _buildSidebar() {
     return Container(
-      width: 150,
+      width: 160,
       decoration: BoxDecoration(
         color: Colors.white,
         boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 5)],
@@ -39,10 +39,16 @@ class _AdminMainState extends State<AdminMain> {
               () => ListView(
                 padding: EdgeInsets.zero,
                 children: [
-                  _buildNavItem(Icons.home, "Home", 0),
-                  _buildNavItem(Icons.account_balance_wallet, "Fees", 1),
-                  _buildNavItem(Icons.receipt_long, "Report", 2),
-                  _buildNavItem(Icons.settings, "Settings", 3),
+                  _buildNavItem(Icons.home, "Dashboard", 0),
+                  _buildNavItem(MoonIcons.generic_user_16_light, "Ahli", 1),
+                  _buildNavItem(MoonIcons.shop_wallet_16_light, "Kewangan", 2),
+                  _buildNavItem(
+                    MoonIcons.media_megaphone_16_light,
+                    "Pengumuman",
+                    3,
+                  ),
+                  _buildNavItem(Icons.receipt_long, "Laporan", 4),
+                  _buildNavItem(Icons.settings, "Tetapan", 5),
                 ],
               ),
             ),
@@ -97,8 +103,10 @@ class _AdminMainState extends State<AdminMain> {
                 index: navController.selectedIndex.value,
                 children: [
                   AdminDashboard(),
-                  Center(child: Text('Fees Screen')),
-                  Center(child: Text('Report Screen')),
+                  Center(child: Text('Ahli Screen')),
+                  Center(child: Text('Kewangan Screen')),
+                  Center(child: Text('Pengumuman Screen')),
+                  Center(child: Text('Laporan Screen')),
                   AdminSettings(),
                 ],
               ),
