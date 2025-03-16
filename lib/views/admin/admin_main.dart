@@ -14,10 +14,11 @@ class AdminMain extends StatefulWidget {
 
 class _AdminMainState extends State<AdminMain> {
   final NavigationController navController = Get.put(NavigationController());
+  var expandedIndex = (-1).obs;
 
   Widget _buildSidebar() {
     return Container(
-      width: 160,
+      width: 190,
       decoration: BoxDecoration(
         color: Colors.white,
         boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 5)],
@@ -40,15 +41,23 @@ class _AdminMainState extends State<AdminMain> {
                 padding: EdgeInsets.zero,
                 children: [
                   _buildNavItem(Icons.home, "Dashboard", 0),
-                  _buildNavItem(MoonIcons.generic_user_16_light, "Ahli", 1),
-                  _buildNavItem(MoonIcons.shop_wallet_16_light, "Kewangan", 2),
+                  _buildExpandableNavItem(
+                    MoonIcons.generic_user_16_light,
+                    "Ahli",
+                    1,
+                    [
+                      _buildSubNavItem("Senarai Ahli", 1),
+                      _buildSubNavItem("Tambah Ahli", 2),
+                    ],
+                  ),
+                  _buildNavItem(MoonIcons.shop_wallet_16_light, "Kewangan", 3),
                   _buildNavItem(
                     MoonIcons.media_megaphone_16_light,
                     "Pengumuman",
-                    3,
+                    4,
                   ),
-                  _buildNavItem(Icons.receipt_long, "Laporan", 4),
-                  _buildNavItem(Icons.settings, "Tetapan", 5),
+                  _buildNavItem(Icons.receipt_long, "Laporan", 5),
+                  _buildNavItem(Icons.settings, "Tetapan", 6),
                 ],
               ),
             ),
@@ -60,30 +69,89 @@ class _AdminMainState extends State<AdminMain> {
 
   Widget _buildNavItem(IconData icon, String label, int index) {
     bool isSelected = navController.selectedIndex.value == index;
-    return InkWell(
+
+    return MoonMenuItem(
       onTap: () => navController.changeIndex(index),
-      child: Container(
-        padding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0),
-        decoration: BoxDecoration(
-          color: isSelected ? Colors.blue.withOpacity(0.1) : Colors.transparent,
-          border:
-              isSelected
-                  ? Border(left: BorderSide(color: Colors.blue, width: 4))
-                  : null,
+      backgroundColor:
+          isSelected ? Colors.blue.withOpacity(0.1) : Colors.transparent,
+      borderRadius: BorderRadius.circular(8),
+      menuItemPadding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0),
+      leading: Icon(icon, color: isSelected ? Colors.blue : Colors.grey),
+      label: Text(
+        label,
+        style: TextStyle(
+          color: isSelected ? Colors.blue : Colors.grey,
+          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
         ),
-        child: Row(
-          children: [
-            Icon(icon, color: isSelected ? Colors.blue : Colors.grey),
-            SizedBox(width: 10),
-            Text(
-              label,
-              style: TextStyle(
-                color: isSelected ? Colors.blue : Colors.grey,
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+      ),
+      decoration: BoxDecoration(
+        border:
+            isSelected
+                ? Border(left: BorderSide(color: Colors.blue, width: 4))
+                : null,
+      ),
+    );
+  }
+
+  Widget _buildExpandableNavItem(
+    IconData icon,
+    String label,
+    int index,
+    List<Widget> subItems,
+  ) {
+    bool isExpanded = expandedIndex.value == index;
+
+    return Column(
+      children: [
+        MoonMenuItem(
+          onTap: () => expandedIndex.value = isExpanded ? -1 : index,
+          backgroundColor: Colors.transparent,
+          borderRadius: BorderRadius.circular(8),
+          menuItemPadding: EdgeInsets.symmetric(
+            vertical: 12.0,
+            horizontal: 16.0,
+          ),
+          leading: Icon(icon, color: Colors.grey),
+          label: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(label, style: TextStyle(color: Colors.grey)),
+              Icon(
+                isExpanded ? Icons.expand_less : Icons.expand_more,
+                color: Colors.grey,
               ),
-            ),
-          ],
+            ],
+          ),
         ),
+        if (isExpanded) Column(children: subItems),
+      ],
+    );
+  }
+
+  Widget _buildSubNavItem(String label, int index) {
+    bool isSelected = navController.selectedIndex.value == index;
+
+    return MoonMenuItem(
+      onTap: () => navController.changeIndex(index),
+      backgroundColor:
+          isSelected ? Colors.blue.withOpacity(0.1) : Colors.transparent,
+      borderRadius: BorderRadius.circular(8),
+      menuItemPadding: EdgeInsets.symmetric(
+        vertical: 12.0,
+        horizontal: 40.0,
+      ), // Increased padding for indentation
+      label: Text(
+        label,
+        style: TextStyle(
+          color: isSelected ? Colors.blue : Colors.grey,
+          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+        ),
+      ),
+      decoration: BoxDecoration(
+        border:
+            isSelected
+                ? Border(left: BorderSide(color: Colors.blue, width: 4))
+                : null,
       ),
     );
   }
@@ -103,6 +171,7 @@ class _AdminMainState extends State<AdminMain> {
                 index: navController.selectedIndex.value,
                 children: [
                   AdminDashboard(),
+                  Center(child: Text('Ahli Screen')),
                   Center(child: Text('Ahli Screen')),
                   Center(child: Text('Kewangan Screen')),
                   Center(child: Text('Pengumuman Screen')),
