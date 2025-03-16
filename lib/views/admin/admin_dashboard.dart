@@ -1,4 +1,5 @@
 import 'package:badges/badges.dart' as badges;
+import 'package:easykhairat/views/admin/components/header.dart';
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -22,7 +23,11 @@ class _AdminDashboardState extends State<AdminDashboard> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildHeader(),
+              AppHeader(
+                title: "Dashboard Overview",
+                notificationCount: 3,
+                onNotificationPressed: () {},
+              ),
               const SizedBox(height: 16),
               _buildDashboardGrid(),
             ],
@@ -32,29 +37,29 @@ class _AdminDashboardState extends State<AdminDashboard> {
     );
   }
 
-  Widget _buildHeader() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          'Dashboard Overview',
-          style: GoogleFonts.roboto(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-            color: Colors.black,
-          ),
-        ),
-        badges.Badge(
-          position: badges.BadgePosition.topEnd(top: 0, end: 5),
-          badgeContent: const Text('3', style: TextStyle(color: Colors.white)),
-          child: IconButton(
-            icon: const Icon(Icons.notifications, color: Colors.grey),
-            onPressed: () {},
-          ),
-        ),
-      ],
-    );
-  }
+  // Widget _buildHeader() {
+  //   return Row(
+  //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  //     children: [
+  //       Text(
+  //         'Dashboard Overview',
+  //         style: GoogleFonts.roboto(
+  //           fontSize: 24,
+  //           fontWeight: FontWeight.bold,
+  //           color: Colors.black,
+  //         ),
+  //       ),
+  //       badges.Badge(
+  //         position: badges.BadgePosition.topEnd(top: 0, end: 5),
+  //         badgeContent: const Text('3', style: TextStyle(color: Colors.white)),
+  //         child: IconButton(
+  //           icon: const Icon(Icons.notifications, color: Colors.grey),
+  //           onPressed: () {},
+  //         ),
+  //       ),
+  //     ],
+  //   );
+  // }
 
   Widget _buildDashboardGrid() {
     return Column(

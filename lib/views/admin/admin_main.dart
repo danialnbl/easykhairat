@@ -1,5 +1,6 @@
 import 'package:easykhairat/views/admin/adminSettings.dart';
 import 'package:easykhairat/views/admin/admin_dashboard.dart';
+import 'package:easykhairat/views/admin/member/member_list.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:moon_design/moon_design.dart';
@@ -171,7 +172,7 @@ class _AdminMainState extends State<AdminMain> {
                 index: navController.selectedIndex.value,
                 children: [
                   AdminDashboard(),
-                  Center(child: Text('Ahli Screen')),
+                  MemberList(),
                   Center(child: Text('Ahli Screen')),
                   Center(child: Text('Kewangan Screen')),
                   Center(child: Text('Pengumuman Screen')),
