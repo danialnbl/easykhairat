@@ -18,7 +18,7 @@ class _MemberListState extends State<MemberList> {
       'user_name': 'Ali Bin Abu',
       'user_email': 'ali@example.com',
       'user_phone_no': '012-3456789',
-      'user_address': 'Kuala Lumpur',
+      'user_address': '87, JALAN SEMARAK 76655 PUCHONG',
       'user_type': 'Admin',
       'user_status': 'Active',
     },
@@ -94,25 +94,25 @@ class _MemberListState extends State<MemberList> {
             columns: const [
               DataColumn(
                 label: Text(
-                  'Name',
+                  'Nama',
                   style: TextStyle(fontWeight: FontWeight.bold),
                 ),
               ),
               DataColumn(
                 label: Text(
-                  'Email',
+                  'IC Baru',
                   style: TextStyle(fontWeight: FontWeight.bold),
                 ),
               ),
               DataColumn(
                 label: Text(
-                  'Phone',
+                  'Tarikh Daftar',
                   style: TextStyle(fontWeight: FontWeight.bold),
                 ),
               ),
               DataColumn(
                 label: Text(
-                  'Address',
+                  'Alamat',
                   style: TextStyle(fontWeight: FontWeight.bold),
                 ),
               ),
@@ -124,7 +124,7 @@ class _MemberListState extends State<MemberList> {
               ),
               DataColumn(
                 label: Text(
-                  'Status',
+                  'Status Ahli',
                   style: TextStyle(fontWeight: FontWeight.bold),
                 ),
               ),

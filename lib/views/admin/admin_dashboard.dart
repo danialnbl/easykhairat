@@ -42,7 +42,7 @@ class AdminDashboard extends StatelessWidget {
               child: _statCard(
                 'Jumlah Ahli Aktif',
                 '49',
-                '+5.25%',
+                '+5',
                 Colors.green,
               ),
             ),
@@ -70,10 +70,10 @@ class AdminDashboard extends StatelessWidget {
         Row(
           children: [
             Expanded(
-              child: _statCard('Jumlah Admin', '2', '+5.25%', Colors.green),
+              child: _statCard('Jumlah Admin', '2', '+1', Colors.green),
             ),
             Expanded(
-              child: _statCard('Jumlah AJK', '10', '+5.25%', Colors.green),
+              child: _statCard('Jumlah AJK', '10', '+2', Colors.green),
             ),
           ],
         ),

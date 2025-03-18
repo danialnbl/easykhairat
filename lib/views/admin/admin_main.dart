@@ -1,5 +1,6 @@
 import 'package:easykhairat/views/admin/adminSettings.dart';
 import 'package:easykhairat/views/admin/admin_dashboard.dart';
+import 'package:easykhairat/views/admin/management/manage_fee.dart';
 import 'package:easykhairat/views/admin/member/member_list.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -58,16 +59,16 @@ class _AdminMainState extends State<AdminMain> {
                     [
                       _buildSubNavItem("Tetapan Yuran", 3),
                       _buildSubNavItem("Proses Yuran", 4),
-                      _buildSubNavItem("Proses Tuntutan", 4),
+                      _buildSubNavItem("Proses Tuntutan", 5),
                     ],
                   ),
                   _buildNavItem(
                     MoonIcons.media_megaphone_16_light,
                     "Pengumuman",
-                    4,
+                    6,
                   ),
-                  _buildNavItem(Icons.receipt_long, "Laporan", 5),
-                  _buildNavItem(Icons.settings, "Tetapan", 6),
+                  _buildNavItem(Icons.receipt_long, "Laporan", 7),
+                  _buildNavItem(Icons.settings, "Tetapan", 8),
                 ],
               ),
             ),
@@ -183,7 +184,9 @@ class _AdminMainState extends State<AdminMain> {
                   AdminDashboard(),
                   MemberList(),
                   Center(child: Text('Ahli Screen')),
-                  Center(child: Text('Kewangan Screen')),
+                  ManageFee(),
+                  Center(child: Text('Proses Yuran Screen')),
+                  Center(child: Text('Proses Tuntutan Screen')),
                   Center(child: Text('Pengumuman Screen')),
                   Center(child: Text('Laporan Screen')),
                   AdminSettings(),
