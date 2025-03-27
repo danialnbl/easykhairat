@@ -36,7 +36,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
-      home: AdminMain(), // Ensure this is correctly implemented
+      home: SignInPage(), // Ensure this is correctly implemented
     );
   }
 }

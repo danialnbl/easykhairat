@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:moon_design/moon_design.dart';
-import 'package:percent_indicator/percent_indicator.dart';
 
 class HomePageWidget extends StatefulWidget {
   @override
@@ -159,7 +158,7 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                             height:
                                 120, // Ensures the carousel has a proper height
                             child: MoonCarousel(
-                              itemCount: 4, // Only show 4 items
+                              itemCount: 3, // Only show 4 items
                               itemExtent: 110,
                               loop: false, // Enables infinite scrolling
                               isCentered: false,
@@ -171,32 +170,56 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                                 int itemIndex,
                                 int _,
                               ) {
-                                // List of preset labels
-                                List<String> labels = [
-                                  "Payment",
-                                  "Receipt",
-                                  "Support",
-                                  "Add Family",
+                                // List of preset labels and their corresponding icons
+                                List<Map<String, dynamic>> items = [
+                                  {
+                                    "label": "Receipt",
+                                    "icon": MoonIcons.generic_bet_16_light,
+                                  },
+                                  {
+                                    "label": "Support",
+                                    "icon": MoonIcons.media_headphones_16_light,
+                                  },
+                                  {
+                                    "label": "Add Family",
+                                    "icon": MoonIcons.generic_users_16_light,
+                                  },
                                 ];
 
                                 return Container(
                                   decoration: ShapeDecoration(
-                                    color: MoonColors.light.bulma,
+                                    color: Colors.white,
+                                    shadows: [
+                                      BoxShadow(
+                                        color: Colors.black.withOpacity(0.1),
+                                        blurRadius: 8,
+                                        offset: Offset(0, 4),
+                                      ),
+                                    ],
                                     shape: MoonSquircleBorder(
                                       borderRadius: BorderRadius.circular(
                                         12,
                                       ).squircleBorderRadius(context),
                                     ),
                                   ),
-                                  child: Center(
-                                    child: Text(
-                                      labels[itemIndex], // No numbers, only text labels
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold,
-                                        color: MoonColors.light.gohan,
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(
+                                        items[itemIndex]["icon"],
+                                        size: 32,
+                                        color: MoonColors.light.bulma,
                                       ),
-                                    ),
+                                      const SizedBox(height: 8),
+                                      Text(
+                                        items[itemIndex]["label"],
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                          color: MoonColors.light.bulma,
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 );
                               },
@@ -239,7 +262,7 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                                       int _,
                                     ) => Container(
                                       decoration: ShapeDecoration(
-                                        color: MoonColors.light.bulma,
+                                        color: MoonColors.light.beerus,
                                         shape: MoonSquircleBorder(
                                           borderRadius: BorderRadius.circular(
                                             12,
@@ -247,13 +270,11 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                                         ),
                                       ),
                                       child: Center(
-                                        child: Text(
-                                          "${itemIndex + 1}",
-                                          style: TextStyle(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.bold,
-                                            color: MoonColors.light.gohan,
-                                          ),
+                                        child: Image.asset(
+                                          'assets/images/easyKhairatLogo.png',
+                                          width: 50.0,
+                                          height: 50.0,
+                                          fit: BoxFit.fitWidth,
                                         ),
                                       ),
                                     ),
@@ -310,14 +331,15 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                                           ).squircleBorderRadius(context),
                                         ),
                                       ),
-                                      child: Center(
-                                        child: Text(
-                                          "${itemIndex + 1}",
-                                          style: TextStyle(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.bold,
-                                            color: MoonColors.light.gohan,
-                                          ),
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(12),
+                                        child: Image.asset(
+                                          'assets/images/advertisement_${itemIndex + 1}.png',
+                                          fit:
+                                              BoxFit
+                                                  .fill, // Ensures the image fills the container
+                                          width: double.infinity,
+                                          height: double.infinity,
                                         ),
                                       ),
                                     ),
@@ -342,75 +364,11 @@ class _HomePageWidgetState extends State<HomePageWidget> {
     );
   }
 
-  Widget _buildCourseSummaryCard() {
-    return Card(
-      color: const Color.fromARGB(255, 255, 255, 255),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      elevation: 4,
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Course Summary',
-              style: GoogleFonts.roboto(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'An overview of your courses.',
-              style: GoogleFonts.roboto(fontSize: 16, color: Colors.grey[600]),
-            ),
-            const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                _buildCircularIndicator(0.23, 'Course Progress', Colors.orange),
-                const SizedBox(width: 16),
-                _buildCircularIndicator(0.93, 'Course Grade', Colors.blue),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildCircularIndicator(double progress, String label, Color color) {
-    return Column(
-      children: [
-        CircularPercentIndicator(
-          percent: progress,
-          radius: 50,
-          lineWidth: 10,
-          animation: true,
-          progressColor: color,
-          backgroundColor: Colors.grey[300]!,
-          center: Text(
-            '${(progress * 100).toInt()}%',
-            style: GoogleFonts.roboto(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          label,
-          style: GoogleFonts.roboto(fontSize: 14, color: Colors.grey[700]),
-        ),
-      ],
-    );
-  }
-
   Widget _buildCard({required String title, required String subtitle}) {
     return Card(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       elevation: 4,
-      color: MoonColors.light.bulma,
+      color: Colors.white,
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Row(
@@ -426,7 +384,7 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                     style: GoogleFonts.roboto(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
-                      color: MoonColors.light.gohan,
+                      color: MoonColors.light.bulma,
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -434,7 +392,7 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                     subtitle,
                     style: GoogleFonts.roboto(
                       fontSize: 16,
-                      color: MoonColors.light.gohan,
+                      color: MoonColors.light.bulma,
                     ),
                   ),
                 ],
@@ -446,8 +404,8 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                 onTap: () {
                   Get.to(() => UserPayment());
                 },
-                backgroundColor: MoonColors.light.goku, // Primary button color
-                textColor: MoonColors.light.bulma, // Text color
+                backgroundColor: Color(0xFF12A09B), // Primary button color
+                textColor: MoonColors.light.gohan, // Text color
                 borderRadius: BorderRadius.circular(50), // Rounded corners
                 buttonSize: MoonButtonSize.md, // Medium size button
                 label: Text(

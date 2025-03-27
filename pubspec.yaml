@@ -74,6 +74,7 @@ flutter:
   assets:
     - assets/
     - assets/images/easyKhairatLogo.png
+    - assets/images/
     - .env
 
   # An image asset can refer to one or more resolution-specific "variants", see
