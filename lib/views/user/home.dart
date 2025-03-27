@@ -83,12 +83,83 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                 height: 50.0,
                 fit: BoxFit.fitWidth,
               ),
-              badges.Badge(
-                position: badges.BadgePosition.topEnd(top: 0, end: 5),
-                badgeContent: Text('3', style: TextStyle(color: Colors.white)),
-                child: IconButton(
-                  icon: Icon(Icons.notifications),
-                  onPressed: () {},
+              Padding(
+                padding: const EdgeInsets.only(right: 16.0),
+                child: badges.Badge(
+                  position: badges.BadgePosition.topEnd(top: -5, end: -5),
+                  badgeContent: Text(
+                    '3',
+                    style: TextStyle(color: Colors.white, fontSize: 10),
+                  ),
+                  child: IconButton(
+                    icon: Icon(Icons.notifications, color: Colors.grey[700]),
+                    onPressed: () {
+                      showMenu(
+                        color: Colors.white,
+                        context: context,
+                        position: RelativeRect.fromLTRB(
+                          MediaQuery.of(context).size.width - 150,
+                          80,
+                          16,
+                          0,
+                        ),
+                        items: [
+                          PopupMenuItem(
+                            child: ListTile(
+                              leading: Padding(
+                                padding: const EdgeInsets.only(
+                                  left: 8.0,
+                                ), // Move icon to the right
+                                child: Icon(
+                                  Icons.check,
+                                  color:
+                                      MoonColors
+                                          .light
+                                          .bulma, // Change icon color
+                                  size: 20,
+                                ),
+                              ),
+                              title: Padding(
+                                padding: const EdgeInsets.only(
+                                  left: 8.0,
+                                ), // Move text to the right
+                                child: Text(
+                                  'Mark all as read',
+                                  style: TextStyle(
+                                    color:
+                                        MoonColors
+                                            .light
+                                            .bulma, // Change text color
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                              tileColor:
+                                  MoonColors
+                                      .light
+                                      .beerus, // Change ListTile background color
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(
+                                  8,
+                                ), // Optional: Add rounded corners
+                              ),
+                              onTap: () {
+                                // Logic to mark all notifications as read
+                                Navigator.pop(context); // Close the menu
+                              },
+                            ),
+                          ),
+                          PopupMenuItem(child: Text('Tuntutan Approved')),
+                          PopupMenuItem(
+                            child: Text('Sila Bayar Yuran Tertunggak'),
+                          ),
+                          PopupMenuItem(
+                            child: Text('Ahli keluarga baharu ditambah'),
+                          ),
+                        ],
+                      );
+                    },
+                  ),
                 ),
               ),
               // IconButton(icon: Icon(Icons.notifications), onPressed: () {}),
