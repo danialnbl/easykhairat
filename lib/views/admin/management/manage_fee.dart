@@ -74,67 +74,142 @@ class _ManageFeeState extends State<ManageFee> {
   }
 
   Widget _buildtable() {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Card(
-        color: MoonColors.light.goten,
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: DataTable(
-            columnSpacing: 20.0,
-            columns: const [
-              DataColumn(
-                label: Text(
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Table(
+        columnWidths: const {
+          0: FlexColumnWidth(2),
+          1: FlexColumnWidth(2),
+          2: FlexColumnWidth(2),
+          3: FlexColumnWidth(2),
+          4: FlexColumnWidth(2),
+        },
+        border: TableBorder(
+          horizontalInside: BorderSide(color: Colors.grey.shade300, width: 1),
+        ),
+        children: [
+          TableRow(
+            decoration: BoxDecoration(color: MoonColors.light.roshi),
+            children: const [
+              Padding(
+                padding: EdgeInsets.all(12.0),
+                child: Text(
                   'Tajuk',
-                  style: TextStyle(fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
                 ),
               ),
-              DataColumn(
-                label: Text(
+              Padding(
+                padding: EdgeInsets.all(12.0),
+                child: Text(
                   'Untuk Tahun',
-                  style: TextStyle(fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
                 ),
               ),
-              DataColumn(
-                label: Text(
+              Padding(
+                padding: EdgeInsets.all(12.0),
+                child: Text(
                   'Jumlah (RM)',
-                  style: TextStyle(fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
                 ),
               ),
-              DataColumn(
-                label: Text(
+              Padding(
+                padding: EdgeInsets.all(12.0),
+                child: Text(
                   'Jana Pada',
-                  style: TextStyle(fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
                 ),
               ),
-
-              DataColumn(
-                label: Text(
+              Padding(
+                padding: EdgeInsets.all(12.0),
+                child: Text(
                   'Actions',
-                  style: TextStyle(fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
                 ),
               ),
             ],
-            rows:
-                members.map((member) {
-                  return DataRow(
-                    cells: [
-                      DataCell(Text(member['user_name']!)),
-                      DataCell(Text(member['user_email']!)),
-                      DataCell(Text(member['user_phone_no']!)),
-                      DataCell(Text(member['user_address']!)),
-                      DataCell(
-                        Row(
-                          children: [
-                            // Add action buttons here
-                          ],
-                        ),
+          ),
+          ...members.map((member) {
+            return TableRow(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                border: Border(
+                  bottom: BorderSide(color: Colors.grey.shade300, width: 1),
+                ),
+              ),
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(12.0),
+                  child: Text(
+                    member['user_name']!,
+                    style: TextStyle(color: Colors.black87),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(12.0),
+                  child: Text(
+                    member['user_email']!,
+                    style: TextStyle(color: Colors.black87),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(12.0),
+                  child: Text(
+                    member['user_phone_no']!,
+                    style: TextStyle(color: Colors.black87),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(12.0),
+                  child: Text(
+                    member['user_address']!,
+                    style: TextStyle(color: Colors.black87),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(12.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      IconButton(
+                        icon: Icon(Icons.visibility, color: Colors.green),
+                        onPressed: () {
+                          // View action
+                        },
+                      ),
+                      IconButton(
+                        icon: Icon(Icons.edit, color: Colors.blue),
+                        onPressed: () {
+                          // Edit action
+                        },
+                      ),
+                      IconButton(
+                        icon: Icon(Icons.delete, color: Colors.red),
+                        onPressed: () {
+                          // Delete action
+                        },
                       ),
                     ],
-                  );
-                }).toList(),
-          ),
-        ),
+                  ),
+                ),
+              ],
+            );
+          }).toList(),
+        ],
       ),
     );
   }

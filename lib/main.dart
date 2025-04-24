@@ -1,4 +1,6 @@
+import 'package:easykhairat/controllers/fee_controller.dart';
 import 'package:easykhairat/controllers/user_controller.dart';
+import 'package:easykhairat/repositories/fee_repository.dart';
 import 'package:easykhairat/views/admin/admin_dashboard.dart';
 import 'package:easykhairat/views/admin/admin_main.dart';
 import 'package:easykhairat/views/auth/signIn.dart';
@@ -22,6 +24,10 @@ void main() async {
 
   Get.put(UserController());
 
+  final supabaseClient = Supabase.instance.client;
+  final feeRepository = FeeRepository(supabaseClient);
+  final feeController = FeeController(feeRepository);
+
   runApp(const MyApp());
 }
 
@@ -36,7 +42,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
-      home: SignInPage(), // Ensure this is correctly implemented
+      home: AdminMain(), // Ensure this is correctly implemented
     );
   }
 }

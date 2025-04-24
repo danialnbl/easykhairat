@@ -2,6 +2,7 @@ import 'package:easykhairat/views/admin/adminSettings.dart';
 import 'package:easykhairat/views/admin/admin_dashboard.dart';
 import 'package:easykhairat/views/admin/management/manage_fee.dart';
 import 'package:easykhairat/views/admin/member/member_list.dart';
+import 'package:easykhairat/views/admin/member/member_new.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:moon_design/moon_design.dart';
@@ -183,7 +184,7 @@ class _AdminMainState extends State<AdminMain> {
                 children: [
                   AdminDashboard(),
                   MemberList(),
-                  Center(child: Text('Ahli Screen')),
+                  memberNew(),
                   ManageFee(),
                   Center(child: Text('Proses Yuran Screen')),
                   Center(child: Text('Proses Tuntutan Screen')),
