@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:moon_design/moon_design.dart';
 import 'package:get/get.dart';
 import 'package:easykhairat/controllers/user_controller.dart';
-import 'package:intl/intl.dart'; // Add this import for date formatting
+import 'package:intl/intl.dart';
 
 class MemberList extends StatefulWidget {
   const MemberList({super.key});
@@ -145,7 +145,7 @@ class MemberListState extends State<MemberList> {
 
   Widget _buildTable() {
     return Obx(() {
-      final filteredUsers = getFilteredUsers(); // This handles filtering
+      final filteredUsers = getFilteredUsers();
 
       if (userController.isLoading.value) {
         return const Center(child: CircularProgressIndicator());
@@ -155,156 +155,158 @@ class MemberListState extends State<MemberList> {
         return const Center(child: Text('No members found'));
       }
 
-      return SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Card(
-          color: MoonColors.light.goten,
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Table(
-              border: TableBorder.all(),
-              columnWidths: {
-                0: FixedColumnWidth(150),
-                1: FixedColumnWidth(120),
-                2: FixedColumnWidth(120),
-                3: FixedColumnWidth(180),
-                4: FixedColumnWidth(100),
-                5: FixedColumnWidth(180),
-              },
-              children: [
-                // Header Row
-                TableRow(
-                  decoration: BoxDecoration(
-                    color: MoonColors.light.goten.withOpacity(0.7),
+      return Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Table(
+          columnWidths: const {
+            0: FlexColumnWidth(2),
+            1: FlexColumnWidth(2),
+            2: FlexColumnWidth(2),
+            3: FlexColumnWidth(3),
+            4: FlexColumnWidth(2),
+            5: FlexColumnWidth(2),
+          },
+          border: TableBorder(
+            horizontalInside: BorderSide(color: Colors.grey.shade300, width: 1),
+          ),
+          children: [
+            // Header
+            TableRow(
+              decoration: BoxDecoration(color: MoonColors.light.roshi),
+              children: const [
+                Padding(
+                  padding: EdgeInsets.all(12.0),
+                  child: Text(
+                    'Nama',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
                   ),
-                  children: const [
-                    TableCell(
-                      child: Padding(
-                        padding: EdgeInsets.all(8.0),
-                        child: Text(
-                          'Nama',
-                          style: TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                    ),
-                    TableCell(
-                      child: Padding(
-                        padding: EdgeInsets.all(8.0),
-                        child: Text(
-                          'IC Baru',
-                          style: TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                    ),
-                    TableCell(
-                      child: Padding(
-                        padding: EdgeInsets.all(8.0),
-                        child: Text(
-                          'Tarikh Daftar',
-                          style: TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                    ),
-                    TableCell(
-                      child: Padding(
-                        padding: EdgeInsets.all(8.0),
-                        child: Text(
-                          'Alamat',
-                          style: TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                    ),
-                    TableCell(
-                      child: Padding(
-                        padding: EdgeInsets.all(8.0),
-                        child: Text(
-                          'Type',
-                          style: TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                    ),
-                    TableCell(
-                      child: Padding(
-                        padding: EdgeInsets.all(8.0),
-                        child: Text(
-                          'Actions',
-                          style: TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                    ),
-                  ],
                 ),
-                // Data Rows
-                ...List.generate(filteredUsers.length, (index) {
-                  final user = filteredUsers[index];
-                  return TableRow(
-                    children: [
-                      TableCell(
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Text(user.userName),
-                        ),
-                      ),
-                      TableCell(
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Text(user.userIdentification),
-                        ),
-                      ),
-                      TableCell(
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Text(formatDate(user.userCreatedAt)),
-                        ),
-                      ),
-                      TableCell(
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Text(user.userAddress),
-                        ),
-                      ),
-                      TableCell(
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Text(user.userType),
-                        ),
-                      ),
-                      TableCell(
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Row(
-                            children: [
-                              IconButton(
-                                icon: const Icon(
-                                  Icons.visibility,
-                                  color: Colors.green,
-                                ),
-                                onPressed: () => viewMember(user),
-                              ),
-                              IconButton(
-                                icon: const Icon(
-                                  Icons.edit,
-                                  color: Colors.blue,
-                                ),
-                                onPressed: () => editMember(user),
-                              ),
-                              IconButton(
-                                icon: const Icon(
-                                  Icons.delete,
-                                  color: Colors.red,
-                                ),
-                                onPressed: () => deleteMember(user),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  );
-                }),
+                Padding(
+                  padding: EdgeInsets.all(12.0),
+                  child: Text(
+                    'IC Baru',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: EdgeInsets.all(12.0),
+                  child: Text(
+                    'Tarikh Daftar',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: EdgeInsets.all(12.0),
+                  child: Text(
+                    'Alamat',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: EdgeInsets.all(12.0),
+                  child: Text(
+                    'Type',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: EdgeInsets.all(12.0),
+                  child: Text(
+                    'Actions',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
               ],
             ),
-          ),
+            // Data rows
+            ...filteredUsers.map((user) {
+              return TableRow(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  border: Border(
+                    bottom: BorderSide(color: Colors.grey.shade300, width: 1),
+                  ),
+                ),
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(12.0),
+                    child: Text(
+                      user.userName,
+                      style: const TextStyle(color: Colors.black87),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(12.0),
+                    child: Text(
+                      user.userIdentification,
+                      style: const TextStyle(color: Colors.black87),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(12.0),
+                    child: Text(
+                      formatDate(user.userCreatedAt),
+                      style: const TextStyle(color: Colors.black87),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(12.0),
+                    child: Text(
+                      user.userAddress,
+                      style: const TextStyle(color: Colors.black87),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(12.0),
+                    child: Text(
+                      user.userType,
+                      style: const TextStyle(color: Colors.black87),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(12.0),
+                    child: Row(
+                      children: [
+                        IconButton(
+                          icon: const Icon(
+                            Icons.visibility,
+                            color: Colors.green,
+                          ),
+                          onPressed: () => viewMember(user),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.edit, color: Colors.blue),
+                          onPressed: () => editMember(user),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.delete, color: Colors.red),
+                          onPressed: () => deleteMember(user),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              );
+            }).toList(),
+          ],
         ),
       );
     });

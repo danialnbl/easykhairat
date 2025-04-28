@@ -3,7 +3,8 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:easykhairat/models/userModel.dart' as pengguna;
 
 class UserController extends GetxController {
-  var users = <pengguna.User>[].obs; // RxList to hold users
+  var users = <pengguna.User>[].obs;
+  var adminUsers = <pengguna.User>[].obs;
   var isLoading = false.obs;
   final supabase = Supabase.instance.client;
 
@@ -32,6 +33,30 @@ class UserController extends GetxController {
     } catch (e) {
       print("Error fetching users: $e");
       Get.snackbar('Error', 'Failed to fetch users');
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<void> fetchAdmin() async {
+    try {
+      isLoading.value = true;
+      final response = await supabase
+          .from('users')
+          .select()
+          .eq('user_type', 'admin');
+
+      final fetchedAdmins =
+          (response as List<dynamic>)
+              .map(
+                (json) => pengguna.User.fromJson(json as Map<String, dynamic>),
+              )
+              .toList();
+
+      adminUsers.assignAll(fetchedAdmins);
+    } catch (e) {
+      print("Error fetching admins: $e");
+      Get.snackbar('Error', 'Failed to fetch admins');
     } finally {
       isLoading.value = false;
     }
@@ -91,7 +116,7 @@ class UserController extends GetxController {
           // On any changes (insert, update, delete), we will update the user list
           if (changes.isNotEmpty) {
             // Handle changes (inserts, updates, deletes)
-            print("Real-time data changed: $changes");
+
             // You can update users in a more customized way here if needed
             fetchUsers(); // Fetch the latest users from the database
           }

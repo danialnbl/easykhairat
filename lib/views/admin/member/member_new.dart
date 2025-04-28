@@ -30,7 +30,6 @@ class _MemberNewState extends State<MemberNew> {
   final TextEditingController _phoneBimbitController = TextEditingController();
   final TextEditingController _surauMasjidController = TextEditingController();
 
-  String? _selectedGelaran;
   String? _selectedMasjid;
   Uint8List? _webImageBytes;
 
@@ -112,26 +111,7 @@ class _MemberNewState extends State<MemberNew> {
                                       'Biarkan kosong sekiranya mahu sistem menjanakan no baru.',
                                 ),
                               ),
-                              DropdownButtonFormField<String>(
-                                value: _selectedGelaran,
-                                hint: Text('Nothing selected'),
-                                items:
-                                    ['Tuan', 'Puan', 'Encik', 'Cik'].map((
-                                      gelaran,
-                                    ) {
-                                      return DropdownMenuItem(
-                                        value: gelaran,
-                                        child: Text(gelaran),
-                                      );
-                                    }).toList(),
-                                onChanged:
-                                    (value) => setState(
-                                      () => _selectedGelaran = value,
-                                    ),
-                                decoration: InputDecoration(
-                                  labelText: 'Gelaran',
-                                ),
-                              ),
+
                               TextFormField(
                                 controller: _namaPenuhController,
                                 decoration: InputDecoration(
@@ -308,7 +288,6 @@ class _MemberNewState extends State<MemberNew> {
                                       _phoneBimbitController.clear();
                                       _surauMasjidController.clear();
                                       setState(() {
-                                        _selectedGelaran = null;
                                         _webImageBytes = null;
                                       });
                                     },
