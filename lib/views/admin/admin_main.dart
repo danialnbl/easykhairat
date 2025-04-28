@@ -184,7 +184,7 @@ class _AdminMainState extends State<AdminMain> {
                 children: [
                   AdminDashboard(),
                   MemberList(),
-                  memberNew(),
+                  MemberNew(),
                   ManageFee(),
                   Center(child: Text('Proses Yuran Screen')),
                   Center(child: Text('Proses Tuntutan Screen')),

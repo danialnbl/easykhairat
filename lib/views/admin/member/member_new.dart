@@ -3,13 +3,14 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:moon_design/moon_design.dart';
 
-class memberNew extends StatefulWidget {
+class MemberNew extends StatefulWidget {
   @override
-  _memberNewState createState() => _memberNewState();
+  _MemberNewState createState() => _MemberNewState();
 }
 
-class _memberNewState extends State<memberNew> {
+class _MemberNewState extends State<MemberNew> {
   final _formKey = GlobalKey<FormState>();
 
   final TextEditingController _noKeahlianController = TextEditingController(
@@ -69,7 +70,7 @@ class _memberNewState extends State<memberNew> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Daftar Ahli Baru')),
+      backgroundColor: MoonColors.light.gohan,
       body: SingleChildScrollView(
         child: Row(
           children: [
@@ -77,219 +78,257 @@ class _memberNewState extends State<memberNew> {
               flex: 2,
               child: SingleChildScrollView(
                 padding: EdgeInsets.all(16),
-                child: Card(
-                  elevation: 4,
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Form(
-                      key: _formKey,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            "Maklumat Ahli",
-                            style: Theme.of(context).textTheme.titleLarge,
-                          ),
-                          SizedBox(height: 16),
-                          TextFormField(
-                            controller: _noKeahlianController,
-                            decoration: InputDecoration(
-                              labelText: 'No Keahlian',
-                              helperText:
-                                  'Biarkan kosong sekiranya mahu sistem menjanakan no baru.',
-                            ),
-                          ),
-                          DropdownButtonFormField<String>(
-                            value: _selectedGelaran,
-                            hint: Text('Nothing selected'),
-                            items:
-                                ['Tuan', 'Puan', 'Encik', 'Cik'].map((gelaran) {
-                                  return DropdownMenuItem(
-                                    value: gelaran,
-                                    child: Text(gelaran),
-                                  );
-                                }).toList(),
-                            onChanged:
-                                (value) =>
-                                    setState(() => _selectedGelaran = value),
-                            decoration: InputDecoration(labelText: 'Gelaran'),
-                          ),
-                          TextFormField(
-                            controller: _namaPenuhController,
-                            decoration: InputDecoration(
-                              labelText: '* Nama Penuh',
-                            ),
-                            validator:
-                                (value) =>
-                                    value == null || value.isEmpty
-                                        ? 'Wajib diisi'
-                                        : null,
-                          ),
-                          TextFormField(
-                            controller: _icBaruController,
-                            decoration: InputDecoration(labelText: '* IC Baru'),
-                            validator:
-                                (value) =>
-                                    value == null || value.isEmpty
-                                        ? 'Wajib diisi'
-                                        : null,
-                          ),
-                          TextFormField(
-                            controller: _emailController,
-                            decoration: InputDecoration(
-                              labelText: 'Email',
-                              helperText:
-                                  'Jika dimasukkan, sistem akan hantar akses automatik.',
-                            ),
-                          ),
-                          SizedBox(height: 16),
-                          TextFormField(
-                            controller: _tarikhLulusController,
-                            readOnly: true,
-                            onTap:
-                                () => _selectDate(
-                                  context,
-                                  _tarikhLulusController,
-                                ),
-                            decoration: InputDecoration(
-                              labelText: 'Tarikh Lulus Pendaftaran',
-                              hintText: 'DD-MM-YYYY',
-                              helperText:
-                                  'Kosongkan jika ahli baru. Tarikh hanya untuk ahli sedia ada.',
-                            ),
-                          ),
-                          SizedBox(height: 16),
-                          Text("Gambar IC"),
-                          Container(
-                            height: 150,
-                            width: 150,
-                            margin: EdgeInsets.symmetric(vertical: 8),
-                            decoration: BoxDecoration(
-                              border: Border.all(color: Colors.grey),
-                            ),
-                            child: _buildImagePreview(),
-                          ),
-                          ElevatedButton.icon(
-                            onPressed: _pickImageWeb,
-                            icon: Icon(Icons.image),
-                            label: Text('Pilih Gambar'),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.teal,
-                            ),
-                          ),
-                          SizedBox(height: 16),
-                          TextFormField(
-                            controller: _tarikhLahirController,
-                            readOnly: true,
-                            onTap:
-                                () => _selectDate(
-                                  context,
-                                  _tarikhLahirController,
-                                ),
-                            decoration: InputDecoration(
-                              labelText: '*Tarikh Lahir',
-                              hintText: 'DD-MM-YYYY',
-                            ),
-                          ),
-                          TextFormField(
-                            controller: _alamatController,
-                            decoration: InputDecoration(labelText: '*Alamat'),
-                          ),
-                          TextFormField(
-                            controller: _poskodController,
-                            decoration: InputDecoration(labelText: '*Poskod'),
-                            keyboardType: TextInputType.number,
-                          ),
-                          TextFormField(
-                            controller: _bandarController,
-                            decoration: InputDecoration(labelText: '*Bandar'),
-                          ),
-                          TextFormField(
-                            controller: _negeriController,
-                            decoration: InputDecoration(labelText: 'Negeri'),
-                          ),
-                          TextFormField(
-                            controller: _pemilikanController,
-                            decoration: InputDecoration(labelText: 'Pemilikan'),
-                          ),
-                          TextFormField(
-                            controller: _phoneRumahController,
-                            decoration: InputDecoration(
-                              labelText: 'Nombor Telefon Rumah',
-                            ),
-                            keyboardType: TextInputType.phone,
-                          ),
-                          TextFormField(
-                            controller: _phoneBimbitController,
-                            decoration: InputDecoration(
-                              labelText: 'Nombor Telefon Bimbit',
-                            ),
-                            keyboardType: TextInputType.phone,
-                          ),
-                          DropdownButtonFormField<String>(
-                            value: _selectedMasjid,
-                            hint: Text('Nothing selected'),
-                            items:
-                                ['Pertubuhan Khairat Kematian'].map((gelaran) {
-                                  return DropdownMenuItem(
-                                    value: gelaran,
-                                    child: Text(gelaran),
-                                  );
-                                }).toList(),
-                            onChanged:
-                                (value) =>
-                                    setState(() => _selectedMasjid = value),
-                            decoration: InputDecoration(
-                              labelText: 'Surau/Masjid',
-                            ),
-                          ),
-                          SizedBox(height: 16),
-                          Row(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "Daftar Ahli Baru",
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    SizedBox(height: 16),
+                    Card(
+                      elevation: 4,
+                      color: Colors.white,
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Form(
+                          key: _formKey,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
+                              Text(
+                                "Maklumat Ahli",
+                                style: Theme.of(context).textTheme.titleLarge
+                                    ?.copyWith(color: Colors.black),
+                              ),
+                              SizedBox(height: 16),
+                              TextFormField(
+                                controller: _noKeahlianController,
+                                decoration: InputDecoration(
+                                  labelText: 'No Keahlian',
+                                  helperText:
+                                      'Biarkan kosong sekiranya mahu sistem menjanakan no baru.',
+                                ),
+                              ),
+                              DropdownButtonFormField<String>(
+                                value: _selectedGelaran,
+                                hint: Text('Nothing selected'),
+                                items:
+                                    ['Tuan', 'Puan', 'Encik', 'Cik'].map((
+                                      gelaran,
+                                    ) {
+                                      return DropdownMenuItem(
+                                        value: gelaran,
+                                        child: Text(gelaran),
+                                      );
+                                    }).toList(),
+                                onChanged:
+                                    (value) => setState(
+                                      () => _selectedGelaran = value,
+                                    ),
+                                decoration: InputDecoration(
+                                  labelText: 'Gelaran',
+                                ),
+                              ),
+                              TextFormField(
+                                controller: _namaPenuhController,
+                                decoration: InputDecoration(
+                                  labelText: '* Nama Penuh',
+                                ),
+
+                                validator:
+                                    (value) =>
+                                        value == null || value.isEmpty
+                                            ? 'Wajib diisi'
+                                            : null,
+                              ),
+                              TextFormField(
+                                controller: _emailController,
+                                decoration: InputDecoration(
+                                  labelText: 'Email',
+                                  helperText:
+                                      'Jika dimasukkan, sistem akan hantar akses automatik.',
+                                ),
+                              ),
+                              SizedBox(height: 16),
+                              TextFormField(
+                                controller: _tarikhLulusController,
+                                readOnly: true,
+                                onTap:
+                                    () => _selectDate(
+                                      context,
+                                      _tarikhLulusController,
+                                    ),
+                                decoration: InputDecoration(
+                                  labelText: 'Tarikh Lulus Pendaftaran',
+                                  hintText: 'DD-MM-YYYY',
+                                  helperText:
+                                      'Kosongkan jika ahli baru. Tarikh hanya untuk ahli sedia ada.',
+                                ),
+                              ),
+                              SizedBox(height: 16),
+                              Text("Gambar IC"),
+                              Container(
+                                height: 150,
+                                width: 150,
+                                margin: EdgeInsets.symmetric(vertical: 8),
+                                decoration: BoxDecoration(
+                                  border: Border.all(color: Colors.grey),
+                                ),
+                                child: _buildImagePreview(),
+                              ),
                               ElevatedButton.icon(
-                                onPressed: () {
-                                  if (_formKey.currentState!.validate()) {
-                                    // Save logic
-                                  }
-                                },
-                                icon: Icon(Icons.check),
-                                label: Text('Simpan'),
+                                onPressed: _pickImageWeb,
+                                icon: Icon(Icons.image, color: Colors.white),
+                                label: Text(
+                                  'Pilih Gambar',
+                                  style: TextStyle(color: Colors.white),
+                                ),
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: Colors.teal,
                                 ),
                               ),
-                              SizedBox(width: 16),
-                              OutlinedButton.icon(
-                                onPressed: () {
-                                  _formKey.currentState!.reset();
-                                  _noKeahlianController.clear();
-                                  _namaPenuhController.clear();
-                                  _icBaruController.clear();
-                                  _emailController.clear();
-                                  _tarikhLulusController.clear();
-                                  _tarikhLahirController.clear();
-                                  _alamatController.clear();
-                                  _poskodController.clear();
-                                  _bandarController.clear();
-                                  _negeriController.clear();
-                                  _pemilikanController.clear();
-                                  _phoneRumahController.clear();
-                                  _phoneBimbitController.clear();
-                                  _surauMasjidController.clear();
-                                  setState(() {
-                                    _selectedGelaran = null;
-                                    _webImageBytes = null;
-                                  });
-                                },
-                                icon: Icon(Icons.cancel),
-                                label: Text('Batal'),
+                              SizedBox(height: 16),
+                              TextFormField(
+                                controller: _tarikhLahirController,
+                                readOnly: true,
+                                onTap:
+                                    () => _selectDate(
+                                      context,
+                                      _tarikhLahirController,
+                                    ),
+                                decoration: InputDecoration(
+                                  labelText: '*Tarikh Lahir',
+                                  hintText: 'DD-MM-YYYY',
+                                ),
+                              ),
+                              TextFormField(
+                                controller: _alamatController,
+                                decoration: InputDecoration(
+                                  labelText: '*Alamat',
+                                ),
+                              ),
+                              TextFormField(
+                                controller: _poskodController,
+                                decoration: InputDecoration(
+                                  labelText: '*Poskod',
+                                ),
+                                keyboardType: TextInputType.number,
+                              ),
+                              TextFormField(
+                                controller: _bandarController,
+                                decoration: InputDecoration(
+                                  labelText: '*Bandar',
+                                ),
+                              ),
+                              TextFormField(
+                                controller: _negeriController,
+                                decoration: InputDecoration(
+                                  labelText: 'Negeri',
+                                ),
+                              ),
+                              TextFormField(
+                                controller: _pemilikanController,
+                                decoration: InputDecoration(
+                                  labelText: 'Pemilikan',
+                                ),
+                              ),
+                              TextFormField(
+                                controller: _phoneRumahController,
+                                decoration: InputDecoration(
+                                  labelText: 'Nombor Telefon Rumah',
+                                ),
+                                keyboardType: TextInputType.phone,
+                              ),
+                              TextFormField(
+                                controller: _phoneBimbitController,
+                                decoration: InputDecoration(
+                                  labelText: 'Nombor Telefon Bimbit',
+                                ),
+                                keyboardType: TextInputType.phone,
+                              ),
+                              DropdownButtonFormField<String>(
+                                value: _selectedMasjid,
+                                hint: Text('Nothing selected'),
+                                items:
+                                    ['Pertubuhan Khairat Kematian'].map((
+                                      gelaran,
+                                    ) {
+                                      return DropdownMenuItem(
+                                        value: gelaran,
+                                        child: Text(gelaran),
+                                      );
+                                    }).toList(),
+                                onChanged:
+                                    (value) =>
+                                        setState(() => _selectedMasjid = value),
+                                decoration: InputDecoration(
+                                  labelText: 'Surau/Masjid',
+                                ),
+                              ),
+                              SizedBox(height: 16),
+                              Row(
+                                children: [
+                                  ElevatedButton.icon(
+                                    onPressed: () {
+                                      if (_formKey.currentState!.validate()) {
+                                        // Save logic
+                                      }
+                                    },
+                                    icon: Icon(
+                                      Icons.check,
+                                      color: Colors.white,
+                                    ),
+                                    label: Text(
+                                      'Simpan',
+                                      style: TextStyle(color: Colors.white),
+                                    ),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.teal,
+                                    ),
+                                  ),
+                                  SizedBox(width: 16),
+                                  OutlinedButton.icon(
+                                    onPressed: () {
+                                      _formKey.currentState!.reset();
+                                      _noKeahlianController.clear();
+                                      _namaPenuhController.clear();
+                                      _icBaruController.clear();
+                                      _emailController.clear();
+                                      _tarikhLulusController.clear();
+                                      _tarikhLahirController.clear();
+                                      _alamatController.clear();
+                                      _poskodController.clear();
+                                      _bandarController.clear();
+                                      _negeriController.clear();
+                                      _pemilikanController.clear();
+                                      _phoneRumahController.clear();
+                                      _phoneBimbitController.clear();
+                                      _surauMasjidController.clear();
+                                      setState(() {
+                                        _selectedGelaran = null;
+                                        _webImageBytes = null;
+                                      });
+                                    },
+                                    icon: Icon(
+                                      Icons.cancel,
+                                      color: Colors.black,
+                                    ),
+                                    label: Text(
+                                      'Batal',
+                                      style: TextStyle(color: Colors.black),
+                                    ),
+                                  ),
+                                ],
                               ),
                             ],
                           ),
-                        ],
+                        ),
                       ),
                     ),
-                  ),
+                  ],
                 ),
               ),
             ),
@@ -298,7 +337,7 @@ class _memberNewState extends State<memberNew> {
                 padding: const EdgeInsets.all(16),
                 child: Card(
                   elevation: 4,
-                  color: Colors.grey[100],
+                  color: MoonColors.light.goten,
                   child: Padding(
                     padding: const EdgeInsets.all(16),
                     child: Column(
