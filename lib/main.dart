@@ -1,8 +1,6 @@
-import 'package:easykhairat/controllers/fee_controller.dart';
 import 'package:easykhairat/controllers/user_controller.dart';
-import 'package:easykhairat/repositories/fee_repository.dart';
-import 'package:easykhairat/views/admin/admin_dashboard.dart';
 import 'package:easykhairat/views/admin/admin_main.dart';
+import 'package:easykhairat/views/admin/kewangan/yuran_individu.dart';
 import 'package:easykhairat/views/auth/signIn.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -24,9 +22,7 @@ void main() async {
 
   Get.put(UserController());
 
-  final supabaseClient = Supabase.instance.client;
-  final feeRepository = FeeRepository(supabaseClient);
-  final feeController = FeeController(feeRepository);
+  // final supabaseClient = Supabase.instance.client;
 
   runApp(const MyApp());
 }
@@ -42,7 +38,12 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
-      home: AdminMain(), // Ensure this is correctly implemented
+      initialRoute: '/adminMain',
+      getPages: [
+        GetPage(name: '/', page: () => SignInPage()),
+        GetPage(name: '/adminMain', page: () => AdminMain()),
+        GetPage(name: '/yuranIndividu', page: () => YuranIndividu()),
+      ],
     );
   }
 }

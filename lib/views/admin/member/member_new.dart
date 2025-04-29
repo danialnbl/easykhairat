@@ -1,9 +1,10 @@
 import 'dart:typed_data';
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:easykhairat/widgets/header.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:moon_design/moon_design.dart';
+import 'package:get/get.dart';
 
 class MemberNew extends StatefulWidget {
   @override
@@ -12,25 +13,10 @@ class MemberNew extends StatefulWidget {
 
 class _MemberNewState extends State<MemberNew> {
   final _formKey = GlobalKey<FormState>();
-
-  final TextEditingController _noKeahlianController = TextEditingController(
-    text: '0000',
-  );
   final TextEditingController _namaPenuhController = TextEditingController();
-  final TextEditingController _icBaruController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _tarikhLulusController = TextEditingController();
   final TextEditingController _tarikhLahirController = TextEditingController();
-  final TextEditingController _alamatController = TextEditingController();
-  final TextEditingController _poskodController = TextEditingController();
-  final TextEditingController _bandarController = TextEditingController();
-  final TextEditingController _negeriController = TextEditingController();
-  final TextEditingController _pemilikanController = TextEditingController();
-  final TextEditingController _phoneRumahController = TextEditingController();
-  final TextEditingController _phoneBimbitController = TextEditingController();
-  final TextEditingController _surauMasjidController = TextEditingController();
-
-  String? _selectedMasjid;
   Uint8List? _webImageBytes;
 
   Future<void> _selectDate(
@@ -71,68 +57,76 @@ class _MemberNewState extends State<MemberNew> {
     return Scaffold(
       backgroundColor: MoonColors.light.gohan,
       body: SingleChildScrollView(
-        child: Row(
-          children: [
-            Expanded(
-              flex: 2,
-              child: SingleChildScrollView(
-                padding: EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "Daftar Ahli Baru",
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              AppHeader(title: "Maklumat Ahli", notificationCount: 3),
+              const SizedBox(height: 16),
+              SizedBox(
+                width: double.infinity,
+                child: Card(
+                  color: MoonColors.light.goku,
+                  elevation: 4,
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: MoonBreadcrumb(
+                      items: [
+                        MoonBreadcrumbItem(
+                          label: Text("Home"),
+                          onTap: () => Get.toNamed('/adminMain'),
+                        ),
+                        MoonBreadcrumbItem(label: Text("Ahli")),
+                        MoonBreadcrumbItem(label: Text("Tambah Ahli")),
+                      ],
                     ),
-                    SizedBox(height: 16),
-                    Card(
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Left Section: Form
+                  Expanded(
+                    flex: 2,
+                    child: Card(
+                      color: MoonColors.light.goku,
                       elevation: 4,
-                      color: Colors.white,
                       child: Padding(
-                        padding: const EdgeInsets.all(16),
+                        padding: const EdgeInsets.all(16.0),
                         child: Form(
                           key: _formKey,
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                "Maklumat Ahli",
-                                style: Theme.of(context).textTheme.titleLarge
-                                    ?.copyWith(color: Colors.black),
+                                "Maklumat Ahli Baru",
+                                style: Theme.of(context).textTheme.bodyLarge,
                               ),
-                              SizedBox(height: 16),
-                              TextFormField(
-                                controller: _noKeahlianController,
-                                decoration: InputDecoration(
-                                  labelText: 'No Keahlian',
-                                  helperText:
-                                      'Biarkan kosong sekiranya mahu sistem menjanakan no baru.',
-                                ),
-                              ),
-
+                              const SizedBox(height: 16),
                               TextFormField(
                                 controller: _namaPenuhController,
                                 decoration: InputDecoration(
                                   labelText: '* Nama Penuh',
+                                  border: OutlineInputBorder(),
                                 ),
-
                                 validator:
                                     (value) =>
                                         value == null || value.isEmpty
                                             ? 'Wajib diisi'
                                             : null,
                               ),
+                              const SizedBox(height: 16),
                               TextFormField(
                                 controller: _emailController,
                                 decoration: InputDecoration(
                                   labelText: 'Email',
-                                  helperText:
-                                      'Jika dimasukkan, sistem akan hantar akses automatik.',
+                                  border: OutlineInputBorder(),
                                 ),
                               ),
-                              SizedBox(height: 16),
+                              const SizedBox(height: 16),
                               TextFormField(
                                 controller: _tarikhLulusController,
                                 readOnly: true,
@@ -144,11 +138,10 @@ class _MemberNewState extends State<MemberNew> {
                                 decoration: InputDecoration(
                                   labelText: 'Tarikh Lulus Pendaftaran',
                                   hintText: 'DD-MM-YYYY',
-                                  helperText:
-                                      'Kosongkan jika ahli baru. Tarikh hanya untuk ahli sedia ada.',
+                                  border: OutlineInputBorder(),
                                 ),
                               ),
-                              SizedBox(height: 16),
+                              const SizedBox(height: 16),
                               Text("Gambar IC"),
                               Container(
                                 height: 150,
@@ -162,15 +155,9 @@ class _MemberNewState extends State<MemberNew> {
                               ElevatedButton.icon(
                                 onPressed: _pickImageWeb,
                                 icon: Icon(Icons.image, color: Colors.white),
-                                label: Text(
-                                  'Pilih Gambar',
-                                  style: TextStyle(color: Colors.white),
-                                ),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.teal,
-                                ),
+                                label: Text('Pilih Gambar'),
                               ),
-                              SizedBox(height: 16),
+                              const SizedBox(height: 16),
                               TextFormField(
                                 controller: _tarikhLahirController,
                                 readOnly: true,
@@ -180,125 +167,36 @@ class _MemberNewState extends State<MemberNew> {
                                       _tarikhLahirController,
                                     ),
                                 decoration: InputDecoration(
-                                  labelText: '*Tarikh Lahir',
+                                  labelText: '* Tarikh Lahir',
                                   hintText: 'DD-MM-YYYY',
+                                  border: OutlineInputBorder(),
                                 ),
                               ),
-                              TextFormField(
-                                controller: _alamatController,
-                                decoration: InputDecoration(
-                                  labelText: '*Alamat',
-                                ),
-                              ),
-                              TextFormField(
-                                controller: _poskodController,
-                                decoration: InputDecoration(
-                                  labelText: '*Poskod',
-                                ),
-                                keyboardType: TextInputType.number,
-                              ),
-                              TextFormField(
-                                controller: _bandarController,
-                                decoration: InputDecoration(
-                                  labelText: '*Bandar',
-                                ),
-                              ),
-                              TextFormField(
-                                controller: _negeriController,
-                                decoration: InputDecoration(
-                                  labelText: 'Negeri',
-                                ),
-                              ),
-                              TextFormField(
-                                controller: _pemilikanController,
-                                decoration: InputDecoration(
-                                  labelText: 'Pemilikan',
-                                ),
-                              ),
-                              TextFormField(
-                                controller: _phoneRumahController,
-                                decoration: InputDecoration(
-                                  labelText: 'Nombor Telefon Rumah',
-                                ),
-                                keyboardType: TextInputType.phone,
-                              ),
-                              TextFormField(
-                                controller: _phoneBimbitController,
-                                decoration: InputDecoration(
-                                  labelText: 'Nombor Telefon Bimbit',
-                                ),
-                                keyboardType: TextInputType.phone,
-                              ),
-                              DropdownButtonFormField<String>(
-                                value: _selectedMasjid,
-                                hint: Text('Nothing selected'),
-                                items:
-                                    ['Pertubuhan Khairat Kematian'].map((
-                                      gelaran,
-                                    ) {
-                                      return DropdownMenuItem(
-                                        value: gelaran,
-                                        child: Text(gelaran),
-                                      );
-                                    }).toList(),
-                                onChanged:
-                                    (value) =>
-                                        setState(() => _selectedMasjid = value),
-                                decoration: InputDecoration(
-                                  labelText: 'Surau/Masjid',
-                                ),
-                              ),
-                              SizedBox(height: 16),
+                              const SizedBox(height: 16),
                               Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
                                 children: [
-                                  ElevatedButton.icon(
+                                  ElevatedButton(
                                     onPressed: () {
                                       if (_formKey.currentState!.validate()) {
                                         // Save logic
                                       }
                                     },
-                                    icon: Icon(
-                                      Icons.check,
-                                      color: Colors.white,
-                                    ),
-                                    label: Text(
-                                      'Simpan',
-                                      style: TextStyle(color: Colors.white),
-                                    ),
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: Colors.teal,
-                                    ),
+                                    child: Text("Simpan"),
                                   ),
-                                  SizedBox(width: 16),
-                                  OutlinedButton.icon(
+                                  const SizedBox(width: 8),
+                                  OutlinedButton(
                                     onPressed: () {
                                       _formKey.currentState!.reset();
-                                      _noKeahlianController.clear();
                                       _namaPenuhController.clear();
-                                      _icBaruController.clear();
                                       _emailController.clear();
                                       _tarikhLulusController.clear();
                                       _tarikhLahirController.clear();
-                                      _alamatController.clear();
-                                      _poskodController.clear();
-                                      _bandarController.clear();
-                                      _negeriController.clear();
-                                      _pemilikanController.clear();
-                                      _phoneRumahController.clear();
-                                      _phoneBimbitController.clear();
-                                      _surauMasjidController.clear();
                                       setState(() {
                                         _webImageBytes = null;
                                       });
                                     },
-                                    icon: Icon(
-                                      Icons.cancel,
-                                      color: Colors.black,
-                                    ),
-                                    label: Text(
-                                      'Batal',
-                                      style: TextStyle(color: Colors.black),
-                                    ),
+                                    child: Text("Batal"),
                                   ),
                                 ],
                               ),
@@ -307,44 +205,44 @@ class _MemberNewState extends State<MemberNew> {
                         ),
                       ),
                     ),
-                  ],
-                ),
-              ),
-            ),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Card(
-                  elevation: 4,
-                  color: MoonColors.light.goten,
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Panduan',
-                          style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                  const SizedBox(width: 16),
+                  // Right Section: Guidelines
+                  Expanded(
+                    flex: 3,
+                    child: Card(
+                      color: MoonColors.light.goku,
+                      elevation: 4,
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "Panduan",
+                              style: Theme.of(context).textTheme.bodyLarge,
+                            ),
+                            const SizedBox(height: 16),
+                            Text("• Ruangan bertanda * wajib diisi."),
+                            const SizedBox(height: 8),
+                            Text("• Sertakan salinan IC untuk di'upload'."),
+                            const SizedBox(height: 8),
+                            Text(
+                              "• Bayaran perlu dibuat kepada pegawai selepas mendaftar.",
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              "• Pastikan anda mendaftar di kariah surau yang betul.",
+                            ),
+                          ],
                         ),
-                        SizedBox(height: 12),
-                        Text('• Ruangan bertanda * wajib diisi.'),
-                        SizedBox(height: 8),
-                        Text("• Sertakan salinan IC untuk di'upload'."),
-                        SizedBox(height: 8),
-                        Text(
-                          "• Bayaran perlu dibuat kepada pegawai selepas mendaftar.",
-                        ),
-                        SizedBox(height: 8),
-                        Text(
-                          "• Pastikan anda mendaftar di kariah surau yang betul.",
-                        ),
-                      ],
+                      ),
                     ),
                   ),
-                ),
+                ],
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

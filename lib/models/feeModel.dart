@@ -6,7 +6,8 @@ class FeeModel {
   final DateTime feeCreatedAt;
   final DateTime feeUpdatedAt;
   final int adminId;
-  final String userId; // Using String for UUID is fine
+  final String? userId;
+  final double feeAmount;
 
   FeeModel({
     required this.feeId,
@@ -16,7 +17,8 @@ class FeeModel {
     required this.feeCreatedAt,
     required this.feeUpdatedAt,
     required this.adminId,
-    required this.userId,
+    this.userId,
+    required this.feeAmount,
   });
 
   factory FeeModel.fromJson(Map<String, dynamic> json) {
@@ -29,6 +31,7 @@ class FeeModel {
       feeUpdatedAt: DateTime.parse(json['fee_updated_at']),
       adminId: json['admin_id'],
       userId: json['user_id'],
+      feeAmount: (json['fee_amount'] as num).toDouble(),
     );
   }
 
@@ -42,6 +45,12 @@ class FeeModel {
       'fee_updated_at': feeUpdatedAt.toIso8601String(),
       'admin_id': adminId,
       'user_id': userId,
+      'fee_amount': feeAmount,
     };
+  }
+
+  @override
+  String toString() {
+    return 'FeeModel(feeId: $feeId, description: $feeDescription, due: $feeDue, type: $feeType, amount: $feeAmount)';
   }
 }

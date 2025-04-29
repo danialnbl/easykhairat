@@ -1,59 +1,125 @@
-import '../models/feeModel.dart';
-import '../repositories/fee_repository.dart';
+import 'package:get/get.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:easykhairat/models/feeModel.dart';
 
-class FeeController {
-  final FeeRepository _feeRepository;
+class FeeController extends GetxController {
+  var fees = <FeeModel>[].obs;
+  var isLoading = false.obs;
+  final supabase = Supabase.instance.client;
 
-  FeeController(this._feeRepository);
-
-  Future<List<FeeModel>> getAllFees() async {
-    return await _feeRepository.getAllFees();
+  @override
+  void onInit() {
+    super.onInit();
+    fetchFees();
+    listenForRealTimeUpdates();
   }
 
-  Future<List<FeeModel>> getFeesByUserId(String userId) async {
-    return await _feeRepository.getFeesByUserId(userId);
+  // Fetch all fees
+  Future<void> fetchFees() async {
+    try {
+      isLoading.value = true;
+      final response = await supabase.from('fees').select();
+
+      final fetchedFees =
+          (response as List<dynamic>)
+              .map((json) => FeeModel.fromJson(json as Map<String, dynamic>))
+              .toList();
+
+      fees.assignAll(fetchedFees);
+    } catch (e) {
+      print("Error fetching fees: $e");
+      Get.snackbar('Error', 'Failed to fetch fees');
+    } finally {
+      isLoading.value = false;
+    }
   }
 
-  Future<void> addFee({
-    required String description,
-    required DateTime dueDate,
-    required String feeType,
-    required int adminId,
-    required String userId,
-  }) async {
-    final now = DateTime.now();
+  // Fetch fees by user ID
+  Future<void> fetchFeesByUserId(String userId) async {
+    try {
+      isLoading.value = true;
+      final response = await supabase
+          .from('fees')
+          .select()
+          .eq('user_id', userId);
 
-    final newFee = FeeModel(
-      feeId: 0, // This will be assigned by Supabase if it's auto-incrementing
-      feeDescription: description,
-      feeDue: dueDate,
-      feeType: feeType,
-      feeCreatedAt: now,
-      feeUpdatedAt: now,
-      adminId: adminId,
-      userId: userId,
-    );
+      final fetchedFees =
+          (response as List<dynamic>)
+              .map((json) => FeeModel.fromJson(json as Map<String, dynamic>))
+              .toList();
 
-    await _feeRepository.addFee(newFee);
+      fees.assignAll(fetchedFees);
+    } catch (e) {
+      print("Error fetching fees by user ID: $e");
+      Get.snackbar('Error', 'Failed to fetch fees');
+    } finally {
+      isLoading.value = false;
+    }
   }
 
+  // Add a new fee
+  Future<void> addFee(FeeModel fee) async {
+    try {
+      isLoading.value = true;
+      await supabase.from('fees').insert(fee.toJson());
+      Get.snackbar('Success', 'Fee added');
+    } catch (e) {
+      print("Error adding fee: $e");
+      Get.snackbar('Error', 'Failed to add fee');
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  // Update a fee
   Future<void> updateFee(FeeModel fee) async {
-    // Update the updatedAt timestamp
-    final updatedFee = FeeModel(
-      feeId: fee.feeId,
-      feeDescription: fee.feeDescription,
-      feeDue: fee.feeDue,
-      feeType: fee.feeType,
-      feeCreatedAt: fee.feeCreatedAt,
-      feeUpdatedAt: DateTime.now(),
-      adminId: fee.adminId,
-      userId: fee.userId,
-    );
+    try {
+      isLoading.value = true;
+      // final updatedFee = fee.copyWith(
+      //   feeUpdatedAt: DateTime.now(), // Update only updatedAt field
+      // );
 
-    await _feeRepository.updateFee(updatedFee);
+      await supabase.from('fees').update(fee.toJson()).eq('fee_id', fee.feeId);
+
+      Get.snackbar('Success', 'Fee updated');
+    } catch (e) {
+      Get.log("Error updating fee: $e");
+      Get.snackbar('Error', 'Failed to update fee');
+    } finally {
+      isLoading.value = false;
+    }
   }
 
+  // Delete a fee
   Future<void> deleteFee(int feeId) async {
-    await _feeRepository.deleteFee(feeId);
+    try {
+      isLoading.value = true;
+      await supabase.from('fees').delete().eq('fee_id', feeId);
+      Get.snackbar('Success', 'Fee deleted');
+    } catch (e) {
+      print("Error deleting fee: $e");
+      Get.snackbar('Error', 'Failed to delete fee');
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  // Listen for real-time updates
+  void listenForRealTimeUpdates() {
+    supabase.from('fees').stream(primaryKey: ['fee_id']).listen((
+      List<Map<String, dynamic>> changes,
+    ) {
+      if (changes.isNotEmpty) {
+        fetchFees(); // Refresh list when any change happens
+      }
+    });
+  }
+
+  // Stream fees by user ID (for real-time updates)
+  Stream<List<Map<String, dynamic>>> streamFeesByUserId(String userId) {
+    return supabase
+        .from('fees')
+        .stream(primaryKey: ['fee_id'])
+        .eq('user_id', userId);
   }
 }

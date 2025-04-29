@@ -1,5 +1,8 @@
+import 'package:easykhairat/controllers/user_controller.dart';
 import 'package:easykhairat/views/admin/adminSettings.dart';
 import 'package:easykhairat/views/admin/admin_dashboard.dart';
+import 'package:easykhairat/views/admin/kewangan/proses_yuran.dart';
+import 'package:easykhairat/views/admin/kewangan/yuran_individu.dart';
 import 'package:easykhairat/views/admin/management/manage_fee.dart';
 import 'package:easykhairat/views/admin/member/member_list.dart';
 import 'package:easykhairat/views/admin/member/member_new.dart';
@@ -69,7 +72,48 @@ class _AdminMainState extends State<AdminMain> {
                     6,
                   ),
                   _buildNavItem(Icons.receipt_long, "Laporan", 7),
-                  _buildNavItem(Icons.settings, "Tetapan", 8),
+                  _buildExpandableNavItem(Icons.settings, "Tetapan", 8, [
+                    _buildSubNavItem("My Profile", 8),
+                    _buildSubNavItem("Edit Profile", 8),
+                    MoonMenuItem(
+                      onTap: () {
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                              title: Text("Log Out"),
+                              content: Text(
+                                "Adakah anda pasti mahu log keluar?",
+                              ),
+                              actions: [
+                                TextButton(
+                                  child: Text("Batal"),
+                                  onPressed: () => Navigator.of(context).pop(),
+                                ),
+                                TextButton(
+                                  child: Text("Log Keluar"),
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                    Get.find<UserController>().signOut();
+                                  },
+                                ),
+                              ],
+                            );
+                          },
+                        );
+                      },
+                      backgroundColor: Colors.transparent,
+                      borderRadius: BorderRadius.circular(8),
+                      menuItemPadding: EdgeInsets.symmetric(
+                        vertical: 12.0,
+                        horizontal: 40.0,
+                      ),
+                      label: Text(
+                        "Log Out",
+                        style: TextStyle(color: Colors.grey),
+                      ),
+                    ),
+                  ]),
                 ],
               ),
             ),
@@ -186,11 +230,12 @@ class _AdminMainState extends State<AdminMain> {
                   MemberList(),
                   MemberNew(),
                   ManageFee(),
-                  Center(child: Text('Proses Yuran Screen')),
+                  ProsesYuran(),
                   Center(child: Text('Proses Tuntutan Screen')),
                   Center(child: Text('Pengumuman Screen')),
                   Center(child: Text('Laporan Screen')),
                   AdminSettings(),
+                  YuranIndividu(),
                 ],
               ),
             ),

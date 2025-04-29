@@ -1,9 +1,9 @@
-import 'package:easykhairat/views/admin/components/header.dart';
+import 'package:easykhairat/widgets/header.dart';
 import 'package:flutter/material.dart';
 import 'package:moon_design/moon_design.dart';
-import 'package:easykhairat/views/admin/components/overall_fee_chart.dart';
-import 'package:easykhairat/views/admin/components/registered_members_chart.dart';
-import 'package:easykhairat/views/admin/components/total_claims_chart.dart';
+import 'package:easykhairat/widgets/admin/overall_fee_chart.dart';
+import 'package:easykhairat/widgets/admin/registered_members_chart.dart';
+import 'package:easykhairat/widgets/admin/total_claims_chart.dart';
 import 'package:easykhairat/controllers/user_controller.dart';
 import 'package:get/get.dart';
 
@@ -40,6 +40,26 @@ class _AdminDashboardState extends State<AdminDashboard> {
                 title: "Dashboard Overview",
                 notificationCount: 3,
                 onNotificationPressed: () {},
+              ),
+              const SizedBox(height: 16),
+              SizedBox(
+                width: double.infinity,
+                child: Card(
+                  color: MoonColors.light.goku,
+                  elevation: 4,
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: MoonBreadcrumb(
+                      items: [
+                        MoonBreadcrumbItem(
+                          label: Text("Home"),
+                          onTap: () => Get.toNamed('/adminMain'),
+                        ),
+                        MoonBreadcrumbItem(label: Text("Dashboard")),
+                      ],
+                    ),
+                  ),
+                ),
               ),
               const SizedBox(height: 16),
               _buildDashboardGrid(),

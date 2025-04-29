@@ -5,6 +5,7 @@ import 'package:easykhairat/models/userModel.dart' as pengguna;
 class UserController extends GetxController {
   var users = <pengguna.User>[].obs;
   var adminUsers = <pengguna.User>[].obs;
+  var normalusers = <pengguna.User>[].obs;
   var isLoading = false.obs;
   final supabase = Supabase.instance.client;
 
@@ -57,6 +58,30 @@ class UserController extends GetxController {
     } catch (e) {
       print("Error fetching admins: $e");
       Get.snackbar('Error', 'Failed to fetch admins');
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<void> fetchNormal() async {
+    try {
+      isLoading.value = true;
+      final response = await supabase
+          .from('users')
+          .select()
+          .eq('user_type', 'user');
+
+      final fetchedNormal =
+          (response as List<dynamic>)
+              .map(
+                (json) => pengguna.User.fromJson(json as Map<String, dynamic>),
+              )
+              .toList();
+
+      normalusers.assignAll(fetchedNormal);
+    } catch (e) {
+      print("Error fetching normal user: $e");
+      Get.snackbar('Error', 'Failed to fetch normal user');
     } finally {
       isLoading.value = false;
     }

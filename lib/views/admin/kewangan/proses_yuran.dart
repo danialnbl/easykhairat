@@ -1,3 +1,4 @@
+import 'package:easykhairat/controllers/navigation_controller.dart';
 import 'package:easykhairat/widgets/header.dart';
 import 'package:flutter/material.dart';
 import 'package:moon_design/moon_design.dart';
@@ -5,15 +6,16 @@ import 'package:get/get.dart';
 import 'package:easykhairat/controllers/user_controller.dart';
 import 'package:intl/intl.dart';
 
-class MemberList extends StatefulWidget {
-  const MemberList({super.key});
+class ProsesYuran extends StatefulWidget {
+  const ProsesYuran({super.key});
 
   @override
-  MemberListState createState() => MemberListState();
+  ProsesYuranState createState() => ProsesYuranState();
 }
 
-class MemberListState extends State<MemberList> {
+class ProsesYuranState extends State<ProsesYuran> {
   final UserController userController = Get.put(UserController());
+  final NavigationController navController = Get.put(NavigationController());
   RxString selectedFilter = 'Semua Ahli'.obs;
   TextEditingController nameSearchController = TextEditingController();
   TextEditingController icSearchController = TextEditingController();
@@ -22,8 +24,8 @@ class MemberListState extends State<MemberList> {
   void initState() {
     super.initState();
     // Load users if needed
-    if (userController.users.isEmpty) {
-      userController.fetchUsers();
+    if (userController.normalusers.isEmpty) {
+      userController.fetchNormal();
     }
   }
 
@@ -35,7 +37,7 @@ class MemberListState extends State<MemberList> {
 
   // Filter users based on search text and selected filter
   List<dynamic> getFilteredUsers() {
-    return userController.users.where((user) {
+    return userController.normalusers.where((user) {
       bool matchesName =
           nameSearchController.text.isEmpty ||
           user.userName.toLowerCase().contains(
@@ -104,35 +106,6 @@ class MemberListState extends State<MemberList> {
     );
   }
 
-  void editMember(dynamic user) {
-    debugPrint("Edit tapped for ${user.userName}");
-    // Navigate to edit screen or show edit dialog
-    // This is a placeholder - implement actual navigation/edit functionality
-    Get.toNamed('/edit-member', arguments: user);
-  }
-
-  void deleteMember(dynamic user) {
-    // Show confirmation dialog
-    Get.dialog(
-      AlertDialog(
-        title: const Text('Confirm Delete'),
-        content: Text('Are you sure you want to delete ${user.userName}?'),
-        actions: [
-          TextButton(child: const Text('Cancel'), onPressed: () => Get.back()),
-          TextButton(
-            child: const Text('Delete'),
-            onPressed: () {
-              userController.deleteUser(
-                user.userId,
-              ); // Implement this method in your controller
-              Get.back();
-            },
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildTable() {
     return Obx(() {
       final filteredUsers = getFilteredUsers();
@@ -154,8 +127,7 @@ class MemberListState extends State<MemberList> {
             2: FlexColumnWidth(2), // IC Baru
             3: FlexColumnWidth(2), // Tarikh Daftar
             4: FlexColumnWidth(3), // Alamat
-            5: FlexColumnWidth(2), // Type
-            6: FlexColumnWidth(2), // Actions
+            5: FlexColumnWidth(2), // Actions
           },
           border: TableBorder(
             horizontalInside: BorderSide(color: Colors.grey.shade300, width: 1),
@@ -215,16 +187,7 @@ class MemberListState extends State<MemberList> {
                     ),
                   ),
                 ),
-                Padding(
-                  padding: EdgeInsets.all(12.0),
-                  child: Text(
-                    'Type',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
+
                 Padding(
                   padding: EdgeInsets.all(12.0),
                   child: Text(
@@ -283,13 +246,7 @@ class MemberListState extends State<MemberList> {
                       style: const TextStyle(color: Colors.black87),
                     ),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.all(12.0),
-                    child: Text(
-                      user.userType,
-                      style: const TextStyle(color: Colors.black87),
-                    ),
-                  ),
+
                   Padding(
                     padding: const EdgeInsets.all(12.0),
                     child: Row(
@@ -299,15 +256,7 @@ class MemberListState extends State<MemberList> {
                             Icons.visibility,
                             color: Colors.green,
                           ),
-                          onPressed: () => viewMember(user),
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.edit, color: Colors.blue),
-                          onPressed: () => editMember(user),
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.delete, color: Colors.red),
-                          onPressed: () => deleteMember(user),
+                          onPressed: () => navController.changeIndex(9),
                         ),
                       ],
                     ),
@@ -330,7 +279,7 @@ class MemberListState extends State<MemberList> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            AppHeader(title: "Senarai Ahli", notificationCount: 3),
+            AppHeader(title: "Proses Yuran", notificationCount: 3),
             const SizedBox(height: 16),
             SizedBox(
               width: double.infinity,
@@ -345,8 +294,8 @@ class MemberListState extends State<MemberList> {
                         label: Text("Home"),
                         onTap: () => Get.toNamed('/adminMain'),
                       ),
-                      MoonBreadcrumbItem(label: Text("Ahli")),
-                      MoonBreadcrumbItem(label: Text("Senarai Ahli")),
+                      MoonBreadcrumbItem(label: Text("Kewangan")),
+                      MoonBreadcrumbItem(label: Text("Proses Yuran")),
                     ],
                   ),
                 ),
