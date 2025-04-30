@@ -414,14 +414,6 @@ class MemberListState extends State<MemberList> {
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          // Navigate to add member screen
-          Get.toNamed('/add-member');
-        },
-        backgroundColor: MoonColors.light.piccolo,
-        child: const Icon(Icons.add),
-      ),
     );
   }
 }

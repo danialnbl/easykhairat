@@ -36,8 +36,10 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'EasyKhairat',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        primaryColor: Color(0xFF2BAAAD),
+        colorScheme: ColorScheme.light(primary: Color(0xFF2BAAAD)),
       ),
+
       initialRoute: '/adminMain',
       getPages: [
         GetPage(name: '/', page: () => SignInPage()),

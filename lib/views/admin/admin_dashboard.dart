@@ -50,12 +50,20 @@ class _AdminDashboardState extends State<AdminDashboard> {
                   child: Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: MoonBreadcrumb(
-                      items: [
+                        items: [
                         MoonBreadcrumbItem(
-                          label: Text("Home"),
+                          label: Text(
+                          "Home",
+                          style: const TextStyle(color: Colors.black),
+                          ),
                           onTap: () => Get.toNamed('/adminMain'),
                         ),
-                        MoonBreadcrumbItem(label: Text("Dashboard")),
+                        MoonBreadcrumbItem(
+                          label: Text(
+                          "Dashboard",
+                          style: const TextStyle(color: Colors.black),
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -149,7 +157,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
           children: [
             Text(
               title,
-              style: const TextStyle(fontSize: 14, color: Colors.black54),
+              style: const TextStyle(fontSize: 14, color: Colors.black),
             ),
             const SizedBox(height: 4),
             Text(

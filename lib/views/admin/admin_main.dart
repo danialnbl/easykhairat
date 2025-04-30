@@ -24,7 +24,7 @@ class _AdminMainState extends State<AdminMain> {
 
   Widget _buildSidebar() {
     return Container(
-      width: 190,
+      width: 250,
       decoration: BoxDecoration(
         color: Colors.white,
         boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 5)],
@@ -129,21 +129,31 @@ class _AdminMainState extends State<AdminMain> {
     return MoonMenuItem(
       onTap: () => navController.changeIndex(index),
       backgroundColor:
-          isSelected ? Colors.blue.withOpacity(0.1) : Colors.transparent,
+          isSelected
+              ? Theme.of(context).primaryColor.withOpacity(0.1)
+              : Colors.transparent,
       borderRadius: BorderRadius.circular(8),
       menuItemPadding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0),
-      leading: Icon(icon, color: isSelected ? Colors.blue : Colors.grey),
+      leading: Icon(
+        icon,
+        color: isSelected ? Theme.of(context).primaryColor : Colors.black,
+      ),
       label: Text(
         label,
         style: TextStyle(
-          color: isSelected ? Colors.blue : Colors.grey,
+          color: isSelected ? Theme.of(context).primaryColor : Colors.black,
           fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
         ),
       ),
       decoration: BoxDecoration(
         border:
             isSelected
-                ? Border(left: BorderSide(color: Colors.blue, width: 4))
+                ? Border(
+                  left: BorderSide(
+                    color: Theme.of(context).primaryColor,
+                    width: 4,
+                  ),
+                )
                 : null,
       ),
     );
@@ -167,14 +177,14 @@ class _AdminMainState extends State<AdminMain> {
             vertical: 12.0,
             horizontal: 16.0,
           ),
-          leading: Icon(icon, color: Colors.grey),
+          leading: Icon(icon, color: Colors.black),
           label: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(label, style: TextStyle(color: Colors.grey)),
+              Text(label, style: TextStyle(color: Colors.black)),
               Icon(
                 isExpanded ? Icons.expand_less : Icons.expand_more,
-                color: Colors.grey,
+                color: Colors.black,
               ),
             ],
           ),
@@ -190,7 +200,9 @@ class _AdminMainState extends State<AdminMain> {
     return MoonMenuItem(
       onTap: () => navController.changeIndex(index),
       backgroundColor:
-          isSelected ? Colors.blue.withOpacity(0.1) : Colors.transparent,
+          isSelected
+              ? Theme.of(context).primaryColor.withOpacity(0.1)
+              : Colors.transparent,
       borderRadius: BorderRadius.circular(8),
       menuItemPadding: EdgeInsets.symmetric(
         vertical: 12.0,
@@ -199,14 +211,19 @@ class _AdminMainState extends State<AdminMain> {
       label: Text(
         label,
         style: TextStyle(
-          color: isSelected ? Colors.blue : Colors.grey,
+          color: isSelected ? Theme.of(context).primaryColor : Colors.black,
           fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
         ),
       ),
       decoration: BoxDecoration(
         border:
             isSelected
-                ? Border(left: BorderSide(color: Colors.blue, width: 4))
+                ? Border(
+                  left: BorderSide(
+                    color: Theme.of(context).primaryColor,
+                    width: 4,
+                  ),
+                )
                 : null,
       ),
     );
@@ -268,7 +285,7 @@ class _AdminMainState extends State<AdminMain> {
                   ],
                   currentIndex: navController.selectedIndex.value,
                   unselectedItemColor: MoonColors.light.bulma,
-                  selectedItemColor: Colors.blue,
+                  selectedItemColor: Theme.of(context).primaryColor,
                   showUnselectedLabels: true,
                   onTap: navController.changeIndex,
                 ),
