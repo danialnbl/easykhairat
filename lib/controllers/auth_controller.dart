@@ -28,18 +28,22 @@ class AuthService {
       if (response.user == null) {
         throw Exception('User creation failed');
       } else {
-        print('User created successfully');
-        Get.to(() => SignInPage());
+        Get.snackbar(
+          "Berjaya",
+          "Maklumat ahli baru telah disimpan.",
+          snackPosition: SnackPosition.BOTTOM,
+          snackStyle: SnackStyle.FLOATING,
+        );
       }
     } catch (error) {
       print('Signup error: $error');
       if (error.toString().contains('User already registered')) {
         print('User already exists');
         Get.snackbar(
-          'Signup Error',
+          'Ralat',
           error.toString(),
-          snackPosition: SnackPosition.BOTTOM,
-          snackStyle: SnackStyle.FLOATING,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
         );
       }
     }

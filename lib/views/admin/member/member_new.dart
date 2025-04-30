@@ -1,10 +1,13 @@
 import 'dart:typed_data';
+import 'package:easykhairat/controllers/auth_controller.dart';
 import 'package:easykhairat/widgets/header.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:moon_design/moon_design.dart';
 import 'package:get/get.dart';
+import 'package:easykhairat/controllers/user_controller.dart'; // Adjust path if different
+import 'package:easykhairat/models/userModel.dart'; // For the User model
 
 class MemberNew extends StatefulWidget {
   @override
@@ -16,7 +19,13 @@ class _MemberNewState extends State<MemberNew> {
   final TextEditingController _namaPenuhController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _tarikhLulusController = TextEditingController();
-  final TextEditingController _tarikhLahirController = TextEditingController();
+  final TextEditingController _nomborTelefonController =
+      TextEditingController();
+  final TextEditingController _nomborIcController = TextEditingController();
+  final TextEditingController _alamatController = TextEditingController();
+  final TextEditingController _katalaluanController = TextEditingController();
+  final UserController userController = Get.put(UserController());
+
   Uint8List? _webImageBytes;
 
   Future<void> _selectDate(
@@ -122,9 +131,14 @@ class _MemberNewState extends State<MemberNew> {
                               TextFormField(
                                 controller: _emailController,
                                 decoration: InputDecoration(
-                                  labelText: 'Email',
+                                  labelText: '* Email',
                                   border: OutlineInputBorder(),
                                 ),
+                                validator:
+                                    (value) =>
+                                        value == null || value.isEmpty
+                                            ? 'Wajib diisi'
+                                            : null,
                               ),
                               const SizedBox(height: 16),
                               TextFormField(
@@ -142,44 +156,122 @@ class _MemberNewState extends State<MemberNew> {
                                 ),
                               ),
                               const SizedBox(height: 16),
-                              Text("Gambar IC"),
-                              Container(
-                                height: 150,
-                                width: 150,
-                                margin: EdgeInsets.symmetric(vertical: 8),
-                                decoration: BoxDecoration(
-                                  border: Border.all(color: Colors.grey),
+                              // Text("Gambar IC"),
+                              // Container(
+                              //   height: 150,
+                              //   width: 150,
+                              //   margin: EdgeInsets.symmetric(vertical: 8),
+                              //   decoration: BoxDecoration(
+                              //     border: Border.all(color: Colors.grey),
+                              //   ),
+                              //   child: _buildImagePreview(),
+                              // ),
+                              // ElevatedButton.icon(
+                              //   onPressed: _pickImageWeb,
+                              //   icon: Icon(Icons.image, color: Colors.white),
+                              //   label: Text('Pilih Gambar'),
+                              // ),
+                              // const SizedBox(height: 16),
+                              TextFormField(
+                                controller: _nomborTelefonController,
+                                decoration: InputDecoration(
+                                  labelText: '* Nombor Telefon',
+                                  border: OutlineInputBorder(),
                                 ),
-                                child: _buildImagePreview(),
-                              ),
-                              ElevatedButton.icon(
-                                onPressed: _pickImageWeb,
-                                icon: Icon(Icons.image, color: Colors.white),
-                                label: Text('Pilih Gambar'),
+                                validator:
+                                    (value) =>
+                                        value == null || value.isEmpty
+                                            ? 'Wajib diisi'
+                                            : null,
                               ),
                               const SizedBox(height: 16),
                               TextFormField(
-                                controller: _tarikhLahirController,
-                                readOnly: true,
-                                onTap:
-                                    () => _selectDate(
-                                      context,
-                                      _tarikhLahirController,
-                                    ),
+                                controller: _nomborIcController,
                                 decoration: InputDecoration(
-                                  labelText: '* Tarikh Lahir',
-                                  hintText: 'DD-MM-YYYY',
+                                  labelText: '* Nombor IC',
                                   border: OutlineInputBorder(),
                                 ),
+                                validator:
+                                    (value) =>
+                                        value == null || value.isEmpty
+                                            ? 'Wajib diisi'
+                                            : null,
+                              ),
+                              const SizedBox(height: 16),
+                              TextFormField(
+                                controller: _alamatController,
+                                decoration: InputDecoration(
+                                  labelText: '* Alamat',
+                                  border: OutlineInputBorder(),
+                                ),
+                                maxLines: 3,
+                                validator:
+                                    (value) =>
+                                        value == null || value.isEmpty
+                                            ? 'Wajib diisi'
+                                            : null,
+                              ),
+                              const SizedBox(height: 16),
+                              TextFormField(
+                                controller: _katalaluanController,
+                                obscureText: true,
+                                decoration: InputDecoration(
+                                  labelText: '* Kata Laluan',
+                                  border: OutlineInputBorder(),
+                                ),
+                                validator:
+                                    (value) =>
+                                        value == null || value.isEmpty
+                                            ? 'Wajib diisi'
+                                            : null,
                               ),
                               const SizedBox(height: 16),
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.end,
                                 children: [
                                   ElevatedButton(
-                                    onPressed: () {
+                                    onPressed: () async {
                                       if (_formKey.currentState!.validate()) {
-                                        // Save logic
+                                        final newUser = User(
+                                          userName: _namaPenuhController.text,
+                                          userEmail: _emailController.text,
+                                          userPhoneNo:
+                                              _nomborTelefonController.text,
+                                          userIdentification:
+                                              _nomborIcController.text,
+                                          userAddress: _alamatController.text,
+                                          userCreatedAt: DateFormat(
+                                            'dd-MM-yyyy',
+                                          ).parse(_tarikhLulusController.text),
+                                          userType:
+                                              'user', // Or 'admin' if applicable
+                                          userPassword:
+                                              _katalaluanController.text,
+                                        );
+
+                                        await AuthService.signUp(
+                                          newUser,
+                                          context,
+                                        );
+
+                                        // Optionally reset form
+                                        _formKey.currentState!.reset();
+                                        _namaPenuhController.clear();
+                                        _emailController.clear();
+                                        _tarikhLulusController.clear();
+                                        _nomborTelefonController.clear();
+                                        _nomborIcController.clear();
+                                        _alamatController.clear();
+                                        setState(() {
+                                          _webImageBytes = null;
+                                        });
+                                      } else {
+                                        Get.snackbar(
+                                          'Ralat',
+                                          'Sila isi semua ruangan yang wajib.',
+                                          backgroundColor: Colors.red,
+                                          colorText: Colors.white,
+                                        );
                                       }
                                     },
                                     child: Text("Simpan"),
@@ -191,11 +283,12 @@ class _MemberNewState extends State<MemberNew> {
                                       _namaPenuhController.clear();
                                       _emailController.clear();
                                       _tarikhLulusController.clear();
-                                      _tarikhLahirController.clear();
+
                                       setState(() {
                                         _webImageBytes = null;
                                       });
                                     },
+
                                     child: Text("Batal"),
                                   ),
                                 ],
@@ -225,8 +318,8 @@ class _MemberNewState extends State<MemberNew> {
                             const SizedBox(height: 16),
                             Text("• Ruangan bertanda * wajib diisi."),
                             const SizedBox(height: 8),
-                            Text("• Sertakan salinan IC untuk di'upload'."),
-                            const SizedBox(height: 8),
+                            // Text("• Sertakan salinan IC untuk di'upload'."),
+                            // const SizedBox(height: 8),
                             Text(
                               "• Bayaran perlu dibuat kepada pegawai selepas mendaftar.",
                             ),

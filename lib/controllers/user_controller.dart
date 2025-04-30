@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:easykhairat/models/userModel.dart' as pengguna;
@@ -88,18 +89,45 @@ class UserController extends GetxController {
   }
 
   // Add a new user
-  Future<void> addUser(pengguna.User user) async {
-    try {
-      isLoading.value = true;
-      await supabase.from('users').insert(user.toJson());
-      Get.snackbar('Success', 'User added');
-    } catch (e) {
-      print("Error adding user: $e");
-      Get.snackbar('Error', 'Failed to add user');
-    } finally {
-      isLoading.value = false;
-    }
-  }
+  // Future<void> addUser(pengguna.User user) async {
+  //   try {
+  //     isLoading.value = true;
+
+  //     final authResponse = await supabase.auth.signUp(
+  //       email: user.userEmail,
+  //       password: user.userPassword,
+  //     );
+
+  //     final uid = authResponse.user?.id;
+
+  //     if (uid == null) {
+  //       throw Exception(
+  //         "User ID is null after sign-up. Email may already be in use.",
+  //       );
+  //     }
+
+  //     final userWithId = user.copyWith(userId: uid.substring(0, 8));
+  //     await supabase.from('users').insert(userWithId.toJson());
+
+  //     Get.snackbar(
+  //       "Berjaya",
+  //       "Maklumat ahli baru telah disimpan.",
+  //       snackPosition: SnackPosition.BOTTOM,
+  //       snackStyle: SnackStyle.FLOATING,
+  //     );
+  //   } catch (e) {
+  //     print("Error adding user: $e");
+  //     Get.snackbar(
+  //       'Ralat',
+  //       e.toString(),
+  //       backgroundColor: Colors.red,
+  //       colorText: Colors.white,
+  //     );
+  //   } finally {
+  //     isLoading.value = false;
+  //   }
+  // }
+  // Use auth Controller to add user
 
   // Update an existing user
   Future<void> updateUser(pengguna.User user) async {
@@ -108,7 +136,7 @@ class UserController extends GetxController {
       await supabase
           .from('users')
           .update(user.toJson())
-          .eq('user_id', user.userId);
+          .eq('user_id', user.userId.toString());
       Get.snackbar('Success', 'User updated');
     } catch (e) {
       print("Error updating user: $e");

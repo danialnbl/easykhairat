@@ -7,8 +7,8 @@ class User {
   final String userType;
   final String userPassword;
   final DateTime userCreatedAt;
-  final DateTime userUpdatedAt;
-  final String userId;
+  final DateTime? userUpdatedAt;
+  final String? userId;
 
   User({
     required this.userName,
@@ -19,8 +19,8 @@ class User {
     required this.userType,
     required this.userPassword,
     required this.userCreatedAt,
-    required this.userUpdatedAt,
-    required this.userId,
+    this.userUpdatedAt,
+    this.userId,
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
@@ -48,9 +48,35 @@ class User {
       'user_type': userType,
       'user_password': userPassword,
       'user_created_at': userCreatedAt.toIso8601String(),
-      'user_updated_at': userUpdatedAt.toIso8601String(),
+      'user_updated_at': userUpdatedAt,
       'user_id': userId,
     };
+  }
+
+  User copyWith({
+    String? userName,
+    String? userIdentification,
+    String? userPhoneNo,
+    String? userAddress,
+    String? userEmail,
+    String? userType,
+    String? userPassword,
+    DateTime? userCreatedAt,
+    DateTime? userUpdatedAt,
+    String? userId,
+  }) {
+    return User(
+      userName: userName ?? this.userName,
+      userIdentification: userIdentification ?? this.userIdentification,
+      userPhoneNo: userPhoneNo ?? this.userPhoneNo,
+      userAddress: userAddress ?? this.userAddress,
+      userEmail: userEmail ?? this.userEmail,
+      userType: userType ?? this.userType,
+      userPassword: userPassword ?? this.userPassword,
+      userCreatedAt: userCreatedAt ?? this.userCreatedAt,
+      userUpdatedAt: userUpdatedAt ?? this.userUpdatedAt,
+      userId: userId ?? this.userId,
+    );
   }
 
   @override

@@ -1,5 +1,6 @@
 import 'package:easykhairat/models/userModel.dart';
 import 'package:easykhairat/controllers/auth_controller.dart';
+import 'package:easykhairat/views/auth/signIn.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -85,7 +86,8 @@ class _SignUpWidgetState extends State<SignUpWidget> {
     // Call sign up
     try {
       await AuthService.signUp(newUser, context);
-      // Navigation happens inside AuthService based on userType
+
+      Get.to(() => SignInPage());
     } catch (e) {
       Get.snackbar(
         'Signup Failed',
