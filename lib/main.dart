@@ -38,6 +38,15 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primaryColor: Color(0xFF2BAAAD),
         colorScheme: ColorScheme.light(primary: Color(0xFF2BAAAD)),
+        inputDecorationTheme: const InputDecorationTheme(
+          focusedBorder: OutlineInputBorder(
+            borderSide: BorderSide(color: Colors.black), // your preferred color
+          ),
+          labelStyle: TextStyle(color: Colors.black), // label when focused
+        ),
+        textSelectionTheme: const TextSelectionThemeData(
+          cursorColor: Colors.black, // changes the teal cursor globally
+        ),
       ),
 
       initialRoute: '/adminMain',
