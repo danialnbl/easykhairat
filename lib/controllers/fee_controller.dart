@@ -18,7 +18,10 @@ class FeeController extends GetxController {
   Future<void> fetchFees() async {
     try {
       isLoading.value = true;
-      final response = await supabase.from('fees').select();
+      final response = await supabase
+          .from('fees')
+          .select()
+          .or('user_id.is.null');
 
       final fetchedFees =
           (response as List<dynamic>)
