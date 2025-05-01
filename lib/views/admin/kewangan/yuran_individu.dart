@@ -176,7 +176,7 @@ class YuranIndividuState extends State<YuranIndividu> {
                                 return DropdownButtonFormField<String>(
                                   value: selectedInvoice,
                                   items:
-                                      feeController.fees.map((fee) {
+                                      feeController.yuranTertunggak.map((fee) {
                                         return DropdownMenuItem(
                                           value: fee.feeId.toString(),
                                           child: Text(fee.feeDescription),
@@ -189,7 +189,7 @@ class YuranIndividuState extends State<YuranIndividu> {
                                   },
                                   decoration: InputDecoration(
                                     labelText:
-                                        feeController.fees == null
+                                        feeController.yuranTertunggak == null
                                             ? "Tiada Bayaran Tertunggak"
                                             : "Bayaran",
                                     border: OutlineInputBorder(),
@@ -252,7 +252,7 @@ class YuranIndividuState extends State<YuranIndividu> {
                             Text("Yuran Tertunggak"),
                             const SizedBox(height: 8),
                             Obx(() {
-                              if (feeController.fees.isEmpty) {
+                              if (feeController.yuranTertunggak.isEmpty) {
                                 return Text("Tiada yuran tertunggak.");
                               }
                               return Container(
@@ -266,9 +266,11 @@ class YuranIndividuState extends State<YuranIndividu> {
                                 child: ListView.builder(
                                   shrinkWrap: true,
                                   physics: NeverScrollableScrollPhysics(),
-                                  itemCount: feeController.fees.length,
+                                  itemCount:
+                                      feeController.yuranTertunggak.length,
                                   itemBuilder: (context, index) {
-                                    final fee = feeController.fees[index];
+                                    final fee =
+                                        feeController.yuranTertunggak[index];
                                     return ListTile(
                                       title: Text(
                                         fee.feeDescription.toString(),

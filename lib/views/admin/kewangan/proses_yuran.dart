@@ -261,7 +261,7 @@ class ProsesYuranState extends State<ProsesYuran> {
                             color: Colors.green,
                           ),
                           onPressed: () {
-                            feeController.fetchFeesByUserId(user.userId);
+                            feeController.fetchYuranTertunggak(user.userId);
                             paymentController.fetchPaymentsByUserId(
                               user.userId,
                             );

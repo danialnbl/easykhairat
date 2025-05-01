@@ -3,7 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:easykhairat/models/feeModel.dart';
 
 class FeeController extends GetxController {
-  var fees = <FeeModel>[].obs;
+  var yuranTertunggak = <FeeModel>[].obs;
   var yuranGeneral = <FeeModel>[].obs;
   var isLoading = false.obs;
   final supabase = Supabase.instance.client;
@@ -39,7 +39,7 @@ class FeeController extends GetxController {
   }
 
   // Fetch fees by user ID
-  Future<void> fetchFeesByUserId(String userId) async {
+  Future<void> fetchYuranTertunggak(String userId) async {
     if (userId == null || userId.isEmpty) {
       Get.snackbar('Error', 'User ID is invalid');
       return; // Avoid making a query if the user ID is invalid
@@ -49,12 +49,13 @@ class FeeController extends GetxController {
       isLoading.value = true;
 
       // Debug the user ID being used
-      print("Fetching fees for user ID: $userId");
+      print("Fetching fees for user ID: $userId with status Tertunggak");
 
       final response = await supabase
           .from('fees')
           .select()
-          .eq('user_id', userId); // Ensures filtering by user_id
+          .eq('user_id', userId) // Ensures filtering by user_id
+          .eq('fee_status', 'Tertunggak'); // Ensures filtering by fee_status
 
       // Debug the raw response from Supabase
       print("Response from Supabase: $response");
@@ -66,13 +67,13 @@ class FeeController extends GetxController {
                 .map((json) => FeeModel.fromJson(json as Map<String, dynamic>))
                 .toList();
 
-        fees.assignAll(fetchedFees);
+        yuranTertunggak.assignAll(fetchedFees);
       } else {
         print("Unexpected response format: $response");
         Get.snackbar('Error', 'Unexpected response format');
       }
     } catch (e) {
-      print("Error fetching fees by user ID: $e");
+      print("Error fetching fees by user ID and status: $e");
       Get.snackbar('Error', 'Failed to fetch fees');
     } finally {
       isLoading.value = false;

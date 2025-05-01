@@ -8,6 +8,7 @@ class FeeModel {
   final int adminId;
   final String? userId;
   final double feeAmount;
+  final String? feeStatus; // Added feeStatus as nullable
 
   FeeModel({
     required this.feeId,
@@ -19,6 +20,7 @@ class FeeModel {
     required this.adminId,
     this.userId,
     required this.feeAmount,
+    this.feeStatus, // Initialize feeStatus
   });
 
   factory FeeModel.fromJson(Map<String, dynamic> json) {
@@ -32,6 +34,7 @@ class FeeModel {
       adminId: json['admin_id'],
       userId: json['user_id'],
       feeAmount: (json['fee_amount'] as num).toDouble(),
+      feeStatus: json['fee_status'], // Parse feeStatus
     );
   }
 
@@ -46,11 +49,12 @@ class FeeModel {
       'admin_id': adminId,
       'user_id': userId,
       'fee_amount': feeAmount,
+      'fee_status': feeStatus, // Add feeStatus to JSON
     };
   }
 
   @override
   String toString() {
-    return 'FeeModel(feeId: $feeId, description: $feeDescription, due: $feeDue, type: $feeType, amount: $feeAmount)';
+    return 'FeeModel(feeId: $feeId, description: $feeDescription, due: $feeDue, type: $feeType, amount: $feeAmount, status: $feeStatus)';
   }
 }
