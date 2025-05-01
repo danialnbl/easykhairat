@@ -37,6 +37,31 @@ class FeeController extends GetxController {
     }
   }
 
+  Future<void> fetchYuranByID(String userId) async {
+    try {
+      isLoading.value = true;
+
+      final response = await supabase
+          .from('fees')
+          .select()
+          .eq('user_id', userId); // Filter by user_id
+
+      final fetchedFees =
+          (response as List<dynamic>)
+              .map((json) => FeeModel.fromJson(json as Map<String, dynamic>))
+              .toList();
+
+      print(fetchedFees);
+
+      fees.assignAll(fetchedFees);
+    } catch (e) {
+      print("Error fetching fees: $e");
+      Get.snackbar('Error', 'Failed to fetch fees');
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
   // Fetch fees by user ID
   Future<void> fetchFeesByUserId(String userId) async {
     try {
