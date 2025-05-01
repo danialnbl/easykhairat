@@ -1,3 +1,4 @@
+import 'package:easykhairat/controllers/fee_controller.dart';
 import 'package:easykhairat/controllers/navigation_controller.dart';
 import 'package:easykhairat/widgets/header.dart';
 import 'package:flutter/material.dart';
@@ -16,6 +17,7 @@ class ProsesYuran extends StatefulWidget {
 class ProsesYuranState extends State<ProsesYuran> {
   final UserController userController = Get.put(UserController());
   final NavigationController navController = Get.put(NavigationController());
+  final FeeController feeController = Get.put(FeeController());
   RxString selectedFilter = 'Semua Ahli'.obs;
   TextEditingController nameSearchController = TextEditingController();
   TextEditingController icSearchController = TextEditingController();
@@ -256,7 +258,11 @@ class ProsesYuranState extends State<ProsesYuran> {
                             Icons.visibility,
                             color: Colors.green,
                           ),
-                          onPressed: () => navController.changeIndex(9),
+                          onPressed: () {
+                            navController.setUser(user);
+                            navController.changeIndex(9);
+                            // Ensure feeController is defined and fetchYuranByID is a valid method
+                          },
                         ),
                       ],
                     ),

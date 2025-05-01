@@ -1,3 +1,5 @@
+import 'package:easykhairat/controllers/fee_controller.dart';
+import 'package:easykhairat/controllers/navigation_controller.dart';
 import 'package:easykhairat/widgets/header.dart';
 import 'package:flutter/material.dart';
 import 'package:moon_design/moon_design.dart';
@@ -12,16 +14,15 @@ class YuranIndividu extends StatefulWidget {
 }
 
 class YuranIndividuState extends State<YuranIndividu> {
-  final UserController userController = Get.put(UserController());
+  final FeeController feeController = Get.put(FeeController());
+  final NavigationController navController = Get.put(NavigationController());
 
   @override
   void initState() {
     super.initState();
-
-    if (userController.normalusers.isEmpty) {
-      userController.fetchNormal();
-    }
   }
+
+  // Fetch fees using userId from NavigationController
 
   @override
   Widget build(BuildContext context) {
@@ -71,7 +72,7 @@ class YuranIndividuState extends State<YuranIndividu> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              "Maklumat Yuran Ahli",
+                              "Maklumat Yuran Ahli ${navController.getUser()?.userName}",
                               style: Theme.of(context).textTheme.bodyLarge,
                             ),
                             const SizedBox(height: 16),
