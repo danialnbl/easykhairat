@@ -1,4 +1,5 @@
 import 'package:easykhairat/controllers/user_controller.dart';
+import 'package:easykhairat/routes/routes.dart';
 import 'package:easykhairat/views/admin/admin_main.dart';
 import 'package:easykhairat/views/admin/kewangan/yuran_individu.dart';
 import 'package:easykhairat/views/auth/signIn.dart';
@@ -49,12 +50,8 @@ class MyApp extends StatelessWidget {
         ),
       ),
 
-      initialRoute: '/adminMain',
-      getPages: [
-        GetPage(name: '/', page: () => SignInPage()),
-        GetPage(name: '/adminMain', page: () => AdminMain()),
-        GetPage(name: '/yuranIndividu', page: () => YuranIndividu()),
-      ],
+      initialRoute: AppRoutes.main,
+      getPages: AppRoutes.pages,
     );
   }
 }
