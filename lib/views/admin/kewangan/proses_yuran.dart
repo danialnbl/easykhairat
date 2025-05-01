@@ -1,5 +1,6 @@
 import 'package:easykhairat/controllers/fee_controller.dart';
 import 'package:easykhairat/controllers/navigation_controller.dart';
+import 'package:easykhairat/controllers/payment_controller.dart';
 import 'package:easykhairat/widgets/header.dart';
 import 'package:flutter/material.dart';
 import 'package:moon_design/moon_design.dart';
@@ -18,6 +19,7 @@ class ProsesYuranState extends State<ProsesYuran> {
   final UserController userController = Get.put(UserController());
   final NavigationController navController = Get.put(NavigationController());
   final FeeController feeController = Get.put(FeeController());
+  final PaymentController paymentController = Get.put(PaymentController());
   RxString selectedFilter = 'Semua Ahli'.obs;
   TextEditingController nameSearchController = TextEditingController();
   TextEditingController icSearchController = TextEditingController();
@@ -260,6 +262,9 @@ class ProsesYuranState extends State<ProsesYuran> {
                           ),
                           onPressed: () {
                             feeController.fetchFeesByUserId(user.userId);
+                            paymentController.fetchPaymentsByUserId(
+                              user.userId,
+                            );
                             navController.setUser(user);
                             navController.changeIndex(9);
                           },

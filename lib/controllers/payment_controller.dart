@@ -49,19 +49,14 @@ class PaymentController extends GetxController {
           .select()
           .eq('user_id', userId);
 
-      if (response is List) {
-        final fetchedPayments =
-            (response as List<dynamic>)
-                .map(
-                  (json) => PaymentModel.fromJson(json as Map<String, dynamic>),
-                )
-                .toList();
+      final fetchedPayments =
+          (response as List<dynamic>)
+              .map(
+                (json) => PaymentModel.fromJson(json as Map<String, dynamic>),
+              )
+              .toList();
 
-        payments.assignAll(fetchedPayments);
-      } else {
-        print("Unexpected response format: $response");
-        Get.snackbar('Error', 'Unexpected response format');
-      }
+      payments.assignAll(fetchedPayments);
     } catch (e) {
       print("Error fetching payments by user ID: $e");
       Get.snackbar('Error', 'Failed to fetch payments');

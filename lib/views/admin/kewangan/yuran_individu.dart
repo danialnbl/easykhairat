@@ -1,5 +1,6 @@
 import 'package:easykhairat/controllers/fee_controller.dart';
 import 'package:easykhairat/controllers/navigation_controller.dart';
+import 'package:easykhairat/controllers/payment_controller.dart';
 import 'package:easykhairat/widgets/header.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -16,6 +17,7 @@ class YuranIndividu extends StatefulWidget {
 class YuranIndividuState extends State<YuranIndividu> {
   final FeeController feeController = Get.put(FeeController());
   final NavigationController navController = Get.put(NavigationController());
+  final PaymentController paymentController = Get.put(PaymentController());
 
   final _formKey = GlobalKey<FormState>();
 
@@ -170,28 +172,30 @@ class YuranIndividuState extends State<YuranIndividu> {
                                 ),
                               ),
                               const SizedBox(height: 16),
-                              DropdownButtonFormField<String>(
-                                value: selectedInvoice,
-                                items: [
-                                  DropdownMenuItem(
-                                    child: Text("Invois 1"),
-                                    value: "1",
+                              Obx(() {
+                                return DropdownButtonFormField<String>(
+                                  value: selectedInvoice,
+                                  items:
+                                      feeController.fees.map((fee) {
+                                        return DropdownMenuItem(
+                                          value: fee.feeId.toString(),
+                                          child: Text(fee.feeDescription),
+                                        );
+                                      }).toList(),
+                                  onChanged: (value) {
+                                    setState(() {
+                                      selectedInvoice = value;
+                                    });
+                                  },
+                                  decoration: InputDecoration(
+                                    labelText:
+                                        feeController.fees == null
+                                            ? "Tiada Bayaran Tertunggak"
+                                            : "Bayaran",
+                                    border: OutlineInputBorder(),
                                   ),
-                                  DropdownMenuItem(
-                                    child: Text("Invois 2"),
-                                    value: "2",
-                                  ),
-                                ],
-                                onChanged: (value) {
-                                  setState(() {
-                                    selectedInvoice = value;
-                                  });
-                                },
-                                decoration: InputDecoration(
-                                  labelText: "Invois",
-                                  border: OutlineInputBorder(),
-                                ),
-                              ),
+                                );
+                              }),
                               const SizedBox(height: 16),
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.end,
@@ -283,25 +287,41 @@ class YuranIndividuState extends State<YuranIndividu> {
                             const SizedBox(height: 16),
                             Text("Transaksi Bayaran dan Tuntutan"),
                             const SizedBox(height: 8),
-                            ListView(
-                              shrinkWrap: true,
-                              physics: NeverScrollableScrollPhysics(),
-                              children: [
-                                ListTile(
-                                  title: Text(
-                                    "Tuntutan untuk Ahli yang meninggal",
+                            Obx(() {
+                              if (paymentController.payments.isEmpty) {
+                                return Text("Tiada transaksi bayaran.");
+                              }
+                              return Container(
+                                decoration: BoxDecoration(
+                                  border: Border.all(
+                                    color: Colors.grey,
+                                    width: 1.0,
                                   ),
-                                  subtitle: Text("30 Oct 19"),
-                                  trailing: Text("RM 1,000.00"),
+                                  borderRadius: BorderRadius.circular(8.0),
                                 ),
-                                ListTile(
-                                  title: Text("Bayaran Yuran Ahli"),
-                                  subtitle: Text("02 Feb 22"),
-                                  trailing: Text("RM 20.00"),
+                                child: ListView.builder(
+                                  shrinkWrap: true,
+                                  physics: NeverScrollableScrollPhysics(),
+                                  itemCount: paymentController.payments.length,
+                                  itemBuilder: (context, index) {
+                                    final payment =
+                                        paymentController.payments[index];
+                                    return ListTile(
+                                      title: Text(
+                                        payment.paymentDescription ??
+                                            "Transaksi",
+                                      ),
+                                      subtitle: Text(
+                                        formatDate(payment.paymentCreatedAt),
+                                      ),
+                                      trailing: Text(
+                                        "RM ${payment.paymentValue.toStringAsFixed(2)}",
+                                      ),
+                                    );
+                                  },
                                 ),
-                                // Add more items here
-                              ],
-                            ),
+                              );
+                            }),
                           ],
                         ),
                       ),

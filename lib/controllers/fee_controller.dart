@@ -4,6 +4,7 @@ import 'package:easykhairat/models/feeModel.dart';
 
 class FeeController extends GetxController {
   var fees = <FeeModel>[].obs;
+  var yuranGeneral = <FeeModel>[].obs;
   var isLoading = false.obs;
   final supabase = Supabase.instance.client;
 
@@ -28,7 +29,7 @@ class FeeController extends GetxController {
               .map((json) => FeeModel.fromJson(json as Map<String, dynamic>))
               .toList();
 
-      fees.assignAll(fetchedFees);
+      yuranGeneral.assignAll(fetchedFees);
     } catch (e) {
       print("Error fetching fees: $e");
       Get.snackbar('Error', 'Failed to fetch fees');

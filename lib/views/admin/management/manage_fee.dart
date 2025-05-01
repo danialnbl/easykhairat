@@ -85,7 +85,7 @@ class ManageFee extends StatelessWidget {
         return const Center(child: CircularProgressIndicator());
       }
 
-      if (feeController.fees.isEmpty) {
+      if (feeController.yuranGeneral.isEmpty) {
         return const Center(child: Text("Tiada Yuran Dijumpai."));
       }
 
@@ -104,7 +104,7 @@ class ManageFee extends StatelessWidget {
           ),
           children: [
             _buildTableHeader(),
-            ...feeController.fees.map((fee) => _buildTableRow(fee)).toList(),
+            ...feeController.yuranGeneral.map((fee) => _buildTableRow(fee)).toList(),
           ],
         ),
       );
