@@ -259,9 +259,9 @@ class ProsesYuranState extends State<ProsesYuran> {
                             color: Colors.green,
                           ),
                           onPressed: () {
+                            feeController.fetchFeesByUserId(user.userId);
                             navController.setUser(user);
                             navController.changeIndex(9);
-                            // Ensure feeController is defined and fetchYuranByID is a valid method
                           },
                         ),
                       ],
