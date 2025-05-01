@@ -1,3 +1,4 @@
+import 'package:easykhairat/controllers/payment_controller.dart';
 import 'package:easykhairat/widgets/header.dart';
 import 'package:flutter/material.dart';
 import 'package:moon_design/moon_design.dart';
@@ -16,6 +17,7 @@ class AdminDashboard extends StatefulWidget {
 
 class _AdminDashboardState extends State<AdminDashboard> {
   final UserController userController = Get.put(UserController());
+  final PaymentController paymentController = Get.put(PaymentController());
 
   @override
   void initState() {
@@ -24,6 +26,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
       userController.fetchUsers();
       userController.fetchAdmin();
     }
+    paymentController.fetchTotalPayments();
   }
 
   @override
@@ -50,18 +53,18 @@ class _AdminDashboardState extends State<AdminDashboard> {
                   child: Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: MoonBreadcrumb(
-                        items: [
+                      items: [
                         MoonBreadcrumbItem(
                           label: Text(
-                          "Home",
-                          style: const TextStyle(color: Colors.black),
+                            "Home",
+                            style: const TextStyle(color: Colors.black),
                           ),
                           onTap: () => Get.toNamed('/adminMain'),
                         ),
                         MoonBreadcrumbItem(
                           label: Text(
-                          "Dashboard",
-                          style: const TextStyle(color: Colors.black),
+                            "Dashboard",
+                            style: const TextStyle(color: Colors.black),
                           ),
                         ),
                       ],
@@ -96,13 +99,16 @@ class _AdminDashboardState extends State<AdminDashboard> {
             ),
             const SizedBox(width: 8),
             Expanded(
-              child: _statCard(
-                'Kutipan Yuran Tahun Ini',
-                'RM45,320',
-                '-1.23%',
-                Colors.red,
+              child: Obx(
+                () => _statCard(
+                  'Kutipan Yuran',
+                  'RM ${paymentController.totalPayments.value.toStringAsFixed(2)}',
+                  '-1.23%',
+                  Colors.red,
+                ),
               ),
             ),
+
             const SizedBox(width: 8),
             Expanded(
               child: _statCard(

@@ -4,6 +4,7 @@ import 'package:easykhairat/models/paymentModel.dart';
 
 class PaymentController extends GetxController {
   var payments = <PaymentModel>[].obs;
+  var totalPayments = 0.0.obs;
   var isLoading = false.obs;
   final supabase = Supabase.instance.client;
 
@@ -109,6 +110,17 @@ class PaymentController extends GetxController {
     } finally {
       isLoading.value = false;
     }
+  }
+
+  Future<void> fetchTotalPayments() async {
+    final response = await supabase.from('payments').select('payment_value');
+
+    double total = 0.0;
+    for (var item in response) {
+      total += (item['payment_value'] ?? 0).toDouble();
+    }
+
+    totalPayments.value = total;
   }
 
   // Listen for real-time updates

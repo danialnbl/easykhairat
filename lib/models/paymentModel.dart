@@ -6,6 +6,7 @@ class PaymentModel {
   final DateTime paymentUpdatedAt;
   final int feeId;
   final String? userId;
+  final String? paymentType; // Added nullable paymentType
 
   PaymentModel({
     required this.paymentId,
@@ -15,6 +16,7 @@ class PaymentModel {
     required this.paymentUpdatedAt,
     required this.feeId,
     this.userId,
+    this.paymentType, // Added to constructor
   });
 
   factory PaymentModel.fromJson(Map<String, dynamic> json) {
@@ -26,6 +28,7 @@ class PaymentModel {
       paymentUpdatedAt: DateTime.parse(json['payment_updated_at']),
       feeId: json['fee_id'],
       userId: json['user_id'],
+      paymentType: json['payment_type'], // Added to fromJson
     );
   }
 
@@ -38,11 +41,12 @@ class PaymentModel {
       'payment_updated_at': paymentUpdatedAt.toIso8601String(),
       'fee_id': feeId,
       'user_id': userId,
+      'payment_type': paymentType, // Added to toJson
     };
   }
 
   @override
   String toString() {
-    return 'PaymentModel(paymentId: $paymentId, value: $paymentValue, description: $paymentDescription, userId: $userId, feeId: $feeId)';
+    return 'PaymentModel(paymentId: $paymentId, value: $paymentValue, description: $paymentDescription, userId: $userId, feeId: $feeId, paymentType: $paymentType)'; // Updated toString
   }
 }
