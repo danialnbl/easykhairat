@@ -2,7 +2,7 @@ import 'dart:typed_data';
 import 'package:easykhairat/controllers/auth_controller.dart';
 import 'package:easykhairat/widgets/header.dart';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
+// import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:moon_design/moon_design.dart';
 import 'package:get/get.dart';
@@ -24,7 +24,7 @@ class _MemberNewState extends State<MemberNew> {
   final TextEditingController _nomborIcController = TextEditingController();
   final TextEditingController _alamatController = TextEditingController();
   final TextEditingController _katalaluanController = TextEditingController();
-  final UserController userController = Get.put(UserController());
+  final UserController userController = Get.find<UserController>();
 
   Uint8List? _webImageBytes;
 
@@ -43,23 +43,23 @@ class _MemberNewState extends State<MemberNew> {
     }
   }
 
-  Future<void> _pickImageWeb() async {
-    final ImagePicker picker = ImagePicker();
-    final XFile? file = await picker.pickImage(source: ImageSource.gallery);
-    if (file != null) {
-      final data = await file.readAsBytes();
-      setState(() {
-        _webImageBytes = data;
-      });
-    }
-  }
+  // Future<void> _pickImageWeb() async {
+  //   final ImagePicker picker = ImagePicker();
+  //   final XFile? file = await picker.pickImage(source: ImageSource.gallery);
+  //   if (file != null) {
+  //     final data = await file.readAsBytes();
+  //     setState(() {
+  //       _webImageBytes = data;
+  //     });
+  //   }
+  // }
 
-  Widget _buildImagePreview() {
-    if (_webImageBytes != null) {
-      return Image.memory(_webImageBytes!, fit: BoxFit.cover);
-    }
-    return Center(child: Text("Tiada Gambar"));
-  }
+  // Widget _buildImagePreview() {
+  //   if (_webImageBytes != null) {
+  //     return Image.memory(_webImageBytes!, fit: BoxFit.cover);
+  //   }
+  //   return Center(child: Text("Tiada Gambar"));
+  // }
 
   @override
   Widget build(BuildContext context) {

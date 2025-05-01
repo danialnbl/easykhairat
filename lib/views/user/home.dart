@@ -14,7 +14,7 @@ class HomePageWidget extends StatefulWidget {
 }
 
 class _HomePageWidgetState extends State<HomePageWidget> {
-  final NavigationController navController = Get.put(NavigationController());
+  final NavigationController navController = Get.find<NavigationController>();
   int selectedDot = 0;
   int advertisementDot = 0;
 
