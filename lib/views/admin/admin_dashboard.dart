@@ -7,6 +7,7 @@ import 'package:easykhairat/widgets/admin/registered_members_chart.dart';
 import 'package:easykhairat/widgets/admin/total_claims_chart.dart';
 import 'package:easykhairat/controllers/user_controller.dart';
 import 'package:get/get.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class AdminDashboard extends StatefulWidget {
   const AdminDashboard({super.key});
@@ -27,6 +28,10 @@ class _AdminDashboardState extends State<AdminDashboard> {
       userController.fetchAdmin();
     }
     paymentController.fetchTotalPayments();
+    userController.fetchAdminDetailsByIdAndAssign(
+      Supabase.instance.client.auth.currentUser?.id ?? "",
+    );
+    print("Admin ID: ${Supabase.instance.client.auth.currentUser?.id}");
   }
 
   @override

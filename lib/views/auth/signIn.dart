@@ -45,8 +45,7 @@ class _SignInPageState extends State<SignInPage> {
     try {
       await AuthService.signIn(
         _emailController.text,
-        _passwordController.text,
-        context,
+        _passwordController.text
       );
     } catch (e) {
       Get.snackbar(

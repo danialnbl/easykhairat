@@ -1,5 +1,5 @@
 class FeeModel {
-  final int feeId;
+  final int? feeId;
   final String feeDescription;
   final DateTime feeDue;
   final String feeType;
@@ -8,10 +8,10 @@ class FeeModel {
   final int adminId;
   final String? userId;
   final double feeAmount;
-  final String? feeStatus; // Added feeStatus as nullable
+  final String? feeStatus;
 
   FeeModel({
-    required this.feeId,
+    this.feeId,
     required this.feeDescription,
     required this.feeDue,
     required this.feeType,
@@ -20,7 +20,7 @@ class FeeModel {
     required this.adminId,
     this.userId,
     required this.feeAmount,
-    this.feeStatus, // Initialize feeStatus
+    this.feeStatus,
   });
 
   factory FeeModel.fromJson(Map<String, dynamic> json) {
@@ -34,13 +34,12 @@ class FeeModel {
       adminId: json['admin_id'],
       userId: json['user_id'],
       feeAmount: (json['fee_amount'] as num).toDouble(),
-      feeStatus: json['fee_status'], // Parse feeStatus
+      feeStatus: json['fee_status'],
     );
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'fee_id': feeId,
+    final data = {
       'fee_description': feeDescription,
       'fee_due': feeDue.toIso8601String(),
       'fee_type': feeType,
@@ -49,8 +48,14 @@ class FeeModel {
       'admin_id': adminId,
       'user_id': userId,
       'fee_amount': feeAmount,
-      'fee_status': feeStatus, // Add feeStatus to JSON
+      'fee_status': feeStatus,
     };
+
+    if (feeId != null) {
+      data['fee_id'] = feeId; // Only include if not null
+    }
+
+    return data;
   }
 
   @override

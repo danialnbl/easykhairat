@@ -249,10 +249,7 @@ class _MemberNewState extends State<MemberNew> {
                                               _katalaluanController.text,
                                         );
 
-                                        await AuthService.signUp(
-                                          newUser,
-                                          context,
-                                        );
+                                        await AuthService.signUp(newUser);
 
                                         // Optionally reset form
                                         _formKey.currentState!.reset();

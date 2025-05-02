@@ -1,4 +1,6 @@
 import 'package:easykhairat/controllers/fee_controller.dart';
+import 'package:easykhairat/controllers/navigation_controller.dart';
+
 import 'package:easykhairat/models/feeModel.dart';
 import 'package:easykhairat/widgets/header.dart';
 import 'package:flutter/material.dart';
@@ -9,6 +11,8 @@ class ManageFee extends StatelessWidget {
   ManageFee({Key? key}) : super(key: key);
 
   final FeeController feeController = Get.put(FeeController());
+  final NavigationController navigationController =
+      Get.find<NavigationController>();
 
   @override
   Widget build(BuildContext context) {
@@ -58,10 +62,7 @@ class ManageFee extends StatelessWidget {
                   ),
                   buttonSize: MoonButtonSize.md,
                   onTap: () {
-                    // Navigate to add fee form
-                    Get.toNamed(
-                      '/addFee',
-                    ); // Assuming you have a route set up for adding fees
+                    navigationController.changeIndex(10);
                   },
                   label: const Text(
                     'Tetapkan Yuran Baru',
@@ -104,7 +105,9 @@ class ManageFee extends StatelessWidget {
           ),
           children: [
             _buildTableHeader(),
-            ...feeController.yuranGeneral.map((fee) => _buildTableRow(fee)).toList(),
+            ...feeController.yuranGeneral
+                .map((fee) => _buildTableRow(fee))
+                .toList(),
           ],
         ),
       );
@@ -143,20 +146,20 @@ class ManageFee extends StatelessWidget {
                 icon: const Icon(Icons.visibility, color: Colors.green),
                 onPressed: () {
                   // Navigate to view fee details
-                  Get.toNamed('/viewFee', arguments: fee.feeId);
+                  // Get.toNamed('/viewFee', arguments: fee.feeId);
                 },
               ),
               IconButton(
                 icon: const Icon(Icons.edit, color: Colors.blue),
                 onPressed: () {
                   // Navigate to edit fee form
-                  Get.toNamed('/editFee', arguments: fee.feeId);
+                  // Get.toNamed('/editFee', arguments: fee.feeId);
                 },
               ),
               IconButton(
                 icon: const Icon(Icons.delete, color: Colors.red),
                 onPressed: () {
-                  feeController.deleteFee(fee.feeId);
+                  // feeController.deleteFee(fee.feeId);
                 },
               ),
             ],

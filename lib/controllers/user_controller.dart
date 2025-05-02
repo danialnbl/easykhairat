@@ -7,6 +7,7 @@ class UserController extends GetxController {
   var users = <pengguna.User>[].obs;
   var adminUsers = <pengguna.User>[].obs;
   var normalusers = <pengguna.User>[].obs;
+  var adminLogged = ''.obs;
   var isLoading = false.obs;
   final supabase = Supabase.instance.client;
 
@@ -83,6 +84,52 @@ class UserController extends GetxController {
     } catch (e) {
       print("Error fetching normal user: $e");
       Get.snackbar('Error', 'Failed to fetch normal user');
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  // Fetch a user by user ID
+  Future<pengguna.User?> fetchUserById(String userId) async {
+    try {
+      isLoading.value = true;
+      final response =
+          await supabase.from('users').select().eq('user_id', userId).single();
+
+      if (response != null) {
+        return pengguna.User.fromJson(response as Map<String, dynamic>);
+      } else {
+        return null;
+      }
+    } catch (e) {
+      print("Error fetching user by ID: $e");
+      Get.snackbar('Error', 'Failed to fetch user by ID');
+      return null;
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  // Fetch admin by user ID by joining with the admin table
+  Future<void> fetchAdminDetailsByIdAndAssign(String userId) async {
+    try {
+      isLoading.value = true;
+      final response =
+          await supabase
+              .from('admin')
+              .select('admin_id, users(*)')
+              .eq('user_id', userId)
+              .single();
+
+      if (response != null) {
+        final adminId = response['admin_id']?.toString();
+        if (adminId != null) {
+          adminLogged.value = adminId;
+        }
+      }
+    } catch (e) {
+      print("Error fetching admin details by ID: $e");
+      Get.snackbar('Error', 'Failed to fetch admin details by ID');
     } finally {
       isLoading.value = false;
     }

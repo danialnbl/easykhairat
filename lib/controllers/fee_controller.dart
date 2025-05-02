@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:easykhairat/models/feeModel.dart';
@@ -85,7 +86,12 @@ class FeeController extends GetxController {
     try {
       isLoading.value = true;
       await supabase.from('fees').insert(fee.toJson());
-      Get.snackbar('Success', 'Fee added');
+      Get.snackbar(
+        'Berjaya',
+        'Maklumat yuran telah disimpan.',
+        backgroundColor: Colors.green,
+        colorText: Colors.white,
+      );
     } catch (e) {
       print("Error adding fee: $e");
       Get.snackbar('Error', 'Failed to add fee');
@@ -102,7 +108,7 @@ class FeeController extends GetxController {
       //   feeUpdatedAt: DateTime.now(), // Update only updatedAt field
       // );
 
-      await supabase.from('fees').update(fee.toJson()).eq('fee_id', fee.feeId);
+      // await supabase.from('fees').update(fee.toJson()).eq('fee_id', fee.feeId);
 
       Get.snackbar('Success', 'Fee updated');
     } catch (e) {

@@ -85,7 +85,7 @@ class _SignUpWidgetState extends State<SignUpWidget> {
 
     // Call sign up
     try {
-      await AuthService.signUp(newUser, context);
+      await AuthService.signUp(newUser);
 
       Get.to(() => SignInPage());
     } catch (e) {

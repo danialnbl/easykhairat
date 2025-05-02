@@ -1,9 +1,10 @@
 import 'package:easykhairat/controllers/user_controller.dart';
 import 'package:easykhairat/views/admin/adminSettings.dart';
 import 'package:easykhairat/views/admin/admin_dashboard.dart';
+import 'package:easykhairat/views/admin/kewangan/form_yuran.dart';
 import 'package:easykhairat/views/admin/kewangan/proses_yuran.dart';
 import 'package:easykhairat/views/admin/kewangan/yuran_individu.dart';
-import 'package:easykhairat/views/admin/management/manage_fee.dart';
+import 'package:easykhairat/views/admin/kewangan/tetapan_yuran.dart';
 import 'package:easykhairat/views/admin/member/member_list.dart';
 import 'package:easykhairat/views/admin/member/member_new.dart';
 import 'package:flutter/material.dart';
@@ -253,6 +254,7 @@ class _AdminMainState extends State<AdminMain> {
                   Center(child: Text('Laporan Screen')),
                   AdminSettings(),
                   YuranIndividu(),
+                  FormYuran(),
                 ],
               ),
             ),
