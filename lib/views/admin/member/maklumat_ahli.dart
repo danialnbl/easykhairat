@@ -36,12 +36,17 @@ class MaklumatAhliState extends State<MaklumatAhli> {
                   child: Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: MoonBreadcrumb(
+                      visibleItemCount: 5,
                       items: [
                         MoonBreadcrumbItem(
                           label: Text("Home"),
                           onTap: () => Get.toNamed('/adminMain'),
                         ),
                         MoonBreadcrumbItem(label: Text("Ahli")),
+                        MoonBreadcrumbItem(
+                          label: Text("Senarai Ahli"),
+                          onTap: () => navController.selectedIndex.value = 1,
+                        ),
                         MoonBreadcrumbItem(label: Text("Maklumat Ahli")),
                         MoonBreadcrumbItem(
                           label: Text(member?.userName ?? "Unknown User"),
@@ -210,12 +215,11 @@ class MaklumatAhliState extends State<MaklumatAhli> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                                Text(
+                              Text(
                                 "Tanggungan",
-                                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
+                                style: Theme.of(context).textTheme.bodyLarge
+                                    ?.copyWith(fontWeight: FontWeight.bold),
+                              ),
                               const SizedBox(height: 16),
                               Table(
                                 border: TableBorder.all(),

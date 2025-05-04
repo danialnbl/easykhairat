@@ -54,12 +54,17 @@ class YuranIndividuState extends State<YuranIndividu> {
                   child: Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: MoonBreadcrumb(
+                      visibleItemCount: 5,
                       items: [
                         MoonBreadcrumbItem(
                           label: Text("Home"),
                           onTap: () => Get.toNamed('/adminMain'),
                         ),
                         MoonBreadcrumbItem(label: Text("Kewangan")),
+                        MoonBreadcrumbItem(
+                          label: Text("Yuran"),
+                          onTap: () => navController.selectedIndex.value = 4,
+                        ),
                         MoonBreadcrumbItem(label: Text("Yuran Individu")),
                         MoonBreadcrumbItem(
                           label: Text("${navController.getUser()?.userName}"),
