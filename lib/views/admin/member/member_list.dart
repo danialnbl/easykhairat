@@ -1,3 +1,4 @@
+import 'package:easykhairat/controllers/navigation_controller.dart';
 import 'package:easykhairat/widgets/header.dart';
 import 'package:flutter/material.dart';
 import 'package:moon_design/moon_design.dart';
@@ -14,6 +15,7 @@ class MemberList extends StatefulWidget {
 
 class MemberListState extends State<MemberList> {
   final UserController userController = Get.put(UserController());
+  final NavigationController navController = Get.put(NavigationController());
   RxString selectedFilter = 'Semua Ahli'.obs;
   TextEditingController nameSearchController = TextEditingController();
   TextEditingController icSearchController = TextEditingController();
@@ -58,31 +60,10 @@ class MemberListState extends State<MemberList> {
 
   void viewMember(dynamic user) {
     debugPrint("View tapped for ${user.userName}");
-    // Add functionality to display member details in a dialog or new screen
-    Get.dialog(
-      AlertDialog(
-        title: Text('User Details: ${user.userName}'),
-        content: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              _detailRow('Name', user.userName),
-              _detailRow('IC Number', user.userIdentification),
-              _detailRow('Phone', user.userPhoneNo),
-              _detailRow('Email', user.userEmail),
-              _detailRow('Address', user.userAddress),
-              _detailRow('Type', user.userType),
-              _detailRow('Created At', formatDate(user.userCreatedAt)),
-              _detailRow('Updated At', formatDate(user.userUpdatedAt)),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(child: const Text('Close'), onPressed: () => Get.back()),
-        ],
-      ),
-    );
+
+    navController.setUser(user);
+
+    navController.selectedIndex.value = 11;
   }
 
   Widget _detailRow(String label, String value) {

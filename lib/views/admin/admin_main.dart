@@ -6,6 +6,7 @@ import 'package:easykhairat/views/admin/kewangan/proses_tuntutan.dart';
 import 'package:easykhairat/views/admin/kewangan/proses_yuran.dart';
 import 'package:easykhairat/views/admin/kewangan/yuran_individu.dart';
 import 'package:easykhairat/views/admin/kewangan/tetapan_yuran.dart';
+import 'package:easykhairat/views/admin/member/maklumat_ahli.dart';
 import 'package:easykhairat/views/admin/member/member_list.dart';
 import 'package:easykhairat/views/admin/member/member_new.dart';
 import 'package:flutter/material.dart';
@@ -256,6 +257,7 @@ class _AdminMainState extends State<AdminMain> {
                   AdminSettings(),
                   YuranIndividu(),
                   FormYuran(),
+                  MaklumatAhli(),
                 ],
               ),
             ),
