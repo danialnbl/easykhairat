@@ -101,19 +101,45 @@ class FeeController extends GetxController {
   }
 
   // Update a fee
-  Future<void> updateFee(FeeModel fee) async {
+  Future<void> updateFee(FeeModel fee, String fee_id) async {
     try {
       isLoading.value = true;
-      // final updatedFee = fee.copyWith(
-      //   feeUpdatedAt: DateTime.now(), // Update only updatedAt field
-      // );
 
-      // await supabase.from('fees').update(fee.toJson()).eq('fee_id', fee.feeId);
+      // Update the feeUpdatedAt field to the current time
+      final updatedFee = fee.copyWith(feeUpdatedAt: DateTime.now());
 
-      Get.snackbar('Success', 'Fee updated');
+      // Send the updated fee data to Supabase
+      await supabase
+          .from('fees')
+          .update(updatedFee.toJson())
+          .eq('fee_id', fee_id);
+
+      Get.snackbar(
+        'Success',
+        'Fee updated successfully',
+        backgroundColor: Colors.green,
+        colorText: Colors.white,
+      );
     } catch (e) {
       Get.log("Error updating fee: $e");
       Get.snackbar('Error', 'Failed to update fee');
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  // Update fee status
+  Future<void> updateFeeStatus(int feeId, String status) async {
+    try {
+      isLoading.value = true;
+      await supabase
+          .from('fees')
+          .update({'fee_status': status})
+          .eq('fee_id', feeId);
+      Get.snackbar('Success', 'Fee status updated');
+    } catch (e) {
+      print("Error updating fee status: $e");
+      Get.snackbar('Error', 'Failed to update fee status');
     } finally {
       isLoading.value = false;
     }

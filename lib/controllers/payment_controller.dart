@@ -87,11 +87,11 @@ class PaymentController extends GetxController {
       await supabase
           .from('payments')
           .update(payment.toJson())
-          .eq('payment_id', payment.paymentId);
+          .eq('payment_id', payment.paymentId ?? 0);
 
       Get.snackbar('Success', 'Payment updated');
     } catch (e) {
-      print("Error updating payment: $e");
+      Get.log("Error updating payment: $e", isError: true);
       Get.snackbar('Error', 'Failed to update payment');
     } finally {
       isLoading.value = false;

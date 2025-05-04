@@ -58,6 +58,32 @@ class FeeModel {
     return data;
   }
 
+  FeeModel copyWith({
+    int? feeId,
+    String? feeDescription,
+    DateTime? feeDue,
+    String? feeType,
+    DateTime? feeCreatedAt,
+    DateTime? feeUpdatedAt,
+    int? adminId,
+    String? userId,
+    double? feeAmount,
+    String? feeStatus,
+  }) {
+    return FeeModel(
+      feeId: feeId ?? this.feeId,
+      feeDescription: feeDescription ?? this.feeDescription,
+      feeDue: feeDue ?? this.feeDue,
+      feeType: feeType ?? this.feeType,
+      feeCreatedAt: feeCreatedAt ?? this.feeCreatedAt,
+      feeUpdatedAt: feeUpdatedAt ?? this.feeUpdatedAt,
+      adminId: adminId ?? this.adminId,
+      userId: userId ?? this.userId,
+      feeAmount: feeAmount ?? this.feeAmount,
+      feeStatus: feeStatus ?? this.feeStatus,
+    );
+  }
+
   @override
   String toString() {
     return 'FeeModel(feeId: $feeId, description: $feeDescription, due: $feeDue, type: $feeType, amount: $feeAmount, status: $feeStatus)';

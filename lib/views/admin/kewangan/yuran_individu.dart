@@ -1,6 +1,7 @@
 import 'package:easykhairat/controllers/fee_controller.dart';
 import 'package:easykhairat/controllers/navigation_controller.dart';
 import 'package:easykhairat/controllers/payment_controller.dart';
+import 'package:easykhairat/models/paymentModel.dart';
 import 'package:easykhairat/widgets/header.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -127,33 +128,27 @@ class YuranIndividuState extends State<YuranIndividu> {
                                 },
                               ),
                               const SizedBox(height: 16),
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: RadioListTile<String>(
-                                      value: "Tunai",
-                                      groupValue: paymentMethod,
-                                      onChanged: (value) {
-                                        setState(() {
-                                          paymentMethod = value!;
-                                        });
-                                      },
-                                      title: Text("Tunai"),
-                                    ),
+                              DropdownButtonFormField<String>(
+                                value: paymentMethod,
+                                items: [
+                                  DropdownMenuItem(
+                                    value: "Tunai",
+                                    child: Text("Tunai"),
                                   ),
-                                  Expanded(
-                                    child: RadioListTile<String>(
-                                      value: "Lain-lain",
-                                      groupValue: paymentMethod,
-                                      onChanged: (value) {
-                                        setState(() {
-                                          paymentMethod = value!;
-                                        });
-                                      },
-                                      title: Text("Lain-lain"),
-                                    ),
+                                  DropdownMenuItem(
+                                    value: "Lain-lain",
+                                    child: Text("Lain-lain"),
                                   ),
                                 ],
+                                onChanged: (value) {
+                                  setState(() {
+                                    paymentMethod = value!;
+                                  });
+                                },
+                                decoration: InputDecoration(
+                                  labelText: "Kaedah Pembayaran",
+                                  border: OutlineInputBorder(),
+                                ),
                               ),
                               const SizedBox(height: 16),
                               TextFormField(
@@ -203,7 +198,70 @@ class YuranIndividuState extends State<YuranIndividu> {
                                   ElevatedButton(
                                     onPressed: () {
                                       if (_formKey.currentState!.validate()) {
-                                        // Submit action here
+                                        // Create a new PaymentModel instance
+                                        final payment = PaymentModel(
+                                          paymentValue: double.parse(
+                                            amountController.text,
+                                          ),
+                                          paymentDescription:
+                                              noteController.text.isEmpty
+                                                  ? "Bayaran Yuran"
+                                                  : noteController.text,
+                                          paymentCreatedAt: DateTime.now(),
+                                          paymentUpdatedAt: DateTime.now(),
+                                          feeId: int.parse(
+                                            selectedInvoice ?? '0',
+                                          ), // Ensure selectedInvoice is not null
+                                          userId:
+                                              navController.getUser()?.userId,
+                                          paymentType: paymentMethod,
+                                        );
+
+                                        // Add the payment using the PaymentController
+                                        paymentController
+                                            .addPayment(payment)
+                                            .then((_) {
+                                              // Update the fee status to "Dibayar"
+                                              feeController.updateFeeStatus(
+                                                int.parse(selectedInvoice!),
+                                                "Dibayar",
+                                              );
+
+                                              // Clear the form after successful submission
+                                              _formKey.currentState?.reset();
+                                              amountController.clear();
+                                              dateController.clear();
+                                              receiptController.clear();
+                                              noteController.clear();
+                                              setState(() {
+                                                selectedInvoice = null;
+                                                paymentMethod = "Tunai";
+                                              });
+
+                                              // Refresh the fee list
+                                              feeController
+                                                  .fetchYuranTertunggak(
+                                                    navController
+                                                            .getUser()
+                                                            ?.userId
+                                                            .toString() ??
+                                                        "",
+                                                  );
+
+                                              // Show success message
+                                              Get.snackbar(
+                                                'Berjaya',
+                                                'Bayaran telah disimpan.',
+                                              );
+                                            })
+                                            .catchError((error) {
+                                              // Show error message
+                                              Get.snackbar(
+                                                'Ralat',
+                                                'Gagal menyimpan bayaran.',
+                                              );
+                                              print("Error: $error");
+                                            });
                                       }
                                     },
                                     child: Text("Simpan"),
