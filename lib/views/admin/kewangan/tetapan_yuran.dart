@@ -159,7 +159,32 @@ class ManageFee extends StatelessWidget {
               IconButton(
                 icon: const Icon(Icons.delete, color: Colors.red),
                 onPressed: () {
-                  // feeController.deleteFee(fee.feeId);
+                  // Show confirmation dialog before deleting
+                  Get.dialog(
+                    AlertDialog(
+                      title: const Text('Confirm Deletion'),
+                      content: const Text(
+                        'Are you sure you want to delete this fee?',
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () {
+                            Get.back(); // Close the dialog
+                          },
+                          child: const Text('Cancel'),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            feeController.deleteFee(
+                              fee.feeId ?? 0,
+                            ); // Call deleteFee
+                            Get.back(); // Close the dialog
+                          },
+                          child: const Text('Delete'),
+                        ),
+                      ],
+                    ),
+                  );
                 },
               ),
             ],

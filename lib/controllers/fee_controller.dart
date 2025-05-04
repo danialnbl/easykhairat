@@ -123,6 +123,8 @@ class FeeController extends GetxController {
   Future<void> deleteFee(int feeId) async {
     try {
       isLoading.value = true;
+      // Check if feeId is valid
+      print("Deleting fee with ID: $feeId");
       await supabase.from('fees').delete().eq('fee_id', feeId);
       Get.snackbar('Success', 'Fee deleted');
     } catch (e) {
