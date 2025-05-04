@@ -23,13 +23,6 @@ void main() async {
 
   await Supabase.initialize(url: supabaseUrl, anonKey: supabaseKey);
 
-  final res = await Supabase.instance.client.functions.invoke(
-    'hello-world',
-    body: {'name': 'Functions'},
-  );
-
-  print(res.data);
-
   runApp(const MyApp());
 }
 
