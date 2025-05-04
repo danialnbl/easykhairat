@@ -2,6 +2,7 @@ import 'package:easykhairat/controllers/user_controller.dart';
 import 'package:easykhairat/views/admin/adminSettings.dart';
 import 'package:easykhairat/views/admin/admin_dashboard.dart';
 import 'package:easykhairat/views/admin/kewangan/form_yuran.dart';
+import 'package:easykhairat/views/admin/kewangan/proses_tuntutan.dart';
 import 'package:easykhairat/views/admin/kewangan/proses_yuran.dart';
 import 'package:easykhairat/views/admin/kewangan/yuran_individu.dart';
 import 'package:easykhairat/views/admin/kewangan/tetapan_yuran.dart';
@@ -249,7 +250,7 @@ class _AdminMainState extends State<AdminMain> {
                   MemberNew(),
                   ManageFee(),
                   ProsesYuran(),
-                  Center(child: Text('Proses Tuntutan Screen')),
+                  ProsesTuntutan(),
                   Center(child: Text('Pengumuman Screen')),
                   Center(child: Text('Laporan Screen')),
                   AdminSettings(),

@@ -1,4 +1,5 @@
 import 'package:easykhairat/controllers/payment_controller.dart';
+import 'package:easykhairat/controllers/tuntutan_controller.dart';
 import 'package:easykhairat/widgets/header.dart';
 import 'package:flutter/material.dart';
 import 'package:moon_design/moon_design.dart';
@@ -19,6 +20,7 @@ class AdminDashboard extends StatefulWidget {
 class _AdminDashboardState extends State<AdminDashboard> {
   final UserController userController = Get.put(UserController());
   final PaymentController paymentController = Get.put(PaymentController());
+  final TuntutanController tuntutanController = Get.put(TuntutanController());
 
   @override
   void initState() {
@@ -31,6 +33,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
     userController.fetchAdminDetailsByIdAndAssign(
       Supabase.instance.client.auth.currentUser?.id ?? "",
     );
+
     print("Admin ID: ${Supabase.instance.client.auth.currentUser?.id}");
   }
 
