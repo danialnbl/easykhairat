@@ -1,7 +1,11 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:http/http.dart' as http;
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:easykhairat/models/userModel.dart' as pengguna;
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class UserController extends GetxController {
   var users = <pengguna.User>[].obs;
@@ -12,8 +16,10 @@ class UserController extends GetxController {
   final supabase = Supabase.instance.client;
 
   @override
-  void onInit() {
+  Future<void> onInit() async {
     super.onInit();
+    // Load environment variables
+    await dotenv.load(fileName: ".env");
 
     // Listen for real-time updates
     listenForRealTimeUpdates();
@@ -195,10 +201,41 @@ class UserController extends GetxController {
 
   // Delete a user
   Future<void> deleteUser(String userId) async {
+    final String supabaseUrl =
+        'https://djeeipnokclsjabwadoq.supabase.co/functions/v1/delete-user'; // Replace with your Supabase function URL
+
     try {
       isLoading.value = true;
-      await supabase.from('users').delete().eq('user_id', userId);
-      Get.snackbar('Success', 'User deleted');
+
+      // Load the environment variables first (in case onInit() is not called at the correct time)
+      await dotenv.load(fileName: ".env");
+      print(dotenv.env); // To see all loaded environment variables
+
+      // Fetch the service role key from .env
+      var key = dotenv.env['SUPABASE_SERVICE_ROLE_KEY'];
+      if (key == null || key.isEmpty) {
+        throw Exception('Service Role Key not found in .env file');
+      }
+
+      print("Deleting user with ID: $userId");
+      print("Supabase URL: $supabaseUrl");
+
+      final response = await http.delete(
+        Uri.parse(supabaseUrl),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $key', // Add the service role key here
+        },
+        body: json.encode({'user_id': userId}),
+      );
+
+      if (response.statusCode == 200) {
+        print('User deleted successfully');
+        Get.snackbar('Success', 'User deleted');
+      } else {
+        print('Error: ${response.body}');
+        Get.snackbar('Error', 'Failed to delete user');
+      }
     } catch (e) {
       print("Error deleting user: $e");
       Get.snackbar('Error', 'Failed to delete user');

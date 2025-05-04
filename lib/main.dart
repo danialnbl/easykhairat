@@ -1,3 +1,4 @@
+import 'package:easykhairat/controllers/auth_controller.dart';
 import 'package:easykhairat/controllers/fee_controller.dart';
 import 'package:easykhairat/controllers/user_controller.dart';
 import 'package:easykhairat/routes/routes.dart';
@@ -21,6 +22,13 @@ void main() async {
   supabaseKey = dotenv.env['SUPABASE_KEY']!;
 
   await Supabase.initialize(url: supabaseUrl, anonKey: supabaseKey);
+
+  final res = await Supabase.instance.client.functions.invoke(
+    'hello-world',
+    body: {'name': 'Functions'},
+  );
+
+  print(res.data);
 
   runApp(const MyApp());
 }
