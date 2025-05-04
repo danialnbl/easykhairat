@@ -1,3 +1,4 @@
+import 'package:easykhairat/controllers/family_controller.dart';
 import 'package:easykhairat/controllers/navigation_controller.dart';
 import 'package:easykhairat/widgets/header.dart';
 import 'package:flutter/material.dart';
@@ -16,6 +17,7 @@ class MemberList extends StatefulWidget {
 class MemberListState extends State<MemberList> {
   final UserController userController = Get.put(UserController());
   final NavigationController navController = Get.put(NavigationController());
+  final FamilyController familyController = Get.put(FamilyController());
   RxString selectedFilter = 'Semua Ahli'.obs;
   TextEditingController nameSearchController = TextEditingController();
   TextEditingController icSearchController = TextEditingController();
@@ -280,7 +282,12 @@ class MemberListState extends State<MemberList> {
                             Icons.visibility,
                             color: Colors.green,
                           ),
-                          onPressed: () => viewMember(user),
+                          onPressed: () {
+                            viewMember(user);
+                            familyController.fetchFamilyMembersByUserId(
+                              user.userId,
+                            );
+                          },
                         ),
                         IconButton(
                           icon: const Icon(Icons.delete, color: Colors.red),
