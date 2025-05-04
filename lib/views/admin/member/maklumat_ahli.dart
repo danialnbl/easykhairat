@@ -1,3 +1,4 @@
+import 'package:easykhairat/controllers/family_controller.dart';
 import 'package:easykhairat/controllers/navigation_controller.dart';
 import 'package:easykhairat/widgets/header.dart';
 import 'package:flutter/material.dart';
@@ -13,6 +14,16 @@ class MaklumatAhli extends StatefulWidget {
 
 class MaklumatAhliState extends State<MaklumatAhli> {
   final NavigationController navController = Get.put(NavigationController());
+  final FamilyController familyController = Get.put(FamilyController());
+
+  @override
+  void initState() {
+    super.initState();
+    final member = navController.getUser();
+    if (member != null && member.userId != null) {
+      familyController.fetchFamilyMembersByUserId(member.userId!);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -221,101 +232,142 @@ class MaklumatAhliState extends State<MaklumatAhli> {
                                     ?.copyWith(fontWeight: FontWeight.bold),
                               ),
                               const SizedBox(height: 16),
-                              Table(
-                                border: TableBorder.all(),
-                                columnWidths: const {
+                              Obx(() {
+                                if (familyController.isLoading.value) {
+                                  return const Center(
+                                    child: CircularProgressIndicator(),
+                                  );
+                                }
+
+                                if (familyController.familyMembers.isEmpty) {
+                                  return const Text(
+                                    "Tiada tanggungan tersedia.",
+                                  );
+                                }
+
+                                return Table(
+                                  columnWidths: const {
                                   0: FlexColumnWidth(1),
                                   1: FlexColumnWidth(2),
                                   2: FlexColumnWidth(2),
                                   3: FlexColumnWidth(2),
-                                },
-                                children: [
+                                  },
+                                  defaultVerticalAlignment:
+                                    TableCellVerticalAlignment.middle,
+                                  children: [
                                   TableRow(
                                     decoration: BoxDecoration(
-                                      color:
-                                          Theme.of(context).primaryColorLight,
+                                    color: Theme.of(context)
+                                      .colorScheme
+                                      .primary
+                                      .withOpacity(0.1),
                                     ),
                                     children: const [
-                                      Padding(
-                                        padding: EdgeInsets.all(8.0),
-                                        child: Text(
-                                          "No.",
-                                          style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
+                                    Padding(
+                                      padding: EdgeInsets.symmetric(
+                                        vertical: 8.0),
+                                      child: Text(
+                                      "No.",
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.w600,
                                       ),
-                                      Padding(
-                                        padding: EdgeInsets.all(8.0),
-                                        child: Text(
-                                          "Nama",
-                                          style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
                                       ),
-                                      Padding(
-                                        padding: EdgeInsets.all(8.0),
-                                        child: Text(
-                                          "IC/SuratBeranak",
-                                          style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
+                                    ),
+                                    Padding(
+                                      padding: EdgeInsets.symmetric(
+                                        vertical: 8.0),
+                                      child: Text(
+                                      "Nama",
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.w600,
                                       ),
-                                      Padding(
-                                        padding: EdgeInsets.all(8.0),
-                                        child: Text(
-                                          "Pertalian",
-                                          style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
                                       ),
+                                    ),
+                                    Padding(
+                                      padding: EdgeInsets.symmetric(
+                                        vertical: 8.0),
+                                      child: Text(
+                                      "IC/SuratBeranak",
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                      ),
+                                    ),
+                                    Padding(
+                                      padding: EdgeInsets.symmetric(
+                                        vertical: 8.0),
+                                      child: Text(
+                                      "Pertalian",
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                      ),
+                                    ),
                                     ],
                                   ),
-                                  TableRow(
-                                    children: [
-                                      Padding(
-                                        padding: const EdgeInsets.all(8.0),
-                                        child: Text("1"),
+                                  ...familyController.familyMembers
+                                    .asMap()
+                                    .entries
+                                    .map(
+                                      (entry) => TableRow(
+                                      decoration: BoxDecoration(
+                                        border: Border(
+                                        bottom: BorderSide(
+                                          color: Theme.of(context)
+                                            .dividerColor,
+                                        ),
+                                        ),
                                       ),
-                                      Padding(
-                                        padding: const EdgeInsets.all(8.0),
-                                        child: Text("Ali Bin Abu"),
+                                      children: [
+                                        Padding(
+                                        padding:
+                                          const EdgeInsets.symmetric(
+                                            vertical: 8.0),
+                                        child: Text(
+                                          (entry.key + 1).toString(),
+                                          textAlign: TextAlign.center,
+                                        ),
+                                        ),
+                                        Padding(
+                                        padding:
+                                          const EdgeInsets.symmetric(
+                                            vertical: 8.0),
+                                        child: Text(
+                                          entry.value.familymemberName,
+                                          textAlign: TextAlign.center,
+                                        ),
+                                        ),
+                                        Padding(
+                                        padding:
+                                          const EdgeInsets.symmetric(
+                                            vertical: 8.0),
+                                        child: Text(
+                                          entry.value
+                                            .familymemberIdentification,
+                                          textAlign: TextAlign.center,
+                                        ),
+                                        ),
+                                        Padding(
+                                        padding:
+                                          const EdgeInsets.symmetric(
+                                            vertical: 8.0),
+                                        child: Text(
+                                          entry.value
+                                            .familymemberRelationship,
+                                          textAlign: TextAlign.center,
+                                        ),
+                                        ),
+                                      ],
                                       ),
-                                      Padding(
-                                        padding: const EdgeInsets.all(8.0),
-                                        child: Text("900101-01-1234"),
-                                      ),
-                                      Padding(
-                                        padding: const EdgeInsets.all(8.0),
-                                        child: Text("Anak"),
-                                      ),
-                                    ],
-                                  ),
-                                  TableRow(
-                                    children: [
-                                      Padding(
-                                        padding: const EdgeInsets.all(8.0),
-                                        child: Text("2"),
-                                      ),
-                                      Padding(
-                                        padding: const EdgeInsets.all(8.0),
-                                        child: Text("Aminah Binti Ali"),
-                                      ),
-                                      Padding(
-                                        padding: const EdgeInsets.all(8.0),
-                                        child: Text("910202-02-5678"),
-                                      ),
-                                      Padding(
-                                        padding: const EdgeInsets.all(8.0),
-                                        child: Text("Isteri"),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
+                                    )
+                                    .toList(),
+                                  ],
+                                );
+                              }),
                             ],
                           ),
                         ),

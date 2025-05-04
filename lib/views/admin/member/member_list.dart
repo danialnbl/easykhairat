@@ -283,10 +283,6 @@ class MemberListState extends State<MemberList> {
                           onPressed: () => viewMember(user),
                         ),
                         IconButton(
-                          icon: const Icon(Icons.edit, color: Colors.blue),
-                          onPressed: () => editMember(user),
-                        ),
-                        IconButton(
                           icon: const Icon(Icons.delete, color: Colors.red),
                           onPressed: () => deleteMember(user),
                         ),
