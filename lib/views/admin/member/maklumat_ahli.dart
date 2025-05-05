@@ -16,6 +16,18 @@ class MaklumatAhliState extends State<MaklumatAhli> {
   final NavigationController navController = Get.put(NavigationController());
   final FamilyController familyController = Get.put(FamilyController());
 
+  final _formKey = GlobalKey<FormState>();
+  final TextEditingController _namaController = TextEditingController();
+  final TextEditingController _noKadPengenalanController =
+      TextEditingController();
+  final TextEditingController _alamatController = TextEditingController();
+  final TextEditingController _noTelefonController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _statusKeahlianController =
+      TextEditingController();
+
+  var isEditing = false;
+
   @override
   void initState() {
     super.initState();
@@ -83,12 +95,138 @@ class MaklumatAhliState extends State<MaklumatAhli> {
                             children: [
                               Text(
                                 "Maklumat Ahli ${member?.userName ?? "Unknown User"}",
-                                style: Theme.of(context).textTheme.bodyLarge
-                                    ?.copyWith(fontWeight: FontWeight.bold),
+                                style: Theme.of(
+                                  context,
+                                ).textTheme.bodyLarge?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black,
+                                ),
                               ),
                               const SizedBox(height: 16),
                               if (member == null)
                                 Text("Tiada maklumat ahli tersedia.")
+                              else if (isEditing)
+                                Form(
+                                  key: _formKey,
+                                  child: Column(
+                                  crossAxisAlignment:
+                                    CrossAxisAlignment.start,
+                                  children: [
+                                    TextFormField(
+                                    controller: _namaController
+                                      ..text = member?.userName ?? '',
+                                    decoration: InputDecoration(
+                                      labelText: "Nama",
+                                      border: OutlineInputBorder(),
+                                    ),
+                                    validator:
+                                      (value) =>
+                                        value == null || value.isEmpty
+                                          ? 'Wajib diisi'
+                                          : null,
+                                    ),
+                                    const SizedBox(height: 8),
+                                    TextFormField(
+                                    controller: _noKadPengenalanController
+                                      ..text = member?.userIdentification ?? '',
+                                    decoration: InputDecoration(
+                                      labelText: "No. Kad Pengenalan",
+                                      border: OutlineInputBorder(),
+                                    ),
+                                    validator:
+                                      (value) =>
+                                        value == null || value.isEmpty
+                                          ? 'Wajib diisi'
+                                          : null,
+                                    ),
+                                    const SizedBox(height: 8),
+                                    TextFormField(
+                                    controller: _alamatController
+                                      ..text = member?.userAddress ?? '',
+                                    decoration: InputDecoration(
+                                      labelText: "Alamat",
+                                      border: OutlineInputBorder(),
+                                    ),
+                                    maxLines: 3,
+                                    validator:
+                                      (value) =>
+                                        value == null || value.isEmpty
+                                          ? 'Wajib diisi'
+                                          : null,
+                                    ),
+                                    const SizedBox(height: 8),
+                                    TextFormField(
+                                    controller: _noTelefonController
+                                      ..text = member?.userPhoneNo ?? '',
+                                    decoration: InputDecoration(
+                                      labelText: "No. Telefon",
+                                      border: OutlineInputBorder(),
+                                    ),
+                                    validator:
+                                      (value) =>
+                                        value == null || value.isEmpty
+                                          ? 'Wajib diisi'
+                                          : null,
+                                    ),
+                                    const SizedBox(height: 8),
+                                    TextFormField(
+                                    controller: _emailController
+                                      ..text = member?.userEmail ?? '',
+                                    decoration: InputDecoration(
+                                      labelText: "Email",
+                                      border: OutlineInputBorder(),
+                                    ),
+                                    validator:
+                                      (value) =>
+                                        value == null || value.isEmpty
+                                          ? 'Wajib diisi'
+                                          : null,
+                                    ),
+                                    const SizedBox(height: 8),
+                                    TextFormField(
+                                    controller: _statusKeahlianController
+                                      ..text = member?.userType ?? '',
+                                    decoration: InputDecoration(
+                                      labelText: "Status Keahlian",
+                                      border: OutlineInputBorder(),
+                                    ),
+                                    validator:
+                                      (value) =>
+                                        value == null || value.isEmpty
+                                          ? 'Wajib diisi'
+                                          : null,
+                                    ),
+                                    const SizedBox(height: 16),
+                                    Row(
+                                    mainAxisAlignment:
+                                      MainAxisAlignment.end,
+                                    children: [
+                                      ElevatedButton(
+                                      onPressed: () {
+                                        if (_formKey.currentState!
+                                          .validate()) {
+                                        // Handle form submission logic here
+                                        setState(() {
+                                          isEditing = false;
+                                        });
+                                        }
+                                      },
+                                      child: const Text("Save"),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      OutlinedButton(
+                                      onPressed: () {
+                                        setState(() {
+                                        isEditing = false;
+                                        });
+                                      },
+                                      child: const Text("Cancel"),
+                                      ),
+                                    ],
+                                    ),
+                                  ],
+                                  ),
+                                )
                               else
                                 Container(
                                   decoration: BoxDecoration(
@@ -106,78 +244,57 @@ class MaklumatAhliState extends State<MaklumatAhli> {
                                         mainAxisSize: MainAxisSize.min,
                                         children: [
                                           Text(
-                                            "No. Ahli",
+                                            "No. Ahli :",
                                             style: TextStyle(
-                                              color:
-                                                  Theme.of(
-                                                    context,
-                                                  ).primaryColor,
+                                              color: Colors.black,
                                               fontWeight: FontWeight.bold,
                                             ),
                                           ),
                                           const SizedBox(height: 8),
                                           Text(
-                                            "Nama",
+                                            "Nama :",
                                             style: TextStyle(
-                                              color:
-                                                  Theme.of(
-                                                    context,
-                                                  ).primaryColor,
+                                              color: Colors.black,
                                               fontWeight: FontWeight.bold,
                                             ),
                                           ),
                                           const SizedBox(height: 8),
                                           Text(
-                                            "No. Kad Pengenalan",
+                                            "No. Kad Pengenalan :",
                                             style: TextStyle(
-                                              color:
-                                                  Theme.of(
-                                                    context,
-                                                  ).primaryColor,
+                                              color: Colors.black,
                                               fontWeight: FontWeight.bold,
                                             ),
                                           ),
                                           const SizedBox(height: 8),
                                           Text(
-                                            "Alamat",
+                                            "Alamat :",
                                             style: TextStyle(
-                                              color:
-                                                  Theme.of(
-                                                    context,
-                                                  ).primaryColor,
+                                              color: Colors.black,
                                               fontWeight: FontWeight.bold,
                                             ),
                                           ),
                                           const SizedBox(height: 8),
                                           Text(
-                                            "No. Telefon",
+                                            "No. Telefon :",
                                             style: TextStyle(
-                                              color:
-                                                  Theme.of(
-                                                    context,
-                                                  ).primaryColor,
+                                              color: Colors.black,
                                               fontWeight: FontWeight.bold,
                                             ),
                                           ),
                                           const SizedBox(height: 8),
                                           Text(
-                                            "Email",
+                                            "Email :",
                                             style: TextStyle(
-                                              color:
-                                                  Theme.of(
-                                                    context,
-                                                  ).primaryColor,
+                                              color: Colors.black,
                                               fontWeight: FontWeight.bold,
                                             ),
                                           ),
                                           const SizedBox(height: 8),
                                           Text(
-                                            "Status Keahlian",
+                                            "Status Keahlian :",
                                             style: TextStyle(
-                                              color:
-                                                  Theme.of(
-                                                    context,
-                                                  ).primaryColor,
+                                              color: Colors.black,
                                               fontWeight: FontWeight.bold,
                                             ),
                                           ),
@@ -211,6 +328,27 @@ class MaklumatAhliState extends State<MaklumatAhli> {
                                   ),
                                 ),
                               const SizedBox(height: 16),
+                              if (!isEditing)
+                                Align(
+                                  alignment: Alignment.centerRight,
+                                  child: ElevatedButton.icon(
+                                    onPressed: () {
+                                      setState(() {
+                                        isEditing = !isEditing;
+                                      });
+                                    },
+                                    label: const Text("Update"),
+                                    icon: const Icon(
+                                      Icons.edit,
+                                      color: Colors.white,
+                                    ),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor:
+                                          Theme.of(context).colorScheme.primary,
+                                      foregroundColor: Colors.white,
+                                    ),
+                                  ),
+                                ),
                             ],
                           ),
                         ),
@@ -247,124 +385,135 @@ class MaklumatAhliState extends State<MaklumatAhli> {
 
                                 return Table(
                                   columnWidths: const {
-                                  0: FlexColumnWidth(1),
-                                  1: FlexColumnWidth(2),
-                                  2: FlexColumnWidth(2),
-                                  3: FlexColumnWidth(2),
+                                    0: FlexColumnWidth(1),
+                                    1: FlexColumnWidth(2),
+                                    2: FlexColumnWidth(2),
+                                    3: FlexColumnWidth(2),
                                   },
                                   defaultVerticalAlignment:
-                                    TableCellVerticalAlignment.middle,
+                                      TableCellVerticalAlignment.middle,
                                   children: [
-                                  TableRow(
-                                    decoration: BoxDecoration(
-                                    color: Theme.of(context)
-                                      .colorScheme
-                                      .primary
-                                      .withOpacity(0.1),
-                                    ),
-                                    children: const [
-                                    Padding(
-                                      padding: EdgeInsets.symmetric(
-                                        vertical: 8.0),
-                                      child: Text(
-                                      "No.",
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                      ),
-                                    ),
-                                    Padding(
-                                      padding: EdgeInsets.symmetric(
-                                        vertical: 8.0),
-                                      child: Text(
-                                      "Nama",
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                      ),
-                                    ),
-                                    Padding(
-                                      padding: EdgeInsets.symmetric(
-                                        vertical: 8.0),
-                                      child: Text(
-                                      "IC/SuratBeranak",
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                      ),
-                                    ),
-                                    Padding(
-                                      padding: EdgeInsets.symmetric(
-                                        vertical: 8.0),
-                                      child: Text(
-                                      "Pertalian",
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                      ),
-                                    ),
-                                    ],
-                                  ),
-                                  ...familyController.familyMembers
-                                    .asMap()
-                                    .entries
-                                    .map(
-                                      (entry) => TableRow(
+                                    TableRow(
                                       decoration: BoxDecoration(
-                                        border: Border(
-                                        bottom: BorderSide(
-                                          color: Theme.of(context)
-                                            .dividerColor,
-                                        ),
-                                        ),
+                                        color: Theme.of(
+                                          context,
+                                        ).colorScheme.primary.withOpacity(0.1),
                                       ),
-                                      children: [
+                                      children: const [
                                         Padding(
-                                        padding:
-                                          const EdgeInsets.symmetric(
-                                            vertical: 8.0),
-                                        child: Text(
-                                          (entry.key + 1).toString(),
-                                          textAlign: TextAlign.center,
-                                        ),
-                                        ),
-                                        Padding(
-                                        padding:
-                                          const EdgeInsets.symmetric(
-                                            vertical: 8.0),
-                                        child: Text(
-                                          entry.value.familymemberName,
-                                          textAlign: TextAlign.center,
-                                        ),
+                                          padding: EdgeInsets.symmetric(
+                                            vertical: 8.0,
+                                          ),
+                                          child: Text(
+                                            "No.",
+                                            textAlign: TextAlign.center,
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
                                         ),
                                         Padding(
-                                        padding:
-                                          const EdgeInsets.symmetric(
-                                            vertical: 8.0),
-                                        child: Text(
-                                          entry.value
-                                            .familymemberIdentification,
-                                          textAlign: TextAlign.center,
-                                        ),
+                                          padding: EdgeInsets.symmetric(
+                                            vertical: 8.0,
+                                          ),
+                                          child: Text(
+                                            "Nama",
+                                            textAlign: TextAlign.center,
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
                                         ),
                                         Padding(
-                                        padding:
-                                          const EdgeInsets.symmetric(
-                                            vertical: 8.0),
-                                        child: Text(
-                                          entry.value
-                                            .familymemberRelationship,
-                                          textAlign: TextAlign.center,
+                                          padding: EdgeInsets.symmetric(
+                                            vertical: 8.0,
+                                          ),
+                                          child: Text(
+                                            "IC/SuratBeranak",
+                                            textAlign: TextAlign.center,
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
                                         ),
+                                        Padding(
+                                          padding: EdgeInsets.symmetric(
+                                            vertical: 8.0,
+                                          ),
+                                          child: Text(
+                                            "Pertalian",
+                                            textAlign: TextAlign.center,
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
                                         ),
                                       ],
-                                      ),
-                                    )
-                                    .toList(),
+                                    ),
+                                    ...familyController.familyMembers
+                                        .asMap()
+                                        .entries
+                                        .map(
+                                          (entry) => TableRow(
+                                            decoration: BoxDecoration(
+                                              border: Border(
+                                                bottom: BorderSide(
+                                                  color:
+                                                      Theme.of(
+                                                        context,
+                                                      ).dividerColor,
+                                                ),
+                                              ),
+                                            ),
+                                            children: [
+                                              Padding(
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                      vertical: 8.0,
+                                                    ),
+                                                child: Text(
+                                                  (entry.key + 1).toString(),
+                                                  textAlign: TextAlign.center,
+                                                ),
+                                              ),
+                                              Padding(
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                      vertical: 8.0,
+                                                    ),
+                                                child: Text(
+                                                  entry.value.familymemberName,
+                                                  textAlign: TextAlign.center,
+                                                ),
+                                              ),
+                                              Padding(
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                      vertical: 8.0,
+                                                    ),
+                                                child: Text(
+                                                  entry
+                                                      .value
+                                                      .familymemberIdentification,
+                                                  textAlign: TextAlign.center,
+                                                ),
+                                              ),
+                                              Padding(
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                      vertical: 8.0,
+                                                    ),
+                                                child: Text(
+                                                  entry
+                                                      .value
+                                                      .familymemberRelationship,
+                                                  textAlign: TextAlign.center,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        )
+                                        .toList(),
                                   ],
                                 );
                               }),
