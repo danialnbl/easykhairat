@@ -1,4 +1,5 @@
 import 'package:easykhairat/controllers/fee_controller.dart';
+import 'package:easykhairat/controllers/navigation_controller.dart';
 import 'package:easykhairat/controllers/user_controller.dart';
 import 'package:easykhairat/models/feeModel.dart';
 import 'package:easykhairat/widgets/header.dart';
@@ -14,6 +15,7 @@ class FormYuran extends StatefulWidget {
 }
 
 class _FormYuranState extends State<FormYuran> {
+  final NavigationController navController = Get.put(NavigationController());
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _tajukYuranController = TextEditingController();
   final TextEditingController _jumlahYuranController = TextEditingController();
@@ -60,12 +62,17 @@ class _FormYuranState extends State<FormYuran> {
                   child: Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: MoonBreadcrumb(
+                      visibleItemCount: 5,
                       items: [
                         MoonBreadcrumbItem(
                           label: Text("Home"),
-                          onTap: () => Get.toNamed('/adminMain'),
+                          onTap: () => navController.selectedIndex.value = 0,
                         ),
                         MoonBreadcrumbItem(label: Text("Kewangan")),
+                        MoonBreadcrumbItem(
+                          label: Text("Tetapan Yuran"),
+                          onTap: () => navController.selectedIndex.value = 3,
+                        ),
                         MoonBreadcrumbItem(label: Text("Tambah Yuran")),
                       ],
                     ),

@@ -14,6 +14,9 @@ class ManageFee extends StatelessWidget {
   final NavigationController navigationController =
       Get.find<NavigationController>();
 
+  RxString selectedFilter = 'Semua Yuran'.obs;
+  TextEditingController searchController = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -53,6 +56,46 @@ class ManageFee extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: searchController,
+                    decoration: InputDecoration(
+                      hintText: "Cari berdasarkan Tajuk...",
+                      prefixIcon: const Icon(Icons.search),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    onChanged: (value) {
+                      feeController.yuranGeneral.refresh(); // Trigger UI update
+                    },
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Obx(
+                  () => DropdownButton<String>(
+                    value: selectedFilter.value,
+                    items:
+                        ['Semua Yuran', 'Tertunggak', 'Selesai', 'General']
+                            .map(
+                              (status) => DropdownMenuItem(
+                                value: status,
+                                child: Text(status),
+                              ),
+                            )
+                            .toList(),
+                    onChanged: (value) {
+                      if (value != null) {
+                        selectedFilter.value = value;
+                      }
+                    },
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 MoonButton(
@@ -82,11 +125,30 @@ class ManageFee extends StatelessWidget {
 
   Widget _buildTable() {
     return Obx(() {
+      // Filter fees based on search text and selected filter
+      final filteredFees =
+          feeController.yuranGeneral.where((fee) {
+            bool matchesSearch =
+                searchController.text.isEmpty ||
+                fee.feeDescription.toLowerCase().contains(
+                  searchController.text.toLowerCase(),
+                );
+
+            // Treat null status as "General"
+            String feeStatus = fee.feeStatus?.toLowerCase() ?? 'general';
+
+            bool matchesFilter =
+                selectedFilter.value == 'Semua Yuran' ||
+                feeStatus == selectedFilter.value.toLowerCase();
+
+            return matchesSearch && matchesFilter;
+          }).toList();
+
       if (feeController.isLoading.value) {
         return const Center(child: CircularProgressIndicator());
       }
 
-      if (feeController.yuranGeneral.isEmpty) {
+      if (filteredFees.isEmpty) {
         return const Center(child: Text("Tiada Yuran Dijumpai."));
       }
 
@@ -99,15 +161,14 @@ class ManageFee extends StatelessWidget {
             2: FlexColumnWidth(2),
             3: FlexColumnWidth(2),
             4: FlexColumnWidth(2),
+            5: FlexColumnWidth(2),
           },
           border: TableBorder(
             horizontalInside: BorderSide(color: Colors.grey.shade300, width: 1),
           ),
           children: [
             _buildTableHeader(),
-            ...feeController.yuranGeneral
-                .map((fee) => _buildTableRow(fee))
-                .toList(),
+            ...filteredFees.map((fee) => _buildTableRow(fee)).toList(),
           ],
         ),
       );
@@ -122,6 +183,7 @@ class ManageFee extends StatelessWidget {
         _TableHeaderCell('Untuk Tahun'),
         _TableHeaderCell('Jumlah (RM)'),
         _TableHeaderCell('Jana Pada'),
+        _TableHeaderCell('Ditetapkan Untuk'),
         _TableHeaderCell('Actions'),
       ],
     );
@@ -137,7 +199,7 @@ class ManageFee extends StatelessWidget {
         _TableCell(
           "${fee.feeCreatedAt.day}/${fee.feeCreatedAt.month}/${fee.feeCreatedAt.year}",
         ),
-
+        _TableCell(fee.user?.userName ?? "General"),
         Padding(
           padding: const EdgeInsets.all(12.0),
           child: Row(

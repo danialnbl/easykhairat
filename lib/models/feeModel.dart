@@ -1,3 +1,5 @@
+import 'package:easykhairat/models/userModel.dart';
+
 class FeeModel {
   final int? feeId;
   final String feeDescription;
@@ -9,6 +11,7 @@ class FeeModel {
   final String? userId;
   final double feeAmount;
   final String? feeStatus;
+  final User? user;
 
   FeeModel({
     this.feeId,
@@ -21,6 +24,7 @@ class FeeModel {
     this.userId,
     required this.feeAmount,
     this.feeStatus,
+    this.user,
   });
 
   factory FeeModel.fromJson(Map<String, dynamic> json) {
@@ -35,6 +39,7 @@ class FeeModel {
       userId: json['user_id'],
       feeAmount: (json['fee_amount'] as num).toDouble(),
       feeStatus: json['fee_status'],
+      user: json['users'] != null ? User.fromJson(json['users']) : null,
     );
   }
 
@@ -49,6 +54,7 @@ class FeeModel {
       'user_id': userId,
       'fee_amount': feeAmount,
       'fee_status': feeStatus,
+      'user': user?.toJson(), // Convert user to JSON if not null
     };
 
     if (feeId != null) {
