@@ -48,7 +48,7 @@ class User {
       'user_type': userType,
       'user_password': userPassword,
       'user_created_at': userCreatedAt.toIso8601String(),
-      'user_updated_at': userUpdatedAt,
+      'user_updated_at': userUpdatedAt?.toIso8601String(), // Ensure null safety
       'user_id': userId,
     };
   }

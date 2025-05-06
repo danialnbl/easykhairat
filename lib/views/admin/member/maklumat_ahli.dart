@@ -1,5 +1,7 @@
 import 'package:easykhairat/controllers/family_controller.dart';
 import 'package:easykhairat/controllers/navigation_controller.dart';
+import 'package:easykhairat/controllers/user_controller.dart';
+import 'package:easykhairat/models/userModel.dart';
 import 'package:easykhairat/widgets/header.dart';
 import 'package:flutter/material.dart';
 import 'package:moon_design/moon_design.dart';
@@ -109,122 +111,186 @@ class MaklumatAhliState extends State<MaklumatAhli> {
                                 Form(
                                   key: _formKey,
                                   child: Column(
-                                  crossAxisAlignment:
-                                    CrossAxisAlignment.start,
-                                  children: [
-                                    TextFormField(
-                                    controller: _namaController
-                                      ..text = member?.userName ?? '',
-                                    decoration: InputDecoration(
-                                      labelText: "Nama",
-                                      border: OutlineInputBorder(),
-                                    ),
-                                    validator:
-                                      (value) =>
-                                        value == null || value.isEmpty
-                                          ? 'Wajib diisi'
-                                          : null,
-                                    ),
-                                    const SizedBox(height: 8),
-                                    TextFormField(
-                                    controller: _noKadPengenalanController
-                                      ..text = member?.userIdentification ?? '',
-                                    decoration: InputDecoration(
-                                      labelText: "No. Kad Pengenalan",
-                                      border: OutlineInputBorder(),
-                                    ),
-                                    validator:
-                                      (value) =>
-                                        value == null || value.isEmpty
-                                          ? 'Wajib diisi'
-                                          : null,
-                                    ),
-                                    const SizedBox(height: 8),
-                                    TextFormField(
-                                    controller: _alamatController
-                                      ..text = member?.userAddress ?? '',
-                                    decoration: InputDecoration(
-                                      labelText: "Alamat",
-                                      border: OutlineInputBorder(),
-                                    ),
-                                    maxLines: 3,
-                                    validator:
-                                      (value) =>
-                                        value == null || value.isEmpty
-                                          ? 'Wajib diisi'
-                                          : null,
-                                    ),
-                                    const SizedBox(height: 8),
-                                    TextFormField(
-                                    controller: _noTelefonController
-                                      ..text = member?.userPhoneNo ?? '',
-                                    decoration: InputDecoration(
-                                      labelText: "No. Telefon",
-                                      border: OutlineInputBorder(),
-                                    ),
-                                    validator:
-                                      (value) =>
-                                        value == null || value.isEmpty
-                                          ? 'Wajib diisi'
-                                          : null,
-                                    ),
-                                    const SizedBox(height: 8),
-                                    TextFormField(
-                                    controller: _emailController
-                                      ..text = member?.userEmail ?? '',
-                                    decoration: InputDecoration(
-                                      labelText: "Email",
-                                      border: OutlineInputBorder(),
-                                    ),
-                                    validator:
-                                      (value) =>
-                                        value == null || value.isEmpty
-                                          ? 'Wajib diisi'
-                                          : null,
-                                    ),
-                                    const SizedBox(height: 8),
-                                    TextFormField(
-                                    controller: _statusKeahlianController
-                                      ..text = member?.userType ?? '',
-                                    decoration: InputDecoration(
-                                      labelText: "Status Keahlian",
-                                      border: OutlineInputBorder(),
-                                    ),
-                                    validator:
-                                      (value) =>
-                                        value == null || value.isEmpty
-                                          ? 'Wajib diisi'
-                                          : null,
-                                    ),
-                                    const SizedBox(height: 16),
-                                    Row(
-                                    mainAxisAlignment:
-                                      MainAxisAlignment.end,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
-                                      ElevatedButton(
-                                      onPressed: () {
-                                        if (_formKey.currentState!
-                                          .validate()) {
-                                        // Handle form submission logic here
-                                        setState(() {
-                                          isEditing = false;
-                                        });
-                                        }
-                                      },
-                                      child: const Text("Save"),
+                                      TextFormField(
+                                        controller:
+                                            _namaController
+                                              ..text = member?.userName ?? '',
+                                        decoration: InputDecoration(
+                                          labelText: "Nama",
+                                          border: OutlineInputBorder(),
+                                        ),
+                                        validator:
+                                            (value) =>
+                                                value == null || value.isEmpty
+                                                    ? 'Wajib diisi'
+                                                    : null,
                                       ),
-                                      const SizedBox(width: 8),
-                                      OutlinedButton(
-                                      onPressed: () {
-                                        setState(() {
-                                        isEditing = false;
-                                        });
-                                      },
-                                      child: const Text("Cancel"),
+                                      const SizedBox(height: 8),
+                                      TextFormField(
+                                        controller:
+                                            _noKadPengenalanController
+                                              ..text =
+                                                  member?.userIdentification ??
+                                                  '',
+                                        decoration: InputDecoration(
+                                          labelText: "No. Kad Pengenalan",
+                                          border: OutlineInputBorder(),
+                                        ),
+                                        validator:
+                                            (value) =>
+                                                value == null || value.isEmpty
+                                                    ? 'Wajib diisi'
+                                                    : null,
+                                      ),
+                                      const SizedBox(height: 8),
+                                      TextFormField(
+                                        controller:
+                                            _alamatController
+                                              ..text =
+                                                  member?.userAddress ?? '',
+                                        decoration: InputDecoration(
+                                          labelText: "Alamat",
+                                          border: OutlineInputBorder(),
+                                        ),
+                                        maxLines: 3,
+                                        validator:
+                                            (value) =>
+                                                value == null || value.isEmpty
+                                                    ? 'Wajib diisi'
+                                                    : null,
+                                      ),
+                                      const SizedBox(height: 8),
+                                      TextFormField(
+                                        controller:
+                                            _noTelefonController
+                                              ..text =
+                                                  member?.userPhoneNo ?? '',
+                                        decoration: InputDecoration(
+                                          labelText: "No. Telefon",
+                                          border: OutlineInputBorder(),
+                                        ),
+                                        validator:
+                                            (value) =>
+                                                value == null || value.isEmpty
+                                                    ? 'Wajib diisi'
+                                                    : null,
+                                      ),
+                                      const SizedBox(height: 8),
+                                      TextFormField(
+                                        controller:
+                                            _emailController
+                                              ..text = member?.userEmail ?? '',
+                                        decoration: InputDecoration(
+                                          labelText: "Email",
+                                          border: OutlineInputBorder(),
+                                        ),
+                                        validator:
+                                            (value) =>
+                                                value == null || value.isEmpty
+                                                    ? 'Wajib diisi'
+                                                    : null,
+                                      ),
+                                      const SizedBox(height: 8),
+                                      TextFormField(
+                                        controller:
+                                            _statusKeahlianController
+                                              ..text = member?.userType ?? '',
+                                        decoration: InputDecoration(
+                                          labelText: "Status Keahlian",
+                                          border: OutlineInputBorder(),
+                                        ),
+                                        validator:
+                                            (value) =>
+                                                value == null || value.isEmpty
+                                                    ? 'Wajib diisi'
+                                                    : null,
+                                      ),
+                                      const SizedBox(height: 16),
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.end,
+                                        children: [
+                                          ElevatedButton(
+                                            onPressed: () async {
+                                              if (_formKey.currentState!
+                                                  .validate()) {
+                                                // Handle form submission logic here
+
+                                                final updatedUser = User(
+                                                  userId: member?.userId,
+                                                  userName:
+                                                      _namaController.text,
+                                                  userIdentification:
+                                                      _noKadPengenalanController
+                                                          .text,
+                                                  userPhoneNo:
+                                                      _noTelefonController.text,
+                                                  userAddress:
+                                                      _alamatController.text,
+                                                  userEmail:
+                                                      _emailController.text,
+                                                  userType:
+                                                      _statusKeahlianController
+                                                          .text,
+                                                  userPassword:
+                                                      member?.userPassword ??
+                                                      '', // Keep the existing password
+                                                  userCreatedAt:
+                                                      member?.userCreatedAt ??
+                                                      DateTime.now(),
+                                                  userUpdatedAt: DateTime.now(),
+                                                );
+
+                                                // Call the updateUser method from UserController
+                                                await UserController()
+                                                    .updateUser(updatedUser);
+
+                                                navController.setUser(
+                                                  updatedUser,
+                                                );
+
+                                                // Exit editing mode
+                                                setState(() {
+                                                  isEditing = false;
+                                                });
+
+                                                // Show success message
+                                                Get.snackbar(
+                                                  'Berjaya',
+                                                  'Maklumat ahli telah dikemaskini.',
+                                                  snackPosition:
+                                                      SnackPosition.BOTTOM,
+                                                  backgroundColor: Colors.green,
+                                                  colorText: Colors.white,
+                                                );
+                                              } else {
+                                                Get.snackbar(
+                                                  'Ralat',
+                                                  'Maklumat ahli gagal dikemaskini.',
+                                                  snackPosition:
+                                                      SnackPosition.BOTTOM,
+                                                  backgroundColor: Colors.red,
+                                                  colorText: Colors.white,
+                                                );
+                                              }
+                                            },
+                                            child: const Text("Save"),
+                                          ),
+                                          const SizedBox(width: 8),
+                                          OutlinedButton(
+                                            onPressed: () {
+                                              setState(() {
+                                                isEditing = false;
+                                              });
+                                            },
+                                            child: const Text("Cancel"),
+                                          ),
+                                        ],
                                       ),
                                     ],
-                                    ),
-                                  ],
                                   ),
                                 )
                               else
