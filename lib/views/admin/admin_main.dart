@@ -1,11 +1,13 @@
 import 'package:easykhairat/controllers/user_controller.dart';
 import 'package:easykhairat/views/admin/adminSettings.dart';
 import 'package:easykhairat/views/admin/admin_dashboard.dart';
+import 'package:easykhairat/views/admin/admin_profile.dart';
 import 'package:easykhairat/views/admin/kewangan/form_yuran.dart';
 import 'package:easykhairat/views/admin/kewangan/proses_tuntutan.dart';
 import 'package:easykhairat/views/admin/kewangan/proses_yuran.dart';
 import 'package:easykhairat/views/admin/kewangan/yuran_individu.dart';
 import 'package:easykhairat/views/admin/kewangan/tetapan_yuran.dart';
+import 'package:easykhairat/views/admin/management/manage_announce.dart';
 import 'package:easykhairat/views/admin/member/maklumat_ahli.dart';
 import 'package:easykhairat/views/admin/member/member_list.dart';
 import 'package:easykhairat/views/admin/member/member_new.dart';
@@ -76,8 +78,8 @@ class _AdminMainState extends State<AdminMain> {
                   ),
                   _buildNavItem(Icons.receipt_long, "Laporan", 7),
                   _buildExpandableNavItem(Icons.settings, "Tetapan", 8, [
-                    _buildSubNavItem("My Profile", 8),
-                    _buildSubNavItem("Edit Profile", 8),
+                    _buildSubNavItem("Profile", 8),
+                    _buildSubNavItem("Notifications", 8),
                     MoonMenuItem(
                       onTap: () {
                         showDialog(
@@ -252,9 +254,9 @@ class _AdminMainState extends State<AdminMain> {
                   ManageFee(),
                   ProsesYuran(),
                   ProsesTuntutan(),
-                  Center(child: Text('Pengumuman Screen')),
+                  ManageAnnounce(),
                   Center(child: Text('Laporan Screen')),
-                  AdminSettings(),
+                  AdminProfile(),
                   YuranIndividu(),
                   FormYuran(),
                   MaklumatAhli(),
