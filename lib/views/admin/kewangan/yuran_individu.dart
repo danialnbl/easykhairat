@@ -62,7 +62,7 @@ class YuranIndividuState extends State<YuranIndividu> {
                         ),
                         MoonBreadcrumbItem(label: Text("Kewangan")),
                         MoonBreadcrumbItem(
-                          label: Text("Yuran"),
+                          label: Text("Proses Yuran"),
                           onTap: () => navController.selectedIndex.value = 4,
                         ),
                         MoonBreadcrumbItem(label: Text("Yuran Individu")),
