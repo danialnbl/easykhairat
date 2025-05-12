@@ -5,8 +5,8 @@ import 'package:get/get.dart';
 import 'package:easykhairat/views/admin/admin_dashboard.dart';
 import 'package:easykhairat/views/admin/member/member_list.dart';
 import 'package:easykhairat/views/admin/member/member_new.dart';
-import 'package:easykhairat/views/admin/kewangan/tetapan_yuran.dart';
-import 'package:easykhairat/views/admin/kewangan/proses_yuran.dart';
+import 'package:easykhairat/views/admin/kewangan/tetapan_yuran/tetapan_yuran.dart';
+import 'package:easykhairat/views/admin/kewangan/yuran/proses_yuran.dart';
 import 'package:easykhairat/views/admin/adminSettings.dart';
 
 class AppRoutes {

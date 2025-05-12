@@ -19,7 +19,10 @@ class TuntutanController extends GetxController {
 
       final response = await supabase
           .from('claims')
-          .select()
+          .select('''
+          *,
+          users (*)
+        ''')
           .order('claim_created_at', ascending: false);
 
       print("Response: $response");

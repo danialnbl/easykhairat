@@ -1,20 +1,24 @@
+import 'package:easykhairat/models/userModel.dart';
+
 class ClaimModel {
-  final int? claimId; // Made nullable to handle Supabase auto-generation
+  final int? claimId;
   final String claimOverallStatus;
   final DateTime claimCreatedAt;
   final DateTime claimUpdatedAt;
-  final int? familyId; // Made nullable
-  final String? userId; // Made nullable
-  final String? claimType; // Added nullable claimType
+  final int? familyId;
+  final String? userId;
+  final String? claimType;
+  final User? user;
 
   ClaimModel({
-    this.claimId, // Made optional
+    this.claimId,
     required this.claimOverallStatus,
     required this.claimCreatedAt,
     required this.claimUpdatedAt,
-    this.familyId, // Made optional
-    this.userId, // Made optional
-    this.claimType, // Added to constructor
+    this.familyId,
+    this.userId,
+    this.claimType,
+    this.user,
   });
 
   factory ClaimModel.fromJson(Map<String, dynamic> json) {
@@ -26,6 +30,7 @@ class ClaimModel {
       familyId: json['family_id'], // Made nullable
       userId: json['user_id'], // Made nullable
       claimType: json['claim_type'], // Added to fromJson
+      user: json['users'] != null ? User.fromJson(json['users']) : null,
     );
   }
 
@@ -38,6 +43,7 @@ class ClaimModel {
       if (familyId != null) 'family_id': familyId, // Include only if not null
       'user_id': userId, // Made nullable
       'claim_type': claimType, // Added to toJson
+      'user': user?.toJson(),
     };
   }
 

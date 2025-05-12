@@ -108,11 +108,10 @@ class ProsesTuntutanState extends State<ProsesTuntutan> {
         child: Table(
           columnWidths: const {
             0: FlexColumnWidth(2),
-            1: FlexColumnWidth(2),
+            1: FlexColumnWidth(3),
             2: FlexColumnWidth(2),
-            3: FlexColumnWidth(2),
-            4: FlexColumnWidth(3),
-            5: FlexColumnWidth(2),
+            3: FlexColumnWidth(3),
+            4: FlexColumnWidth(2),
           },
           border: TableBorder(
             horizontalInside: BorderSide(color: Colors.grey.shade300, width: 1),
@@ -134,7 +133,7 @@ class ProsesTuntutanState extends State<ProsesTuntutan> {
                 Padding(
                   padding: EdgeInsets.all(12.0),
                   child: Text(
-                    'User ID',
+                    'User Name',
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
@@ -155,16 +154,6 @@ class ProsesTuntutanState extends State<ProsesTuntutan> {
                   padding: EdgeInsets.all(12.0),
                   child: Text(
                     'Created At',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding: EdgeInsets.all(12.0),
-                  child: Text(
-                    'Claim Type',
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
@@ -202,7 +191,7 @@ class ProsesTuntutanState extends State<ProsesTuntutan> {
                   Padding(
                     padding: const EdgeInsets.all(12.0),
                     child: Text(
-                      claim.userId ?? 'N/A',
+                      claim.user?.userName ?? 'N/A',
                       style: const TextStyle(color: Colors.black87),
                     ),
                   ),
@@ -217,13 +206,6 @@ class ProsesTuntutanState extends State<ProsesTuntutan> {
                     padding: const EdgeInsets.all(12.0),
                     child: Text(
                       formatDate(claim.claimCreatedAt),
-                      style: const TextStyle(color: Colors.black87),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(12.0),
-                    child: Text(
-                      claim.claimType ?? 'N/A',
                       style: const TextStyle(color: Colors.black87),
                     ),
                   ),
