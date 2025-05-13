@@ -28,7 +28,7 @@ class TuntutanAhliState extends State<TuntutanAhli> {
   final TextEditingController dateController = TextEditingController();
   final TextEditingController reasonController = TextEditingController();
   final TextEditingController noteController = TextEditingController();
-  String claimType = "Kematian";
+  String claimType = "Ahli Sendiri";
   String claimStatus = "Dalam Proses";
 
   @override
@@ -145,16 +145,12 @@ class TuntutanAhliState extends State<TuntutanAhli> {
                                 value: claimType,
                                 items: [
                                   DropdownMenuItem(
-                                    value: "Kematian",
-                                    child: Text("Kematian"),
+                                    value: "Ahli Sendiri",
+                                    child: Text("Ahli Sendiri"),
                                   ),
                                   DropdownMenuItem(
-                                    value: "Kemalangan",
-                                    child: Text("Kemalangan"),
-                                  ),
-                                  DropdownMenuItem(
-                                    value: "Lain-lain",
-                                    child: Text("Lain-lain"),
+                                    value: "Ahli Keluarga",
+                                    child: Text("Ahli Keluarga"),
                                   ),
                                 ],
                                 onChanged: (value) {
@@ -352,20 +348,6 @@ class TuntutanAhliState extends State<TuntutanAhli> {
                                               ),
                                             ],
                                           ),
-                                          if (claim
-                                              .claimLineReason
-                                              .isNotEmpty) ...[
-                                            SizedBox(height: 4),
-                                            Row(
-                                              children: [
-                                                Icon(Icons.note, size: 16),
-                                                SizedBox(width: 4),
-                                                Text(
-                                                  'Nota: ${claim.claimLineReason}',
-                                                ),
-                                              ],
-                                            ),
-                                          ],
                                         ],
                                       ),
                                       trailing: Row(
