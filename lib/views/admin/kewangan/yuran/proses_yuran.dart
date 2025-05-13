@@ -94,8 +94,8 @@ class ProsesYuranState extends State<ProsesYuran> {
             0: FlexColumnWidth(2), // User ID
             1: FlexColumnWidth(2), // Name
             2: FlexColumnWidth(2), // IC Baru
-            3: FlexColumnWidth(2), // Tarikh Daftar
-            4: FlexColumnWidth(3), // Alamat
+            3: FlexColumnWidth(3), // Alamat
+            4: FlexColumnWidth(2), // Status Bayaran
             5: FlexColumnWidth(2), // Actions
           },
           border: TableBorder(
@@ -138,6 +138,16 @@ class ProsesYuranState extends State<ProsesYuran> {
                 ),
                 Padding(
                   padding: EdgeInsets.all(12.0),
+                  child: Text(
+                    'Alamat',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: EdgeInsets.all(12.0),
                   child: Center(
                     child: Text(
                       'Status Bayaran',
@@ -148,17 +158,6 @@ class ProsesYuranState extends State<ProsesYuran> {
                     ),
                   ),
                 ),
-                Padding(
-                  padding: EdgeInsets.all(12.0),
-                  child: Text(
-                    'Alamat',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-
                 Padding(
                   padding: EdgeInsets.all(12.0),
                   child: Text(
@@ -200,6 +199,13 @@ class ProsesYuranState extends State<ProsesYuran> {
                     padding: const EdgeInsets.all(12.0),
                     child: Text(
                       user.userIdentification,
+                      style: const TextStyle(color: Colors.black87),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(12.0),
+                    child: Text(
+                      user.userAddress,
                       style: const TextStyle(color: Colors.black87),
                     ),
                   ),
@@ -253,14 +259,6 @@ class ProsesYuranState extends State<ProsesYuran> {
                       ),
                     ),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.all(12.0),
-                    child: Text(
-                      user.userAddress,
-                      style: const TextStyle(color: Colors.black87),
-                    ),
-                  ),
-
                   Padding(
                     padding: const EdgeInsets.all(12.0),
                     child: Row(
