@@ -8,11 +8,20 @@ class ClaimLineController extends GetxController {
   // Reactive list to store claim lines by claim ID
   var claimLineListByClaimId = <ClaimLineModel>[].obs;
 
+  // Reactive variable to store total payments
+  var totalClaimLine = 0.0.obs;
+
   // Loading state
   var isLoading = false.obs;
 
   // Supabase client instance
   final supabase = Supabase.instance.client;
+
+  @override
+  void onInit() {
+    super.onInit();
+    listenForRealTimeUpdates();
+  }
 
   // Fetch claim lines from Supabase
   Future<void> fetchClaimLines() async {
@@ -101,6 +110,25 @@ class ClaimLineController extends GetxController {
     );
   }
 
+  Future<void> fetchTotalClaimLine() async {
+    try {
+      final response = await supabase
+          .from('claim_line')
+          .select('claimLine_totalPrice');
+
+      double total = 0.0;
+      for (var item in response) {
+        total += (item['claimLine_totalPrice'] ?? 0).toDouble();
+      }
+
+      totalClaimLine.value = total;
+      print("Total Claim Line: ${totalClaimLine.value}");
+    } catch (e) {
+      print("Error fetching total claim line: $e");
+      totalClaimLine.value = 0.0;
+    }
+  }
+
   // Get claim lines by claim ID
   Future<List<ClaimLineModel>> getClaimLinesByClaimId(int claimId) async {
     try {
@@ -147,5 +175,16 @@ class ClaimLineController extends GetxController {
     } catch (e) {
       print("Error updating claim line status: $e");
     }
+  }
+
+  // real time listener for claim line changes
+  void listenForRealTimeUpdates() {
+    supabase.from('claim_line').stream(primaryKey: ['claimLine_id']).listen((
+      List<Map<String, dynamic>> changes,
+    ) {
+      if (changes.isNotEmpty) {
+        fetchClaimLines(); // Refresh list when any change happens
+      }
+    });
   }
 }

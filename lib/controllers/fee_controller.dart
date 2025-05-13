@@ -27,7 +27,7 @@ class FeeController extends GetxController {
           ); // Join fees table with users table using user_id
 
       // Debug the raw response from Supabase
-      print("Response from Supabase: $response");
+      // print("Response from Supabase: $response");
 
       final fetchedFees =
           (response as List<dynamic>)
@@ -35,7 +35,7 @@ class FeeController extends GetxController {
               .toList();
 
       // Debug the fetched fees
-      print("Fetched fees: $fetchedFees");
+      // print("Fetched fees: $fetchedFees");
 
       yuranGeneral.assignAll(fetchedFees);
     } catch (e) {
@@ -66,7 +66,7 @@ class FeeController extends GetxController {
           .eq('fee_status', 'Tertunggak'); // Ensures filtering by fee_status
 
       // Debug the raw response from Supabase
-      print("Response from Supabase: $response");
+      // print("Response from Supabase: $response");
 
       // Handle the case where the response might not be in the expected format
       if (response is List) {

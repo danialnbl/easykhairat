@@ -1,3 +1,4 @@
+import 'package:easykhairat/controllers/claimline_controller.dart';
 import 'package:easykhairat/controllers/payment_controller.dart';
 import 'package:easykhairat/controllers/tuntutan_controller.dart';
 import 'package:easykhairat/widgets/header.dart';
@@ -21,6 +22,9 @@ class _AdminDashboardState extends State<AdminDashboard> {
   final UserController userController = Get.put(UserController());
   final PaymentController paymentController = Get.put(PaymentController());
   final TuntutanController tuntutanController = Get.put(TuntutanController());
+  final ClaimLineController claimLineController = Get.put(
+    ClaimLineController(),
+  );
 
   @override
   void initState() {
@@ -33,6 +37,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
     userController.fetchAdminDetailsByIdAndAssign(
       Supabase.instance.client.auth.currentUser?.id ?? "",
     );
+    claimLineController.fetchTotalClaimLine();
 
     print("Admin ID: ${Supabase.instance.client.auth.currentUser?.id}");
   }
@@ -119,11 +124,13 @@ class _AdminDashboardState extends State<AdminDashboard> {
 
             const SizedBox(width: 8),
             Expanded(
-              child: _statCard(
-                'Tuntutan Ahli Tahun Ini',
-                'RM50,320',
-                '-1.23%',
-                Colors.red,
+              child: Obx(
+                () => _statCard(
+                  'Tuntutan Ahli Tahun Ini',
+                  'RM ${claimLineController.totalClaimLine.value.toStringAsFixed(2)}',
+                  '-1.23%',
+                  Colors.red,
+                ),
               ),
             ),
           ],
