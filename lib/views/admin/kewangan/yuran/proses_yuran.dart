@@ -20,7 +20,7 @@ class ProsesYuranState extends State<ProsesYuran> {
   final NavigationController navController = Get.put(NavigationController());
   final FeeController feeController = Get.put(FeeController());
   final PaymentController paymentController = Get.put(PaymentController());
-  RxString selectedFilter = 'Semua Ahli'.obs;
+  RxString selectedFilter = 'Semua'.obs;
   TextEditingController nameSearchController = TextEditingController();
   TextEditingController icSearchController = TextEditingController();
 
@@ -30,6 +30,10 @@ class ProsesYuranState extends State<ProsesYuran> {
     // Load users if needed
     if (userController.normalusers.isEmpty) {
       userController.fetchNormal();
+    }
+    // Fetch fees if needed
+    if (feeController.yuranGeneral.isEmpty) {
+      feeController.fetchFees();
     }
   }
 
@@ -55,59 +59,20 @@ class ProsesYuranState extends State<ProsesYuran> {
           );
 
       bool matchesFilter =
-          selectedFilter.value == 'Semua Ahli' ||
-          user.userType == selectedFilter.value.toLowerCase();
+          selectedFilter.value == 'Semua' ||
+          (selectedFilter.value == 'Tertunggak' &&
+              feeController.yuranGeneral.any(
+                (fee) =>
+                    fee.feeStatus == 'Tertunggak' && fee.userId == user.userId,
+              )) ||
+          (selectedFilter.value == 'Selesai' &&
+              !feeController.yuranGeneral.any(
+                (fee) =>
+                    fee.feeStatus == 'Tertunggak' && fee.userId == user.userId,
+              ));
 
       return matchesName && matchesIC && matchesFilter;
     }).toList();
-  }
-
-  void viewMember(dynamic user) {
-    debugPrint("View tapped for ${user.userName}");
-    // Add functionality to display member details in a dialog or new screen
-    Get.dialog(
-      AlertDialog(
-        title: Text('User Details: ${user.userName}'),
-        content: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              _detailRow('Name', user.userName),
-              _detailRow('IC Number', user.userIdentification),
-              _detailRow('Phone', user.userPhoneNo),
-              _detailRow('Email', user.userEmail),
-              _detailRow('Address', user.userAddress),
-              _detailRow('Type', user.userType),
-              _detailRow('Created At', formatDate(user.userCreatedAt)),
-              _detailRow('Updated At', formatDate(user.userUpdatedAt)),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(child: const Text('Close'), onPressed: () => Get.back()),
-        ],
-      ),
-    );
-  }
-
-  Widget _detailRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4.0),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: 100,
-            child: Text(
-              '$label:',
-              style: const TextStyle(fontWeight: FontWeight.bold),
-            ),
-          ),
-          Expanded(child: Text(value)),
-        ],
-      ),
-    );
   }
 
   Widget _buildTable() {
@@ -173,11 +138,13 @@ class ProsesYuranState extends State<ProsesYuran> {
                 ),
                 Padding(
                   padding: EdgeInsets.all(12.0),
-                  child: Text(
-                    'Tarikh Daftar',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
+                  child: Center(
+                    child: Text(
+                      'Status Bayaran',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
                     ),
                   ),
                 ),
@@ -238,9 +205,52 @@ class ProsesYuranState extends State<ProsesYuran> {
                   ),
                   Padding(
                     padding: const EdgeInsets.all(12.0),
-                    child: Text(
-                      formatDate(user.userCreatedAt),
-                      style: const TextStyle(color: Colors.black87),
+                    child: Center(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          if (feeController.yuranGeneral.any(
+                            (fee) =>
+                                fee.feeStatus == 'Tertunggak' &&
+                                fee.userId == user.userId,
+                          ))
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.red,
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: const Text(
+                                'Tertunggak',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            )
+                          else
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.green,
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: const Text(
+                                'Selesai',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
                     ),
                   ),
                   Padding(
@@ -351,7 +361,7 @@ class ProsesYuranState extends State<ProsesYuran> {
                   () => DropdownButton<String>(
                     value: selectedFilter.value,
                     items:
-                        ['Semua Ahli', 'User', 'Admin']
+                        ['Semua', 'Selesai', 'Tertunggak']
                             .map(
                               (status) => DropdownMenuItem(
                                 value: status,

@@ -22,14 +22,17 @@ class FeeController extends GetxController {
       isLoading.value = true;
       final response = await supabase
           .from('fees')
-          .select('*, users(*)'); // Join fees table with users table using user_id
+          .select(
+            '*, users(*)',
+          ); // Join fees table with users table using user_id
 
       // Debug the raw response from Supabase
       print("Response from Supabase: $response");
 
-      final fetchedFees = (response as List<dynamic>)
-          .map((json) => FeeModel.fromJson(json as Map<String, dynamic>))
-          .toList();
+      final fetchedFees =
+          (response as List<dynamic>)
+              .map((json) => FeeModel.fromJson(json as Map<String, dynamic>))
+              .toList();
 
       // Debug the fetched fees
       print("Fetched fees: $fetchedFees");
