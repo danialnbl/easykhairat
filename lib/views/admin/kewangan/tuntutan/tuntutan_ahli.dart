@@ -1,3 +1,4 @@
+import 'package:easykhairat/controllers/claimline_controller.dart';
 import 'package:easykhairat/controllers/navigation_controller.dart';
 import 'package:easykhairat/controllers/tuntutan_controller.dart';
 import 'package:easykhairat/models/tuntutanModel.dart';
@@ -17,6 +18,9 @@ class TuntutanAhli extends StatefulWidget {
 class TuntutanAhliState extends State<TuntutanAhli> {
   final TuntutanController claimController = Get.put(TuntutanController());
   final NavigationController navController = Get.put(NavigationController());
+  final ClaimLineController claimLineController = Get.put(
+    ClaimLineController(),
+  );
 
   final _formKey = GlobalKey<FormState>();
 
@@ -26,6 +30,12 @@ class TuntutanAhliState extends State<TuntutanAhli> {
   final TextEditingController noteController = TextEditingController();
   String claimType = "Kematian";
   String claimStatus = "Dalam Proses";
+
+  @override
+  void initState() {
+    super.initState();
+    claimController.fetchTuntutan();
+  }
 
   String formatDate(DateTime? date) {
     if (date == null) return 'N/A';
@@ -178,51 +188,50 @@ class TuntutanAhliState extends State<TuntutanAhli> {
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.end,
                                 children: [
-                                  // ElevatedButton(
-                                  //   onPressed: () {
-                                  //     if (_formKey.currentState!.validate()) {
-                                  //       final claim = ClaimModel(
-                                  //         claimValue: double.parse(
-                                  //           amountController.text,
-                                  //         ),
-                                  //         claimDescription:
-                                  //             reasonController.text,
-                                  //         claimType: claimType,
-                                  //         claimStatus: claimStatus,
-                                  //         claimCreatedAt: DateTime.now(),
-                                  //         claimUpdatedAt: DateTime.now(),
-                                  //         userId:
-                                  //             navController.getUser()?.userId,
-                                  //         additionalNotes: noteController.text,
-                                  //       );
+                                  ElevatedButton(
+                                    onPressed: () {
+                                      if (_formKey.currentState!.validate()) {
+                                        final claim = ClaimModel(
+                                          claimOverallStatus: claimStatus,
+                                          claimCreatedAt: DateTime.now(),
+                                          claimUpdatedAt: DateTime.now(),
+                                          userId:
+                                              navController.getUser()?.userId,
+                                          claimType: claimType,
+                                        );
 
-                                  //       claimController
-                                  //           .addClaim(claim)
-                                  //           .then((_) {
-                                  //             _formKey.currentState?.reset();
-                                  //             amountController.clear();
-                                  //             dateController.clear();
-                                  //             reasonController.clear();
-                                  //             noteController.clear();
-                                  //             setState(() {
-                                  //               claimType = "Kematian";
-                                  //             });
+                                        claimController
+                                            .addTuntutan(claim)
+                                            .then((_) {
+                                              _formKey.currentState?.reset();
+                                              amountController.clear();
+                                              dateController.clear();
+                                              reasonController.clear();
+                                              noteController.clear();
+                                              setState(() {
+                                                claimType = "Kematian";
+                                              });
 
-                                  //             Get.snackbar(
-                                  //               'Berjaya',
-                                  //               'Tuntutan telah dihantar.',
-                                  //             );
-                                  //           })
-                                  //           .catchError((error) {
-                                  //             Get.snackbar(
-                                  //               'Ralat',
-                                  //               'Gagal menghantar tuntutan.',
-                                  //             );
-                                  //             print("Error: $error");
-                                  //                                                 }
-                                  //   },
-                                  //   child: Text("Hantar"),
-                                  // ),
+                                              Get.snackbar(
+                                                'Berjaya',
+                                                'Tuntutan telah dihantar.',
+                                                snackPosition:
+                                                    SnackPosition.TOP,
+                                              );
+                                            })
+                                            .catchError((error) {
+                                              Get.snackbar(
+                                                'Ralat',
+                                                'Gagal menghantar tuntutan: $error',
+                                                snackPosition:
+                                                    SnackPosition.TOP,
+                                              );
+                                              print("Error: $error");
+                                            });
+                                      }
+                                    },
+                                    child: Text("Hantar"),
+                                  ),
                                   const SizedBox(width: 8),
                                   OutlinedButton(
                                     onPressed: () {
@@ -257,14 +266,23 @@ class TuntutanAhliState extends State<TuntutanAhli> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              "Sejarah Tuntutan",
+                              "Senarai Tuntutan",
                               style: Theme.of(context).textTheme.bodyLarge,
                             ),
                             const SizedBox(height: 16),
                             Obx(() {
-                              // if (claimController.claims.isEmpty) {
-                              //   return Text("Tiada sejarah tuntutan.");
-                              // }
+                              if (claimLineController.isLoading.value) {
+                                return Center(
+                                  child: CircularProgressIndicator(),
+                                );
+                              }
+
+                              if (claimLineController
+                                  .claimLineListByClaimId
+                                  .isEmpty) {
+                                return Text("Tiada senarai tuntutan.");
+                              }
+
                               return Container(
                                 decoration: BoxDecoration(
                                   border: Border.all(
@@ -273,30 +291,129 @@ class TuntutanAhliState extends State<TuntutanAhli> {
                                   ),
                                   borderRadius: BorderRadius.circular(8.0),
                                 ),
-                                // child: ListView.builder(
-                                //   shrinkWrap: true,
-                                //   physics: NeverScrollableScrollPhysics(),
-                                //   itemCount: claimController.claims.length,
-                                //   itemBuilder: (context, index) {
-                                //     final claim = claimController.claims[index];
-                                //     return ListTile(
-                                //       title: Text(claim.claimType),
-                                //       subtitle: Column(
-                                //         crossAxisAlignment:
-                                //             CrossAxisAlignment.start,
-                                //         children: [
-                                //           Text(
-                                //             formatDate(claim.claimCreatedAt),
-                                //           ),
-                                //           Text("Status: ${claim.claimStatus}"),
-                                //         ],
-                                //       ),
-                                //       trailing: Text(
-                                //         "RM ${claim.claimValue.toStringAsFixed(2)}",
-                                //       ),
-                                //     );
-                                //   },
-                                // ),
+                                child: ListView.builder(
+                                  shrinkWrap: true,
+                                  physics: NeverScrollableScrollPhysics(),
+                                  itemCount:
+                                      claimLineController
+                                          .claimLineListByClaimId
+                                          .length,
+                                  itemBuilder: (context, index) {
+                                    final claim =
+                                        claimLineController
+                                            .claimLineListByClaimId[index];
+                                    return ListTile(
+                                      title: Text(
+                                        'Tuntutan: ${claim.claimLineReason}',
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      subtitle: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          SizedBox(height: 4),
+                                          Row(
+                                            children: [
+                                              Icon(
+                                                Icons.calendar_today,
+                                                size: 16,
+                                              ),
+                                              SizedBox(width: 4),
+                                              Text(
+                                                'Tarikh: ${formatDate(claim.claimLineCreatedAt)}',
+                                              ),
+                                            ],
+                                          ),
+                                          SizedBox(height: 4),
+                                          Row(
+                                            children: [
+                                              Icon(
+                                                Icons.attach_money,
+                                                size: 16,
+                                              ),
+                                              SizedBox(width: 4),
+                                              Text(
+                                                'Jumlah: RM${claim.claimLineTotalPrice.toStringAsFixed(2)}',
+                                              ),
+                                            ],
+                                          ),
+                                          SizedBox(height: 4),
+                                          Row(
+                                            children: [
+                                              Icon(
+                                                Icons.info_outline,
+                                                size: 16,
+                                              ),
+                                              SizedBox(width: 4),
+                                              Text(
+                                                'Status: ${claim.claimLineStatus}',
+                                              ),
+                                            ],
+                                          ),
+                                          if (claim
+                                              .claimLineReason
+                                              .isNotEmpty) ...[
+                                            SizedBox(height: 4),
+                                            Row(
+                                              children: [
+                                                Icon(Icons.note, size: 16),
+                                                SizedBox(width: 4),
+                                                Text(
+                                                  'Nota: ${claim.claimLineReason}',
+                                                ),
+                                              ],
+                                            ),
+                                          ],
+                                        ],
+                                      ),
+                                      trailing: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          IconButton(
+                                            icon: Icon(Icons.edit),
+                                            onPressed: () {
+                                              // Show edit dialog
+                                              showDialog(
+                                                context: context,
+                                                builder:
+                                                    (context) => AlertDialog(
+                                                      title: Text(
+                                                        'Edit Tuntutan',
+                                                      ),
+                                                      content: Text(
+                                                        'Fungsi edit akan datang',
+                                                      ),
+                                                      actions: [
+                                                        TextButton(
+                                                          onPressed:
+                                                              () =>
+                                                                  Navigator.pop(
+                                                                    context,
+                                                                  ),
+                                                          child: Text('Tutup'),
+                                                        ),
+                                                      ],
+                                                    ),
+                                              );
+                                            },
+                                          ),
+                                          IconButton(
+                                            icon: Icon(Icons.delete),
+                                            onPressed: () {
+                                              if (claim.claimId != null) {
+                                                claimController.deleteTuntutan(
+                                                  claim.claimId!,
+                                                );
+                                              }
+                                            },
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                  },
+                                ),
                               );
                             }),
                           ],

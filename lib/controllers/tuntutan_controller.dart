@@ -23,7 +23,7 @@ class TuntutanController extends GetxController {
           *,
           users (*)
         ''')
-          .order('claim_created_at', ascending: false);
+          .order('claim_created_at', ascending: true);
 
       print("Response: $response");
 

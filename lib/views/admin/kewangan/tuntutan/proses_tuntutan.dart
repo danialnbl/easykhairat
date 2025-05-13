@@ -1,3 +1,5 @@
+import 'package:easykhairat/controllers/claimline_controller.dart';
+import 'package:easykhairat/controllers/navigation_controller.dart';
 import 'package:easykhairat/controllers/tuntutan_controller.dart';
 import 'package:easykhairat/models/tuntutanModel.dart';
 import 'package:easykhairat/widgets/header.dart';
@@ -15,6 +17,10 @@ class ProsesTuntutan extends StatefulWidget {
 
 class ProsesTuntutanState extends State<ProsesTuntutan> {
   final TuntutanController tuntutanController = Get.put(TuntutanController());
+  final NavigationController navController = Get.put(NavigationController());
+  final ClaimLineController claimLineController = Get.put(
+    ClaimLineController(),
+  );
   RxString selectedFilter = 'Semua Tuntutan'.obs;
   TextEditingController nameSearchController = TextEditingController();
 
@@ -33,10 +39,9 @@ class ProsesTuntutanState extends State<ProsesTuntutan> {
     return tuntutanController.tuntutanList.where((claim) {
       bool matchesName =
           nameSearchController.text.isEmpty ||
-              claim.userId!.toLowerCase().contains(
-                nameSearchController.text.toLowerCase(),
-              ) ??
-          false;
+          claim.userId!.toLowerCase().contains(
+            nameSearchController.text.toLowerCase(),
+          );
 
       bool matchesFilter =
           selectedFilter.value == 'Semua Tuntutan' ||
@@ -45,50 +50,6 @@ class ProsesTuntutanState extends State<ProsesTuntutan> {
 
       return matchesName && matchesFilter;
     }).toList();
-  }
-
-  void viewClaim(ClaimModel claim) {
-    Get.dialog(
-      AlertDialog(
-        title: Text('Claim Details: ${claim.userId ?? "Unknown"}'),
-        content: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              _detailRow('Claim ID', claim.claimId?.toString() ?? 'N/A'),
-              _detailRow('Status', claim.claimOverallStatus),
-              _detailRow('Created At', formatDate(claim.claimCreatedAt)),
-              _detailRow('Updated At', formatDate(claim.claimUpdatedAt)),
-              _detailRow('Family ID', claim.familyId.toString()),
-              _detailRow('Claim Type', claim.claimType ?? 'N/A'),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(child: const Text('Close'), onPressed: () => Get.back()),
-        ],
-      ),
-    );
-  }
-
-  Widget _detailRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4.0),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: 100,
-            child: Text(
-              '$label:',
-              style: const TextStyle(fontWeight: FontWeight.bold),
-            ),
-          ),
-          Expanded(child: Text(value)),
-        ],
-      ),
-    );
   }
 
   Widget _buildTable() {
@@ -218,7 +179,15 @@ class ProsesTuntutanState extends State<ProsesTuntutan> {
                             Icons.visibility,
                             color: Colors.green,
                           ),
-                          onPressed: () => viewClaim(claim),
+                          onPressed: () {
+                            if (claim.user != null) {
+                              claimLineController.getClaimLinesByClaimId(
+                                claim.claimId!,
+                              );
+                              navController.setUser(claim.user!);
+                              navController.changeIndex(12);
+                            }
+                          },
                         ),
                       ],
                     ),

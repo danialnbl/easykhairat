@@ -4,6 +4,7 @@ import 'package:easykhairat/views/admin/admin_dashboard.dart';
 import 'package:easykhairat/views/admin/admin_profile.dart';
 import 'package:easykhairat/views/admin/kewangan/tetapan_yuran/form_yuran.dart';
 import 'package:easykhairat/views/admin/kewangan/tuntutan/proses_tuntutan.dart';
+import 'package:easykhairat/views/admin/kewangan/tuntutan/tuntutan_ahli.dart';
 import 'package:easykhairat/views/admin/kewangan/yuran/proses_yuran.dart';
 import 'package:easykhairat/views/admin/kewangan/yuran/yuran_individu.dart';
 import 'package:easykhairat/views/admin/kewangan/tetapan_yuran/tetapan_yuran.dart';
@@ -260,6 +261,7 @@ class _AdminMainState extends State<AdminMain> {
                   YuranIndividu(),
                   FormYuran(),
                   MaklumatAhli(),
+                  TuntutanAhli(),
                 ],
               ),
             ),
