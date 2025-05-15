@@ -94,7 +94,7 @@ class ProsesTuntutanState extends State<ProsesTuntutan> {
                 Padding(
                   padding: EdgeInsets.all(12.0),
                   child: Text(
-                    'User Name',
+                    'Tuntutan Oleh',
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       color: Colors.white,

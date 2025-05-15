@@ -77,7 +77,7 @@ class ManageFee extends StatelessWidget {
                   () => DropdownButton<String>(
                     value: selectedFilter.value,
                     items:
-                        ['Semua Yuran', 'Tertunggak', 'Selesai', 'General']
+                        ['Semua Yuran', 'Individu', 'General']
                             .map(
                               (status) => DropdownMenuItem(
                                 value: status,
@@ -134,12 +134,12 @@ class ManageFee extends StatelessWidget {
                   searchController.text.toLowerCase(),
                 );
 
-            // Treat null status as "General"
-            String feeStatus = fee.feeStatus?.toLowerCase() ?? 'general';
+            // Determine fee type based on userId
+            String feeType = fee.userId != null ? 'individu' : 'general';
 
             bool matchesFilter =
                 selectedFilter.value == 'Semua Yuran' ||
-                feeStatus == selectedFilter.value.toLowerCase();
+                feeType == selectedFilter.value.toLowerCase();
 
             return matchesSearch && matchesFilter;
           }).toList();
