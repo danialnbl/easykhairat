@@ -6,6 +6,7 @@ import 'package:easykhairat/models/feeModel.dart';
 class FeeController extends GetxController {
   var yuranTertunggak = <FeeModel>[].obs;
   var yuranGeneral = <FeeModel>[].obs;
+  var selectedYuran = Rxn<FeeModel>();
   var isLoading = false.obs;
   final supabase = Supabase.instance.client;
 
@@ -108,28 +109,40 @@ class FeeController extends GetxController {
   }
 
   // Update a fee
-  Future<void> updateFee(FeeModel fee, String fee_id) async {
+  // Replace the existing updateFee method
+  Future<void> updateFee(FeeModel fee) async {
     try {
       isLoading.value = true;
+      final updateData = {
+        'fee_description': fee.feeDescription,
+        'fee_due': fee.feeDue.toIso8601String(),
+        'fee_type': fee.feeType,
+        'fee_updated_at': DateTime.now().toIso8601String(),
+        'admin_id': fee.adminId,
+        'fee_amount': fee.feeAmount,
+        'fee_status': fee.feeStatus,
+      };
 
-      // Update the feeUpdatedAt field to the current time
-      final updatedFee = fee.copyWith(feeUpdatedAt: DateTime.now());
+      print("Updating fee with data: $updateData"); // Debug print
 
-      // Send the updated fee data to Supabase
-      await supabase
-          .from('fees')
-          .update(updatedFee.toJson())
-          .eq('fee_id', fee_id);
+      await supabase.from('fees').update(updateData).eq('fee_id', fee.feeId!);
+
+      await fetchFees(); // Refresh the fees list
 
       Get.snackbar(
-        'Success',
-        'Fee updated successfully',
+        'Berjaya',
+        'Maklumat yuran telah dikemaskini',
         backgroundColor: Colors.green,
         colorText: Colors.white,
       );
     } catch (e) {
-      Get.log("Error updating fee: $e");
-      Get.snackbar('Error', 'Failed to update fee');
+      print("Error updating fee: $e");
+      Get.snackbar(
+        'Error',
+        'Gagal mengemaskini yuran: $e',
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
     } finally {
       isLoading.value = false;
     }
@@ -185,5 +198,15 @@ class FeeController extends GetxController {
         .from('fees')
         .stream(primaryKey: ['fee_id'])
         .eq('user_id', userId);
+  }
+
+  // Set Fee
+  void setFee(FeeModel fee) {
+    selectedYuran.value = fee;
+  }
+
+  // Get Fee
+  FeeModel? getFee() {
+    return selectedYuran.value;
   }
 }

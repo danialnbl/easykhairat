@@ -54,7 +54,6 @@ class FeeModel {
       'user_id': userId,
       'fee_amount': feeAmount,
       'fee_status': feeStatus,
-      'user': user?.toJson(), // Convert user to JSON if not null
     };
 
     if (feeId != null) {
