@@ -101,37 +101,7 @@ class _FormYuranState extends State<FormYuran> {
                                 style: Theme.of(context).textTheme.bodyLarge,
                               ),
                               const SizedBox(height: 16),
-                              Obx(() {
-                                if (userController.isLoading.value) {
-                                  return CircularProgressIndicator();
-                                } else if (userController.normalusers.isEmpty) {
-                                  return Text('Tiada pengguna tersedia.');
-                                } else {
-                                  return DropdownButtonFormField<String>(
-                                    decoration: InputDecoration(
-                                      labelText: 'Pilih Pengguna',
-                                      border: OutlineInputBorder(),
-                                    ),
-                                    items:
-                                        userController.normalusers
-                                            .map(
-                                              (user) => DropdownMenuItem(
-                                                value:
-                                                    user.userId, // Assuming 'id' is a String property of User
-                                                child: Text(
-                                                  user.userName,
-                                                ), // Assuming 'name' is a property of User
-                                              ),
-                                            )
-                                            .toList(),
-                                    onChanged: (value) {
-                                      // Handle user selection
-                                      selectedUserId = value;
-                                    },
-                                  );
-                                }
-                              }),
-                              const SizedBox(height: 16),
+
                               TextFormField(
                                 controller: _tajukYuranController,
                                 decoration: InputDecoration(
@@ -211,6 +181,37 @@ class _FormYuranState extends State<FormYuran> {
                                             ? 'Wajib diisi'
                                             : null,
                               ),
+                              const SizedBox(height: 16),
+                              Obx(() {
+                                if (userController.isLoading.value) {
+                                  return CircularProgressIndicator();
+                                } else if (userController.normalusers.isEmpty) {
+                                  return Text('Tiada pengguna tersedia.');
+                                } else {
+                                  return DropdownButtonFormField<String>(
+                                    decoration: InputDecoration(
+                                      labelText: 'Pilih Pengguna',
+                                      border: OutlineInputBorder(),
+                                    ),
+                                    items:
+                                        userController.normalusers
+                                            .map(
+                                              (user) => DropdownMenuItem(
+                                                value:
+                                                    user.userId, // Assuming 'id' is a String property of User
+                                                child: Text(
+                                                  user.userName,
+                                                ), // Assuming 'name' is a property of User
+                                              ),
+                                            )
+                                            .toList(),
+                                    onChanged: (value) {
+                                      // Handle user selection
+                                      selectedUserId = value;
+                                    },
+                                  );
+                                }
+                              }),
                               const SizedBox(height: 16),
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.end,

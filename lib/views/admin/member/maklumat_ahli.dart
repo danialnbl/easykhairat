@@ -1,6 +1,7 @@
 import 'package:easykhairat/controllers/family_controller.dart';
 import 'package:easykhairat/controllers/navigation_controller.dart';
 import 'package:easykhairat/controllers/user_controller.dart';
+import 'package:easykhairat/models/familyModel.dart';
 import 'package:easykhairat/models/userModel.dart';
 import 'package:easykhairat/widgets/header.dart';
 import 'package:flutter/material.dart';
@@ -29,6 +30,7 @@ class MaklumatAhliState extends State<MaklumatAhli> {
       TextEditingController();
 
   var isEditing = false;
+  var isEditingFamily = false;
 
   @override
   void initState() {
@@ -436,6 +438,7 @@ class MaklumatAhliState extends State<MaklumatAhli> {
                                     ?.copyWith(fontWeight: FontWeight.bold),
                               ),
                               const SizedBox(height: 16),
+                              // Replace the existing Obx section with this code:
                               Obx(() {
                                 if (familyController.isLoading.value) {
                                   return const Center(
@@ -443,146 +446,435 @@ class MaklumatAhliState extends State<MaklumatAhli> {
                                   );
                                 }
 
-                                if (familyController.familyMembers.isEmpty) {
-                                  return const Text(
-                                    "Tiada tanggungan tersedia.",
+                                // Automatically add an empty row if there are no family members and in editing mode
+                                if (familyController.familyMembers.isEmpty &&
+                                    isEditingFamily) {
+                                  familyController.familyMembers.add(
+                                    FamilyModel(
+                                      familymemberName: '',
+                                      familymemberIdentification: '',
+                                      familymemberRelationship: '',
+                                      familyCreatedAt: DateTime.now(),
+                                      familyUpdatedAt: DateTime.now(),
+                                      userId:
+                                          navController.getUser()?.userId ?? '',
+                                    ),
                                   );
                                 }
 
-                                return Table(
-                                  columnWidths: const {
-                                    0: FlexColumnWidth(1),
-                                    1: FlexColumnWidth(2),
-                                    2: FlexColumnWidth(2),
-                                    3: FlexColumnWidth(2),
-                                  },
-                                  defaultVerticalAlignment:
-                                      TableCellVerticalAlignment.middle,
+                                if (familyController.familyMembers.isEmpty &&
+                                    !isEditingFamily) {
+                                  return Column(
+                                    children: [
+                                      const Text("Tiada tanggungan tersedia."),
+                                    ],
+                                  );
+                                }
+
+                                return Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    TableRow(
-                                      decoration: BoxDecoration(
-                                        color: Theme.of(
-                                          context,
-                                        ).colorScheme.primary.withOpacity(0.1),
-                                      ),
-                                      children: const [
-                                        Padding(
-                                          padding: EdgeInsets.symmetric(
-                                            vertical: 8.0,
+                                    Table(
+                                      columnWidths: const {
+                                        0: FlexColumnWidth(1),
+                                        1: FlexColumnWidth(2),
+                                        2: FlexColumnWidth(2),
+                                        3: FlexColumnWidth(2),
+                                        4: FlexColumnWidth(1),
+                                      },
+                                      defaultVerticalAlignment:
+                                          TableCellVerticalAlignment.middle,
+                                      children: [
+                                        TableRow(
+                                          decoration: BoxDecoration(
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .primary
+                                                .withOpacity(0.1),
                                           ),
-                                          child: Text(
-                                            "No.",
-                                            textAlign: TextAlign.center,
-                                            style: TextStyle(
-                                              fontWeight: FontWeight.w600,
+                                          children: const [
+                                            Padding(
+                                              padding: EdgeInsets.symmetric(
+                                                vertical: 8.0,
+                                              ),
+                                              child: Text(
+                                                "No.",
+                                                textAlign: TextAlign.center,
+                                                style: TextStyle(
+                                                  fontWeight: FontWeight.w600,
+                                                ),
+                                              ),
                                             ),
-                                          ),
-                                        ),
-                                        Padding(
-                                          padding: EdgeInsets.symmetric(
-                                            vertical: 8.0,
-                                          ),
-                                          child: Text(
-                                            "Nama",
-                                            textAlign: TextAlign.center,
-                                            style: TextStyle(
-                                              fontWeight: FontWeight.w600,
+                                            Padding(
+                                              padding: EdgeInsets.symmetric(
+                                                vertical: 8.0,
+                                              ),
+                                              child: Text(
+                                                "Nama",
+                                                textAlign: TextAlign.center,
+                                                style: TextStyle(
+                                                  fontWeight: FontWeight.w600,
+                                                ),
+                                              ),
                                             ),
-                                          ),
-                                        ),
-                                        Padding(
-                                          padding: EdgeInsets.symmetric(
-                                            vertical: 8.0,
-                                          ),
-                                          child: Text(
-                                            "IC/SuratBeranak",
-                                            textAlign: TextAlign.center,
-                                            style: TextStyle(
-                                              fontWeight: FontWeight.w600,
+                                            Padding(
+                                              padding: EdgeInsets.symmetric(
+                                                vertical: 8.0,
+                                              ),
+                                              child: Text(
+                                                "IC/SuratBeranak",
+                                                textAlign: TextAlign.center,
+                                                style: TextStyle(
+                                                  fontWeight: FontWeight.w600,
+                                                ),
+                                              ),
                                             ),
-                                          ),
-                                        ),
-                                        Padding(
-                                          padding: EdgeInsets.symmetric(
-                                            vertical: 8.0,
-                                          ),
-                                          child: Text(
-                                            "Pertalian",
-                                            textAlign: TextAlign.center,
-                                            style: TextStyle(
-                                              fontWeight: FontWeight.w600,
+                                            Padding(
+                                              padding: EdgeInsets.symmetric(
+                                                vertical: 8.0,
+                                              ),
+                                              child: Text(
+                                                "Pertalian",
+                                                textAlign: TextAlign.center,
+                                                style: TextStyle(
+                                                  fontWeight: FontWeight.w600,
+                                                ),
+                                              ),
                                             ),
-                                          ),
+                                            Padding(
+                                              padding: EdgeInsets.symmetric(
+                                                vertical: 8.0,
+                                              ),
+                                              child: Text(
+                                                "Tindakan",
+                                                textAlign: TextAlign.center,
+                                                style: TextStyle(
+                                                  fontWeight: FontWeight.w600,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
                                         ),
+                                        ...familyController.familyMembers
+                                            .asMap()
+                                            .entries
+                                            .map(
+                                              (entry) => TableRow(
+                                                decoration: BoxDecoration(
+                                                  border: Border(
+                                                    bottom: BorderSide(
+                                                      color:
+                                                          Theme.of(
+                                                            context,
+                                                          ).dividerColor,
+                                                    ),
+                                                  ),
+                                                ),
+                                                children: [
+                                                  Padding(
+                                                    padding:
+                                                        const EdgeInsets.symmetric(
+                                                          vertical: 8.0,
+                                                        ),
+                                                    child: Text(
+                                                      (entry.key + 1)
+                                                          .toString(),
+                                                      textAlign:
+                                                          TextAlign.center,
+                                                    ),
+                                                  ),
+                                                  Padding(
+                                                    padding:
+                                                        const EdgeInsets.symmetric(
+                                                          vertical: 8.0,
+                                                        ),
+                                                    child:
+                                                        isEditingFamily
+                                                            ? TextFormField(
+                                                              decoration:
+                                                                  const InputDecoration(
+                                                                    border:
+                                                                        OutlineInputBorder(),
+                                                                  ),
+                                                              initialValue:
+                                                                  entry
+                                                                      .value
+                                                                      .familymemberName,
+                                                              textAlign:
+                                                                  TextAlign
+                                                                      .center,
+                                                              onChanged: (
+                                                                value,
+                                                              ) {
+                                                                var updatedMember = entry
+                                                                    .value
+                                                                    .copyWith(
+                                                                      familymemberName:
+                                                                          value,
+                                                                      familyUpdatedAt:
+                                                                          DateTime.now(),
+                                                                    );
+                                                                familyController
+                                                                        .familyMembers[entry
+                                                                        .key] =
+                                                                    updatedMember;
+                                                              },
+                                                            )
+                                                            : Text(
+                                                              entry
+                                                                  .value
+                                                                  .familymemberName,
+                                                              textAlign:
+                                                                  TextAlign
+                                                                      .center,
+                                                            ),
+                                                  ),
+                                                  Padding(
+                                                    padding:
+                                                        const EdgeInsets.symmetric(
+                                                          vertical: 8.0,
+                                                        ),
+                                                    child:
+                                                        isEditingFamily
+                                                            ? TextFormField(
+                                                              decoration:
+                                                                  const InputDecoration(
+                                                                    border:
+                                                                        OutlineInputBorder(),
+                                                                  ),
+                                                              initialValue:
+                                                                  entry
+                                                                      .value
+                                                                      .familymemberIdentification,
+                                                              textAlign:
+                                                                  TextAlign
+                                                                      .center,
+                                                              onChanged: (
+                                                                value,
+                                                              ) {
+                                                                var updatedMember = entry
+                                                                    .value
+                                                                    .copyWith(
+                                                                      familymemberIdentification:
+                                                                          value,
+                                                                      familyUpdatedAt:
+                                                                          DateTime.now(),
+                                                                    );
+                                                                familyController
+                                                                        .familyMembers[entry
+                                                                        .key] =
+                                                                    updatedMember;
+                                                              },
+                                                            )
+                                                            : Text(
+                                                              entry
+                                                                  .value
+                                                                  .familymemberIdentification,
+                                                              textAlign:
+                                                                  TextAlign
+                                                                      .center,
+                                                            ),
+                                                  ),
+                                                  Padding(
+                                                    padding:
+                                                        const EdgeInsets.symmetric(
+                                                          vertical: 8.0,
+                                                        ),
+                                                    child:
+                                                        isEditingFamily
+                                                            ? TextFormField(
+                                                              decoration:
+                                                                  const InputDecoration(
+                                                                    border:
+                                                                        OutlineInputBorder(),
+                                                                  ),
+                                                              initialValue:
+                                                                  entry
+                                                                      .value
+                                                                      .familymemberRelationship,
+                                                              textAlign:
+                                                                  TextAlign
+                                                                      .center,
+                                                              onChanged: (
+                                                                value,
+                                                              ) {
+                                                                var updatedMember = entry
+                                                                    .value
+                                                                    .copyWith(
+                                                                      familymemberRelationship:
+                                                                          value,
+                                                                      familyUpdatedAt:
+                                                                          DateTime.now(),
+                                                                    );
+                                                                familyController
+                                                                        .familyMembers[entry
+                                                                        .key] =
+                                                                    updatedMember;
+                                                              },
+                                                            )
+                                                            : Text(
+                                                              entry
+                                                                  .value
+                                                                  .familymemberRelationship,
+                                                              textAlign:
+                                                                  TextAlign
+                                                                      .center,
+                                                            ),
+                                                  ),
+                                                  Padding(
+                                                    padding:
+                                                        const EdgeInsets.symmetric(
+                                                          vertical: 8.0,
+                                                        ),
+                                                    child:
+                                                        isEditingFamily
+                                                            ? IconButton(
+                                                              icon: const Icon(
+                                                                Icons.delete,
+                                                                color:
+                                                                    Colors.red,
+                                                              ),
+                                                              onPressed: () async {
+                                                                if (entry
+                                                                        .value
+                                                                        .familyId !=
+                                                                    null) {
+                                                                  await familyController
+                                                                      .deleteFamilyMember(
+                                                                        entry
+                                                                            .value
+                                                                            .familyId!,
+                                                                      );
+                                                                }
+                                                                familyController
+                                                                    .familyMembers
+                                                                    .removeAt(
+                                                                      entry.key,
+                                                                    );
+                                                              },
+                                                            )
+                                                            : const SizedBox.shrink(),
+                                                  ),
+                                                ],
+                                              ),
+                                            )
+                                            .toList(),
                                       ],
                                     ),
-                                    ...familyController.familyMembers
-                                        .asMap()
-                                        .entries
-                                        .map(
-                                          (entry) => TableRow(
-                                            decoration: BoxDecoration(
-                                              border: Border(
-                                                bottom: BorderSide(
-                                                  color:
-                                                      Theme.of(
-                                                        context,
-                                                      ).dividerColor,
+                                    const SizedBox(height: 16),
+                                    if (isEditingFamily)
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.end,
+                                        children: [
+                                          ElevatedButton.icon(
+                                            onPressed: () {
+                                              familyController.familyMembers.add(
+                                                FamilyModel(
+                                                  familymemberName: '',
+                                                  familymemberIdentification:
+                                                      '',
+                                                  familymemberRelationship: '',
+                                                  familyCreatedAt:
+                                                      DateTime.now(),
+                                                  familyUpdatedAt:
+                                                      DateTime.now(),
+                                                  userId:
+                                                      navController
+                                                          .getUser()
+                                                          ?.userId ??
+                                                      '',
                                                 ),
-                                              ),
+                                              );
+                                            },
+                                            icon: const Icon(
+                                              Icons.add,
+                                              color: Colors.white,
                                             ),
-                                            children: [
-                                              Padding(
-                                                padding:
-                                                    const EdgeInsets.symmetric(
-                                                      vertical: 8.0,
-                                                    ),
-                                                child: Text(
-                                                  (entry.key + 1).toString(),
-                                                  textAlign: TextAlign.center,
-                                                ),
-                                              ),
-                                              Padding(
-                                                padding:
-                                                    const EdgeInsets.symmetric(
-                                                      vertical: 8.0,
-                                                    ),
-                                                child: Text(
-                                                  entry.value.familymemberName,
-                                                  textAlign: TextAlign.center,
-                                                ),
-                                              ),
-                                              Padding(
-                                                padding:
-                                                    const EdgeInsets.symmetric(
-                                                      vertical: 8.0,
-                                                    ),
-                                                child: Text(
-                                                  entry
-                                                      .value
-                                                      .familymemberIdentification,
-                                                  textAlign: TextAlign.center,
-                                                ),
-                                              ),
-                                              Padding(
-                                                padding:
-                                                    const EdgeInsets.symmetric(
-                                                      vertical: 8.0,
-                                                    ),
-                                                child: Text(
-                                                  entry
-                                                      .value
-                                                      .familymemberRelationship,
-                                                  textAlign: TextAlign.center,
-                                                ),
-                                              ),
-                                            ],
+                                            label: const Text("Add Row"),
+                                            style: ElevatedButton.styleFrom(
+                                              backgroundColor: Colors.green,
+                                              foregroundColor: Colors.white,
+                                            ),
                                           ),
-                                        )
-                                        .toList(),
+                                          const SizedBox(width: 8),
+                                          ElevatedButton.icon(
+                                            onPressed: () async {
+                                              for (var member
+                                                  in familyController
+                                                      .familyMembers) {
+                                                if (member.familyId != null) {
+                                                  await familyController
+                                                      .updateFamilyMember(
+                                                        member,
+                                                      );
+                                                } else {
+                                                  await familyController
+                                                      .addFamilyMember(member);
+                                                }
+                                              }
+                                              setState(() {
+                                                isEditingFamily = false;
+                                              });
+                                            },
+                                            icon: const Icon(
+                                              Icons.save,
+                                              color: Colors.white,
+                                            ),
+                                            label: const Text("Save All"),
+                                            style: ElevatedButton.styleFrom(
+                                              backgroundColor:
+                                                  Theme.of(
+                                                    context,
+                                                  ).colorScheme.primary,
+                                              foregroundColor: Colors.white,
+                                            ),
+                                          ),
+                                          const SizedBox(width: 8),
+                                          OutlinedButton(
+                                            onPressed: () {
+                                              setState(() {
+                                                isEditingFamily = false;
+                                                final member =
+                                                    navController.getUser();
+                                                if (member != null &&
+                                                    member.userId != null) {
+                                                  familyController
+                                                      .fetchFamilyMembersByUserId(
+                                                        member.userId!,
+                                                      );
+                                                }
+                                              });
+                                            },
+                                            child: const Text("Cancel"),
+                                          ),
+                                        ],
+                                      ),
                                   ],
                                 );
                               }),
+                              const SizedBox(height: 16),
+                              if (!isEditingFamily)
+                                Align(
+                                  alignment: Alignment.centerRight,
+                                  child: ElevatedButton.icon(
+                                    onPressed: () {
+                                      setState(() {
+                                        isEditingFamily = !isEditingFamily;
+                                      });
+                                    },
+                                    label: const Text("Edit"),
+                                    icon: const Icon(
+                                      Icons.edit,
+                                      color: Colors.white,
+                                    ),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor:
+                                          Theme.of(context).colorScheme.primary,
+                                      foregroundColor: Colors.white,
+                                    ),
+                                  ),
+                                ),
                             ],
                           ),
                         ),
