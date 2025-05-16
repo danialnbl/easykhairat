@@ -8,6 +8,8 @@ class ClaimLineController extends GetxController {
   // Reactive list to store claim lines by claim ID
   var claimLineListByClaimId = <ClaimLineModel>[].obs;
 
+  var selectedClaimLine = Rxn<ClaimLineModel>();
+
   // Reactive variable to store total payments
   var totalClaimLine = 0.0.obs;
 
@@ -21,6 +23,16 @@ class ClaimLineController extends GetxController {
   void onInit() {
     super.onInit();
     listenForRealTimeUpdates();
+  }
+
+  // Method to set selected claim line
+  void setClaimLine(ClaimLineModel newSelectedClaimLine) {
+    selectedClaimLine.value = newSelectedClaimLine;
+  }
+
+  // Method to get selected claim line
+  ClaimLineModel? getClaimLine() {
+    return selectedClaimLine.value;
   }
 
   // Fetch claim lines from Supabase
@@ -66,24 +78,37 @@ class ClaimLineController extends GetxController {
   }
 
   // Update an existing claim line in Supabase
-  Future<void> updateClaimLine(
-    int claimLineId,
-    ClaimLineModel updatedClaimLine,
-  ) async {
+  Future<void> updateClaimLine(ClaimLineModel updatedClaimLine) async {
     try {
       final response =
           await supabase
               .from('claim_line')
-              .update(updatedClaimLine.toJson())
-              .eq('claimLine_id', claimLineId)
+              .update({
+                'claimLine_reason': updatedClaimLine.claimLineReason,
+                'claimLine_totalPrice': updatedClaimLine.claimLineTotalPrice,
+              })
+              .eq('claimLine_id', updatedClaimLine.claimLineId.toString())
               .select()
               .single();
 
       if (response != null) {
-        fetchClaimLines(); // Refresh the list after updating
+        await getClaimLinesByClaimId(
+          updatedClaimLine.claimId ?? 0,
+        ); // Refresh the list after updating
+        Get.snackbar(
+          'Berjaya',
+          'Tuntutan telah dikemaskini',
+          snackPosition: SnackPosition.TOP,
+        );
       }
     } catch (e) {
       print("Error updating claim line: $e");
+      Get.snackbar(
+        'Ralat',
+        'Gagal mengemaskini tuntutan',
+        snackPosition: SnackPosition.TOP,
+      );
+      rethrow;
     }
   }
 
@@ -139,7 +164,7 @@ class ClaimLineController extends GetxController {
           .eq('claim_id', claimId)
           .order('claimLine_created_at', ascending: false);
 
-      print("Response claimline: $response");
+      // print("Response claimline: $response");
 
       claimLineListByClaimId.assignAll(
         (response as List)

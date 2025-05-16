@@ -71,7 +71,7 @@ class ProsesTuntutanState extends State<ProsesTuntutan> {
             0: FlexColumnWidth(2),
             1: FlexColumnWidth(3),
             2: FlexColumnWidth(2),
-            3: FlexColumnWidth(3),
+            3: FlexColumnWidth(2),
             4: FlexColumnWidth(2),
           },
           border: TableBorder(
@@ -101,10 +101,11 @@ class ProsesTuntutanState extends State<ProsesTuntutan> {
                     ),
                   ),
                 ),
+
                 Padding(
                   padding: EdgeInsets.all(12.0),
                   child: Text(
-                    'Status',
+                    'Created At',
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
@@ -113,11 +114,13 @@ class ProsesTuntutanState extends State<ProsesTuntutan> {
                 ),
                 Padding(
                   padding: EdgeInsets.all(12.0),
-                  child: Text(
-                    'Created At',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
+                  child: Center(
+                    child: Text(
+                      'Status Tuntutan',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
                     ),
                   ),
                 ),
@@ -159,15 +162,42 @@ class ProsesTuntutanState extends State<ProsesTuntutan> {
                   Padding(
                     padding: const EdgeInsets.all(12.0),
                     child: Text(
-                      claim.claimOverallStatus,
+                      formatDate(claim.claimCreatedAt),
                       style: const TextStyle(color: Colors.black87),
                     ),
                   ),
                   Padding(
                     padding: const EdgeInsets.all(12.0),
-                    child: Text(
-                      formatDate(claim.claimCreatedAt),
-                      style: const TextStyle(color: Colors.black87),
+                    child: Center(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color:
+                                  claim.claimOverallStatus == 'Dalam Proses'
+                                      ? Colors.orange
+                                      : claim.claimOverallStatus == 'Lulus'
+                                      ? Colors.green
+                                      : claim.claimOverallStatus == 'Gagal'
+                                      ? Colors.red
+                                      : Colors.grey,
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Text(
+                              claim.claimOverallStatus,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                   Padding(
@@ -184,6 +214,7 @@ class ProsesTuntutanState extends State<ProsesTuntutan> {
                               claimLineController.getClaimLinesByClaimId(
                                 claim.claimId!,
                               );
+                              tuntutanController.setTuntutan(claim);
                               navController.setUser(claim.user!);
                               navController.changeIndex(12);
                             }
@@ -255,7 +286,7 @@ class ProsesTuntutanState extends State<ProsesTuntutan> {
                   () => DropdownButton<String>(
                     value: selectedFilter.value,
                     items:
-                        ['Semua Tuntutan', 'Approved', 'Pending', 'Rejected']
+                        ['Semua Tuntutan', 'Lulus', 'Dalam Proses', 'Gagal']
                             .map(
                               (status) => DropdownMenuItem(
                                 value: status,

@@ -1,6 +1,7 @@
 import 'package:easykhairat/controllers/claimline_controller.dart';
 import 'package:easykhairat/controllers/navigation_controller.dart';
 import 'package:easykhairat/controllers/tuntutan_controller.dart';
+import 'package:easykhairat/models/claimLineModel.dart';
 import 'package:easykhairat/models/tuntutanModel.dart';
 import 'package:easykhairat/widgets/header.dart';
 import 'package:flutter/material.dart';
@@ -44,6 +45,14 @@ class TuntutanAhliState extends State<TuntutanAhli> {
 
   @override
   Widget build(BuildContext context) {
+    final tuntutan = claimController.getTuntutan();
+    if (tuntutan?.claimOverallStatus != null) {
+      claimStatus = tuntutan!.claimOverallStatus;
+    }
+    if (tuntutan?.claimType != null) {
+      claimType = tuntutan!.claimType.toString();
+    }
+
     return Scaffold(
       backgroundColor: MoonColors.light.gohan,
       body: SingleChildScrollView(
@@ -104,22 +113,11 @@ class TuntutanAhliState extends State<TuntutanAhli> {
                               ),
                               const SizedBox(height: 16),
                               TextFormField(
-                                controller: amountController,
-                                decoration: InputDecoration(
-                                  labelText: "Jumlah Tuntutan (RM)",
-                                  border: OutlineInputBorder(),
-                                ),
-                                keyboardType: TextInputType.number,
-                                validator: (value) {
-                                  if (value == null || value.isEmpty) {
-                                    return 'Sila isi jumlah tuntutan';
-                                  }
-                                  return null;
-                                },
-                              ),
-                              const SizedBox(height: 16),
-                              TextFormField(
-                                controller: dateController,
+                                controller:
+                                    dateController
+                                      ..text = formatDate(
+                                        tuntutan?.claimCreatedAt,
+                                      ),
                                 readOnly: true,
                                 decoration: InputDecoration(
                                   labelText: "Tarikh Tuntutan",
@@ -164,19 +162,29 @@ class TuntutanAhliState extends State<TuntutanAhli> {
                                 ),
                               ),
                               const SizedBox(height: 16),
-                              TextFormField(
-                                controller: reasonController,
+                              DropdownButtonFormField<String>(
+                                value: claimStatus,
+                                items: [
+                                  DropdownMenuItem(
+                                    value: "Dalam Proses",
+                                    child: Text("Dalam Proses"),
+                                  ),
+                                  DropdownMenuItem(
+                                    value: "Lulus",
+                                    child: Text("Lulus"),
+                                  ),
+                                  DropdownMenuItem(
+                                    value: "Gagal",
+                                    child: Text("Gagal"),
+                                  ),
+                                ],
+                                onChanged: (value) {
+                                  setState(() {
+                                    claimStatus = value!;
+                                  });
+                                },
                                 decoration: InputDecoration(
-                                  labelText: "Sebab Tuntutan",
-                                  border: OutlineInputBorder(),
-                                ),
-                                maxLines: 3,
-                              ),
-                              const SizedBox(height: 16),
-                              TextFormField(
-                                controller: noteController,
-                                decoration: InputDecoration(
-                                  labelText: "Nota Tambahan",
+                                  labelText: "Status Tuntutan",
                                   border: OutlineInputBorder(),
                                 ),
                               ),
@@ -335,19 +343,6 @@ class TuntutanAhliState extends State<TuntutanAhli> {
                                               ),
                                             ],
                                           ),
-                                          SizedBox(height: 4),
-                                          Row(
-                                            children: [
-                                              Icon(
-                                                Icons.info_outline,
-                                                size: 16,
-                                              ),
-                                              SizedBox(width: 4),
-                                              Text(
-                                                'Status: ${claim.claimLineStatus}',
-                                              ),
-                                            ],
-                                          ),
                                         ],
                                       ),
                                       trailing: Row(
@@ -356,7 +351,22 @@ class TuntutanAhliState extends State<TuntutanAhli> {
                                           IconButton(
                                             icon: Icon(Icons.edit),
                                             onPressed: () {
-                                              // Show edit dialog
+                                              claimLineController.setClaimLine(
+                                                claim,
+                                              );
+
+                                              final editAmountController =
+                                                  TextEditingController(
+                                                    text:
+                                                        claim
+                                                            .claimLineTotalPrice
+                                                            .toString(),
+                                                  );
+                                              final editReasonController =
+                                                  TextEditingController(
+                                                    text: claim.claimLineReason,
+                                                  );
+
                                               showDialog(
                                                 context: context,
                                                 builder:
@@ -364,8 +374,40 @@ class TuntutanAhliState extends State<TuntutanAhli> {
                                                       title: Text(
                                                         'Edit Tuntutan',
                                                       ),
-                                                      content: Text(
-                                                        'Fungsi edit akan datang',
+                                                      content: SingleChildScrollView(
+                                                        child: Column(
+                                                          mainAxisSize:
+                                                              MainAxisSize.min,
+                                                          children: [
+                                                            TextField(
+                                                              controller:
+                                                                  editAmountController,
+                                                              decoration: InputDecoration(
+                                                                labelText:
+                                                                    'Jumlah (RM)',
+                                                                border:
+                                                                    OutlineInputBorder(),
+                                                              ),
+                                                              keyboardType:
+                                                                  TextInputType
+                                                                      .number,
+                                                            ),
+                                                            SizedBox(
+                                                              height: 16,
+                                                            ),
+                                                            TextField(
+                                                              controller:
+                                                                  editReasonController,
+                                                              decoration:
+                                                                  InputDecoration(
+                                                                    labelText:
+                                                                        'Sebab',
+                                                                    border:
+                                                                        OutlineInputBorder(),
+                                                                  ),
+                                                            ),
+                                                          ],
+                                                        ),
                                                       ),
                                                       actions: [
                                                         TextButton(
@@ -374,7 +416,39 @@ class TuntutanAhliState extends State<TuntutanAhli> {
                                                                   Navigator.pop(
                                                                     context,
                                                                   ),
-                                                          child: Text('Tutup'),
+                                                          child: Text('Batal'),
+                                                        ),
+                                                        ElevatedButton(
+                                                          onPressed: () {
+                                                            final updatedClaim = ClaimLineModel(
+                                                              claimLineId:
+                                                                  claim
+                                                                      .claimLineId,
+                                                              claimId:
+                                                                  claim.claimId,
+                                                              claimLineTotalPrice:
+                                                                  double.parse(
+                                                                    editAmountController
+                                                                        .text,
+                                                                  ),
+                                                              claimLineReason:
+                                                                  editReasonController
+                                                                      .text,
+                                                              claimLineCreatedAt:
+                                                                  claim
+                                                                      .claimLineCreatedAt,
+                                                              claimLineUpdatedAt:
+                                                                  DateTime.now(),
+                                                            );
+                                                            claimLineController
+                                                                .updateClaimLine(
+                                                                  updatedClaim,
+                                                                );
+                                                            Navigator.pop(
+                                                              context,
+                                                            );
+                                                          },
+                                                          child: Text('Simpan'),
                                                         ),
                                                       ],
                                                     ),

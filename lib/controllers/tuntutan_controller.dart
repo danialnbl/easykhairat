@@ -5,12 +5,23 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 class TuntutanController extends GetxController {
   // Reactive list to store claims
   var tuntutanList = <ClaimModel>[].obs;
+  var selectedTuntutan = Rxn<ClaimModel>();
 
   // Loading state
   var isLoading = false.obs;
 
   // Supabase client instance
   final supabase = Supabase.instance.client;
+
+  // Method to set tuntutan
+  void setTuntutan(ClaimModel newselectedTuntutan) {
+    selectedTuntutan.value = newselectedTuntutan;
+  }
+
+  // Method to get tuntutan
+  ClaimModel? getTuntutan() {
+    return selectedTuntutan.value;
+  }
 
   // Fetch claims from Supabase
   Future<void> fetchTuntutan() async {
