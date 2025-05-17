@@ -31,11 +31,20 @@ class TuntutanAhliState extends State<TuntutanAhli> {
   final TextEditingController noteController = TextEditingController();
   String claimType = "Ahli Sendiri";
   String claimStatus = "Dalam Proses";
+  DateTime selectedDate = DateTime.now();
 
   @override
   void initState() {
     super.initState();
     claimController.fetchTuntutan();
+
+    // Initialize with current claim data or defaults
+    final tuntutan = claimController.getTuntutan();
+    selectedDate = tuntutan?.claimCreatedAt ?? DateTime.now();
+    claimType = tuntutan?.claimType ?? "Ahli Sendiri";
+    claimStatus = tuntutan?.claimOverallStatus ?? "Dalam Proses";
+
+    dateController.text = DateFormat('dd-MM-yyyy').format(selectedDate);
   }
 
   String formatDate(DateTime? date) {
@@ -113,11 +122,7 @@ class TuntutanAhliState extends State<TuntutanAhli> {
                               ),
                               const SizedBox(height: 16),
                               TextFormField(
-                                controller:
-                                    dateController
-                                      ..text = formatDate(
-                                        tuntutan?.claimCreatedAt,
-                                      ),
+                                controller: dateController,
                                 readOnly: true,
                                 decoration: InputDecoration(
                                   labelText: "Tarikh Tuntutan",
@@ -125,16 +130,19 @@ class TuntutanAhliState extends State<TuntutanAhli> {
                                   suffixIcon: Icon(Icons.calendar_today),
                                 ),
                                 onTap: () async {
-                                  DateTime? selectedDate = await showDatePicker(
+                                  DateTime? pickedDate = await showDatePicker(
                                     context: context,
-                                    initialDate: DateTime.now(),
+                                    initialDate: selectedDate,
                                     firstDate: DateTime(2000),
                                     lastDate: DateTime(2100),
                                   );
-                                  if (selectedDate != null) {
-                                    dateController.text = DateFormat(
-                                      'dd-MM-yyyy',
-                                    ).format(selectedDate);
+                                  if (pickedDate != null) {
+                                    setState(() {
+                                      selectedDate = pickedDate;
+                                      dateController.text = DateFormat(
+                                        'dd-MM-yyyy',
+                                      ).format(pickedDate);
+                                    });
                                   }
                                 },
                               ),
@@ -154,6 +162,9 @@ class TuntutanAhliState extends State<TuntutanAhli> {
                                 onChanged: (value) {
                                   setState(() {
                                     claimType = value!;
+                                    print(
+                                      "Changed claim type to: $claimType",
+                                    ); // Debug print
                                   });
                                 },
                                 decoration: InputDecoration(
@@ -181,6 +192,9 @@ class TuntutanAhliState extends State<TuntutanAhli> {
                                 onChanged: (value) {
                                   setState(() {
                                     claimStatus = value!;
+                                    print(
+                                      "Changed claim status to: $claimStatus",
+                                    ); // Debug print
                                   });
                                 },
                                 decoration: InputDecoration(
@@ -195,9 +209,17 @@ class TuntutanAhliState extends State<TuntutanAhli> {
                                   ElevatedButton(
                                     onPressed: () {
                                       if (_formKey.currentState!.validate()) {
+                                        print(
+                                          "Submitting - Type: $claimType, Status: $claimStatus",
+                                        ); // Debug print
+
                                         final claim = ClaimModel(
+                                          claimId:
+                                              claimController
+                                                  .getTuntutan()
+                                                  ?.claimId,
                                           claimOverallStatus: claimStatus,
-                                          claimCreatedAt: DateTime.now(),
+                                          claimCreatedAt: selectedDate,
                                           claimUpdatedAt: DateTime.now(),
                                           userId:
                                               navController.getUser()?.userId,
@@ -205,36 +227,19 @@ class TuntutanAhliState extends State<TuntutanAhli> {
                                         );
 
                                         claimController
-                                            .addTuntutan(claim)
+                                            .updateTuntutan(claim)
                                             .then((_) {
-                                              _formKey.currentState?.reset();
-                                              amountController.clear();
-                                              dateController.clear();
-                                              reasonController.clear();
-                                              noteController.clear();
-                                              setState(() {
-                                                claimType = "Kematian";
-                                              });
-
+                                              // Show success message
                                               Get.snackbar(
                                                 'Berjaya',
-                                                'Tuntutan telah dihantar.',
+                                                'Tuntutan telah dikemaskini',
                                                 snackPosition:
                                                     SnackPosition.TOP,
                                               );
-                                            })
-                                            .catchError((error) {
-                                              Get.snackbar(
-                                                'Ralat',
-                                                'Gagal menghantar tuntutan: $error',
-                                                snackPosition:
-                                                    SnackPosition.TOP,
-                                              );
-                                              print("Error: $error");
                                             });
                                       }
                                     },
-                                    child: Text("Hantar"),
+                                    child: Text("Kemaskini"),
                                   ),
                                   const SizedBox(width: 8),
                                   OutlinedButton(
@@ -458,11 +463,46 @@ class TuntutanAhliState extends State<TuntutanAhli> {
                                           IconButton(
                                             icon: Icon(Icons.delete),
                                             onPressed: () {
-                                              if (claim.claimId != null) {
-                                                claimController.deleteTuntutan(
-                                                  claim.claimId!,
-                                                );
-                                              }
+                                              showDialog(
+                                                context: context,
+                                                builder: (
+                                                  BuildContext context,
+                                                ) {
+                                                  return AlertDialog(
+                                                    title: Text(
+                                                      'Padam Tuntutan',
+                                                    ),
+                                                    content: Text(
+                                                      'Adakah anda pasti ingin memadam tuntutan ini?',
+                                                    ),
+                                                    actions: [
+                                                      TextButton(
+                                                        onPressed:
+                                                            () => Navigator.pop(
+                                                              context,
+                                                            ),
+                                                        child: Text('Batal'),
+                                                      ),
+                                                      ElevatedButton(
+                                                        onPressed: () {
+                                                          if (claim
+                                                                  .claimLineId !=
+                                                              null) {
+                                                            claimLineController
+                                                                .deleteClaimLine(
+                                                                  claim,
+                                                                );
+                                                          }
+                                                          Navigator.pop(
+                                                            context,
+                                                          );
+                                                        },
+                                                        child: Text('Padam'),
+                                                      ),
+                                                    ],
+                                                  );
+                                                },
+                                              );
                                             },
                                           ),
                                         ],
@@ -472,6 +512,95 @@ class TuntutanAhliState extends State<TuntutanAhli> {
                                 ),
                               );
                             }),
+                            const SizedBox(height: 16),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                ElevatedButton.icon(
+                                  onPressed: () {
+                                    final newAmountController =
+                                        TextEditingController();
+                                    final newReasonController =
+                                        TextEditingController();
+
+                                    showDialog(
+                                      context: context,
+                                      builder:
+                                          (context) => AlertDialog(
+                                            title: Text('Tambah Tuntutan Baru'),
+                                            content: SingleChildScrollView(
+                                              child: Column(
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  TextField(
+                                                    controller:
+                                                        newReasonController,
+                                                    decoration: InputDecoration(
+                                                      labelText: 'Sebab',
+                                                      border:
+                                                          OutlineInputBorder(),
+                                                    ),
+                                                  ),
+                                                  SizedBox(height: 16),
+                                                  TextField(
+                                                    controller:
+                                                        newAmountController,
+                                                    decoration: InputDecoration(
+                                                      labelText: 'Jumlah (RM)',
+                                                      border:
+                                                          OutlineInputBorder(),
+                                                    ),
+                                                    keyboardType:
+                                                        TextInputType.number,
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                            actions: [
+                                              TextButton(
+                                                onPressed:
+                                                    () =>
+                                                        Navigator.pop(context),
+                                                child: Text('Batal'),
+                                              ),
+                                              ElevatedButton(
+                                                onPressed: () {
+                                                  final newClaimLine =
+                                                      ClaimLineModel(
+                                                        claimId:
+                                                            claimController
+                                                                .getTuntutan()
+                                                                ?.claimId,
+                                                        claimLineTotalPrice:
+                                                            double.parse(
+                                                              newAmountController
+                                                                  .text,
+                                                            ),
+                                                        claimLineReason:
+                                                            newReasonController
+                                                                .text,
+                                                        claimLineCreatedAt:
+                                                            DateTime.now(),
+                                                        claimLineUpdatedAt:
+                                                            DateTime.now(),
+                                                      );
+                                                  claimLineController
+                                                      .addClaimLine(
+                                                        newClaimLine,
+                                                      );
+                                                  Navigator.pop(context);
+                                                },
+                                                child: Text('Tambah'),
+                                              ),
+                                            ],
+                                          ),
+                                    );
+                                  },
+                                  icon: Icon(Icons.add),
+                                  label: Text('Tambah Tuntutan'),
+                                ),
+                              ],
+                            ),
                           ],
                         ),
                       ),

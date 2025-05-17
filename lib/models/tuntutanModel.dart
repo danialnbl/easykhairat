@@ -43,7 +43,6 @@ class ClaimModel {
       if (familyId != null) 'family_id': familyId, // Include only if not null
       'user_id': userId, // Made nullable
       'claim_type': claimType, // Added to toJson
-      'user': user?.toJson(),
     };
   }
 

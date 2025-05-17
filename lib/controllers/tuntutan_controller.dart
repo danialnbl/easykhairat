@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:easykhairat/models/tuntutanModel.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -36,7 +37,7 @@ class TuntutanController extends GetxController {
         ''')
           .order('claim_created_at', ascending: true);
 
-      print("Response: $response");
+      // print("Response: $response");
 
       tuntutanList.assignAll(
         (response as List).map((data) => ClaimModel.fromJson(data)).toList(),
@@ -61,18 +62,37 @@ class TuntutanController extends GetxController {
   }
 
   // Update an existing claim in Supabase
-  Future<void> updateTuntutan(int claimId, ClaimModel updatedTuntutan) async {
+  Future<void> updateTuntutan(ClaimModel updatedTuntutan) async {
     try {
-      final response = await supabase
-          .from('claims')
-          .update(updatedTuntutan.toJson())
-          .eq('claim_id', claimId);
+      final response =
+          await supabase
+              .from('claims')
+              .update({
+                'claim_overallStatus': updatedTuntutan.claimOverallStatus,
+                'claim_type': updatedTuntutan.claimType,
+                'claim_updated_at':
+                    updatedTuntutan.claimUpdatedAt.toIso8601String(),
+              })
+              .eq('claim_id', updatedTuntutan.claimId.toString())
+              .select()
+              .single();
 
       if (response != null) {
-        fetchTuntutan(); // Refresh the list after updating
+        await fetchTuntutan(); // Refresh the list after updating
+        Get.snackbar(
+          'Berjaya',
+          'Tuntutan telah dikemaskini',
+          snackPosition: SnackPosition.TOP,
+        );
       }
     } catch (e) {
-      print("Error updating tuntutan: $e");
+      print("Error updating claim line: $e");
+      Get.snackbar(
+        'Ralat',
+        'Gagal mengemaskini tuntutan',
+        snackPosition: SnackPosition.TOP,
+      );
+      rethrow;
     }
   }
 

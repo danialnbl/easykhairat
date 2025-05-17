@@ -45,7 +45,7 @@ class ClaimLineController extends GetxController {
           .select()
           .order('claimLine_created_at', ascending: false);
 
-      print("Response: $response");
+      // print("Response: $response");
 
       claimLineList.assignAll(
         (response as List)
@@ -69,9 +69,9 @@ class ClaimLineController extends GetxController {
               .select()
               .single();
 
-      if (response != null) {
-        fetchClaimLines(); // Refresh the list after adding
-      }
+      await getClaimLinesByClaimId(
+        claimLine.claimId!,
+      ); // Refresh the list after adding
     } catch (e) {
       print("Error adding claim line: $e");
     }
@@ -113,18 +113,27 @@ class ClaimLineController extends GetxController {
   }
 
   // Delete a claim line from Supabase
-  Future<void> deleteClaimLine(int claimLineId) async {
+  Future<void> deleteClaimLine(ClaimLineModel deleteClaimLine) async {
     try {
-      final response = await supabase
+      await supabase
           .from('claim_line')
           .delete()
-          .eq('claimLine_id', claimLineId);
-
-      if (response != null) {
-        fetchClaimLines(); // Refresh the list after deleting
-      }
+          .eq('claimLine_id', deleteClaimLine.claimLineId.toString());
+      
+      await getClaimLinesByClaimId(deleteClaimLine.claimId ?? 0); // Refresh claim lines list
+      await fetchClaimLines(); // Refresh main list
+      Get.snackbar(
+        'Berjaya',
+        'Tuntutan telah dipadam',
+        snackPosition: SnackPosition.TOP,
+      );
     } catch (e) {
       print("Error deleting claim line: $e");
+      Get.snackbar(
+        'Ralat', 
+        'Gagal memadam tuntutan',
+        snackPosition: SnackPosition.TOP,
+      );
     }
   }
 
