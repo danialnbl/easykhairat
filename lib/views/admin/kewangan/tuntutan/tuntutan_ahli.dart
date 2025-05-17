@@ -25,26 +25,14 @@ class TuntutanAhliState extends State<TuntutanAhli> {
 
   final _formKey = GlobalKey<FormState>();
 
-  final TextEditingController amountController = TextEditingController();
+  final TextEditingController overallstatus = TextEditingController();
+  final TextEditingController claimtype = TextEditingController();
   final TextEditingController dateController = TextEditingController();
-  final TextEditingController reasonController = TextEditingController();
-  final TextEditingController noteController = TextEditingController();
-  String claimType = "Ahli Sendiri";
-  String claimStatus = "Dalam Proses";
-  DateTime selectedDate = DateTime.now();
 
   @override
   void initState() {
     super.initState();
     claimController.fetchTuntutan();
-
-    // Initialize with current claim data or defaults
-    final tuntutan = claimController.getTuntutan();
-    selectedDate = tuntutan?.claimCreatedAt ?? DateTime.now();
-    claimType = tuntutan?.claimType ?? "Ahli Sendiri";
-    claimStatus = tuntutan?.claimOverallStatus ?? "Dalam Proses";
-
-    dateController.text = DateFormat('dd-MM-yyyy').format(selectedDate);
   }
 
   String formatDate(DateTime? date) {
@@ -55,11 +43,8 @@ class TuntutanAhliState extends State<TuntutanAhli> {
   @override
   Widget build(BuildContext context) {
     final tuntutan = claimController.getTuntutan();
-    if (tuntutan?.claimOverallStatus != null) {
-      claimStatus = tuntutan!.claimOverallStatus;
-    }
-    if (tuntutan?.claimType != null) {
-      claimType = tuntutan!.claimType.toString();
+    if (tuntutan == null) {
+      return Center(child: Text("Tiada maklumat tuntutan."));
     }
 
     return Scaffold(
@@ -117,64 +102,26 @@ class TuntutanAhliState extends State<TuntutanAhli> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                "Maklumat Tuntutan ${navController.getUser()?.userName}",
+                                "Maklumat Tuntutan",
                                 style: Theme.of(context).textTheme.bodyLarge,
                               ),
                               const SizedBox(height: 16),
+                              // created at
                               TextFormField(
-                                controller: dateController,
                                 readOnly: true,
-                                decoration: InputDecoration(
-                                  labelText: "Tarikh Tuntutan",
-                                  border: OutlineInputBorder(),
-                                  suffixIcon: Icon(Icons.calendar_today),
+                                initialValue: formatDate(
+                                  tuntutan.claimCreatedAt,
                                 ),
-                                onTap: () async {
-                                  DateTime? pickedDate = await showDatePicker(
-                                    context: context,
-                                    initialDate: selectedDate,
-                                    firstDate: DateTime(2000),
-                                    lastDate: DateTime(2100),
-                                  );
-                                  if (pickedDate != null) {
-                                    setState(() {
-                                      selectedDate = pickedDate;
-                                      dateController.text = DateFormat(
-                                        'dd-MM-yyyy',
-                                      ).format(pickedDate);
-                                    });
-                                  }
-                                },
-                              ),
-                              const SizedBox(height: 16),
-                              DropdownButtonFormField<String>(
-                                value: claimType,
-                                items: [
-                                  DropdownMenuItem(
-                                    value: "Ahli Sendiri",
-                                    child: Text("Ahli Sendiri"),
-                                  ),
-                                  DropdownMenuItem(
-                                    value: "Ahli Keluarga",
-                                    child: Text("Ahli Keluarga"),
-                                  ),
-                                ],
-                                onChanged: (value) {
-                                  setState(() {
-                                    claimType = value!;
-                                    print(
-                                      "Changed claim type to: $claimType",
-                                    ); // Debug print
-                                  });
-                                },
                                 decoration: InputDecoration(
-                                  labelText: "Jenis Tuntutan",
+                                  labelText: 'Tarikh Tuntutan',
                                   border: OutlineInputBorder(),
                                 ),
                               ),
                               const SizedBox(height: 16),
-                              DropdownButtonFormField<String>(
-                                value: claimStatus,
+                              DropdownButtonFormField(
+                                value:
+                                    tuntutan?.claimOverallStatus ??
+                                    "Dalam Proses",
                                 items: [
                                   DropdownMenuItem(
                                     value: "Dalam Proses",
@@ -191,71 +138,62 @@ class TuntutanAhliState extends State<TuntutanAhli> {
                                 ],
                                 onChanged: (value) {
                                   setState(() {
-                                    claimStatus = value!;
-                                    print(
-                                      "Changed claim status to: $claimStatus",
-                                    ); // Debug print
+                                    overallstatus.text = value.toString();
                                   });
                                 },
                                 decoration: InputDecoration(
-                                  labelText: "Status Tuntutan",
+                                  labelText: 'Status Tuntutan',
                                   border: OutlineInputBorder(),
                                 ),
                               ),
                               const SizedBox(height: 16),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                children: [
-                                  ElevatedButton(
-                                    onPressed: () {
-                                      if (_formKey.currentState!.validate()) {
-                                        print(
-                                          "Submitting - Type: $claimType, Status: $claimStatus",
-                                        ); // Debug print
-
-                                        final claim = ClaimModel(
-                                          claimId:
-                                              claimController
-                                                  .getTuntutan()
-                                                  ?.claimId,
-                                          claimOverallStatus: claimStatus,
-                                          claimCreatedAt: selectedDate,
-                                          claimUpdatedAt: DateTime.now(),
-                                          userId:
-                                              navController.getUser()?.userId,
-                                          claimType: claimType,
-                                        );
-
-                                        claimController
-                                            .updateTuntutan(claim)
-                                            .then((_) {
-                                              // Show success message
-                                              Get.snackbar(
-                                                'Berjaya',
-                                                'Tuntutan telah dikemaskini',
-                                                snackPosition:
-                                                    SnackPosition.TOP,
-                                              );
-                                            });
-                                      }
-                                    },
-                                    child: Text("Kemaskini"),
+                              // claim type
+                              DropdownButtonFormField(
+                                value: tuntutan?.claimType ?? "Ahli Sendiri",
+                                items: [
+                                  DropdownMenuItem(
+                                    value: "Ahli Sendiri",
+                                    child: Text("Ahli Sendiri"),
                                   ),
-                                  const SizedBox(width: 8),
-                                  OutlinedButton(
-                                    onPressed: () {
-                                      _formKey.currentState?.reset();
-                                      amountController.clear();
-                                      dateController.clear();
-                                      reasonController.clear();
-                                      noteController.clear();
-                                      setState(() {
-                                        claimType = "Kematian";
-                                      });
-                                    },
-                                    child: Text("Batal"),
+                                  DropdownMenuItem(
+                                    value: "Tanggungan",
+                                    child: Text("Tanggungan"),
                                   ),
                                 ],
+                                onChanged: (value) {
+                                  setState(() {
+                                    claimtype.text = value.toString();
+                                  });
+                                },
+                                decoration: InputDecoration(
+                                  labelText: 'Jenis Tuntutan',
+                                  border: OutlineInputBorder(),
+                                ),
+                              ),
+                              const SizedBox(height: 16),
+                              // update button
+                              ElevatedButton(
+                                onPressed: () {
+                                  if (_formKey.currentState!.validate()) {
+                                    final updatedClaim = ClaimModel(
+                                      claimId: tuntutan.claimId,
+                                      claimOverallStatus:
+                                          overallstatus.text.isEmpty
+                                              ? tuntutan.claimOverallStatus
+                                              : overallstatus.text,
+                                      claimType:
+                                          claimtype.text.isEmpty
+                                              ? tuntutan.claimType
+                                              : claimtype.text,
+                                      claimCreatedAt: tuntutan.claimCreatedAt,
+                                      claimUpdatedAt: DateTime.now(),
+                                    );
+                                    claimController.updateTuntutan(
+                                      updatedClaim,
+                                    );
+                                  }
+                                },
+                                child: Text('Kemaskini'),
                               ),
                             ],
                           ),
