@@ -52,32 +52,6 @@ class _ManageAnnounceState extends State<ManageAnnounce> {
     }).toList();
   }
 
-  void viewAnnouncement(AnnouncementModel announcement) {
-    Get.dialog(
-      AlertDialog(
-        title: Text(announcement.announcementTitle),
-        content: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text('Description: ${announcement.announcementDescription}'),
-              const SizedBox(height: 8),
-              Text('Type: ${announcement.announcementType}'),
-              const SizedBox(height: 8),
-              Text(
-                'Created: ${DateFormat('dd/MM/yyyy').format(announcement.announcementCreatedAt)}',
-              ),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(child: const Text('Close'), onPressed: () => Get.back()),
-        ],
-      ),
-    );
-  }
-
   void deleteAnnouncement(AnnouncementModel announcement) {
     Get.dialog(
       AlertDialog(
@@ -221,7 +195,12 @@ class _ManageAnnounceState extends State<ManageAnnounce> {
                             Icons.visibility,
                             color: Colors.green,
                           ),
-                          onPressed: () => viewAnnouncement(announcement),
+                          onPressed: () {
+                            navigationController.selectedIndex.value = 15;
+                            announcementController.setSelectedAnnouncement(
+                              announcement,
+                            );
+                          },
                         ),
                         IconButton(
                           icon: const Icon(Icons.delete, color: Colors.red),
@@ -324,11 +303,14 @@ class _ManageAnnounceState extends State<ManageAnnounce> {
             ),
             const SizedBox(height: 16),
             //add button
-            ElevatedButton(
-              onPressed: () {
-                navigationController.selectedIndex.value = 14;
-              },
-              child: const Text('Add Announcement'),
+            Align(
+              alignment: Alignment.centerRight,
+              child: ElevatedButton(
+                onPressed: () {
+                  navigationController.selectedIndex.value = 14;
+                },
+                child: const Text('Add Announcement'),
+              ),
             ),
             const SizedBox(height: 16),
             Expanded(child: _buildTable()),

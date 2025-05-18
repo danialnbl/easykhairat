@@ -1,4 +1,5 @@
 import 'package:easykhairat/controllers/announcement_controller.dart';
+import 'package:easykhairat/controllers/navigation_controller.dart';
 import 'package:easykhairat/models/announcementModel.dart';
 import 'package:easykhairat/widgets/header.dart';
 import 'package:flutter/material.dart';
@@ -26,6 +27,8 @@ class _AddAnnouncementState extends State<AddAnnouncement> {
   String? _imageUrl;
   String? _fileName;
   Uint8List? _imageBytes;
+
+  final NavigationController navigationController = Get.find();
 
   @override
   void initState() {
@@ -147,7 +150,12 @@ class _AddAnnouncementState extends State<AddAnnouncement> {
                           label: Text("Home"),
                           onTap: () => Get.toNamed('/adminMain'),
                         ),
-                        MoonBreadcrumbItem(label: Text("Pengumuman")),
+                        MoonBreadcrumbItem(
+                          label: Text("Pengumuman"),
+                          onTap:
+                              () =>
+                                  navigationController.selectedIndex.value = 6,
+                        ),
                         MoonBreadcrumbItem(label: Text("Tambah Pengumuman")),
                       ],
                     ),
