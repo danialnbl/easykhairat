@@ -13,14 +13,8 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Load environment variables
-  // await dotenv.load(fileName: ".env");
-
   const supabaseUrl = 'https://djeeipnokclsjabwadoq.supabase.co';
-  var supabaseKey = '';
-
-  // supabaseKey =  dotenv.env['SUPABASE_KEY']!;
-  supabaseKey =  String.fromEnvironment('SUPABASE_KEY');
+  const supabaseKey = String.fromEnvironment('SUPABASE_KEY');
 
   await Supabase.initialize(url: supabaseUrl, anonKey: supabaseKey);
 
