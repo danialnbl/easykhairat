@@ -14,12 +14,13 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // Load environment variables
-  await dotenv.load(fileName: ".env");
+  // await dotenv.load(fileName: ".env");
 
   const supabaseUrl = 'https://djeeipnokclsjabwadoq.supabase.co';
   var supabaseKey = '';
 
-  supabaseKey = dotenv.env['SUPABASE_KEY']!;
+  // supabaseKey =  dotenv.env['SUPABASE_KEY']!;
+  supabaseKey =  String.fromEnvironment('SUPABASE_KEY');
 
   await Supabase.initialize(url: supabaseUrl, anonKey: supabaseKey);
 
