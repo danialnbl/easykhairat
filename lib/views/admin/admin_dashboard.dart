@@ -157,7 +157,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
           children: [
             Expanded(flex: 1, child: RegisteredMembersChart()),
             const SizedBox(width: 8),
-            const Expanded(flex: 1, child: OverallFeeChart()),
+            Expanded(flex: 1, child: OverallFeeChart()),
             const SizedBox(width: 8),
             const Expanded(flex: 1, child: TotalClaimsChart()),
           ],
