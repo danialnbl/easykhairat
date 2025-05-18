@@ -16,7 +16,7 @@ void main() async {
   const supabaseUrl = 'https://djeeipnokclsjabwadoq.supabase.co';
   // Replace this with your actual Supabase anon key
   const supabaseKey =
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRqZWVpcG5va2Nsc2phYndhZG9xIiwicm9sZSI6ImFub24iLCJpYXQiOjE2ODUwMzk5ODUsImV4cCI6MjAwMDYxNTk4NX0.gQizkBNCJ9Jx1DWAFHDM6vPJKkSj2Cxjf_eKb40vXrA';
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRqZWVpcG5va2Nsc2phYndhZG9xIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDA0MTE4NDUsImV4cCI6MjA1NTk4Nzg0NX0.sk1UM2xXnUmk6N0jV5UCytHNmWgX9CA6f1uI102uijg';
 
   await Supabase.initialize(url: supabaseUrl, anonKey: supabaseKey);
 
