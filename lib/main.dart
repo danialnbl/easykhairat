@@ -14,7 +14,9 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   const supabaseUrl = 'https://djeeipnokclsjabwadoq.supabase.co';
-  const supabaseKey = String.fromEnvironment('SUPABASE_KEY');
+  // Replace this with your actual Supabase anon key
+  const supabaseKey =
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRqZWVpcG5va2Nsc2phYndhZG9xIiwicm9sZSI6ImFub24iLCJpYXQiOjE2ODUwMzk5ODUsImV4cCI6MjAwMDYxNTk4NX0.gQizkBNCJ9Jx1DWAFHDM6vPJKkSj2Cxjf_eKb40vXrA';
 
   await Supabase.initialize(url: supabaseUrl, anonKey: supabaseKey);
 
