@@ -105,7 +105,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
                 () => _statCard(
                   'Jumlah Ahli Aktif',
                   userController.users.length.toString(), // dynamic count
-                  '+5',
+
                   Colors.green,
                 ),
               ),
@@ -116,7 +116,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
                 () => _statCard(
                   'Kutipan Yuran',
                   'RM ${paymentController.totalPayments.value.toStringAsFixed(2)}',
-                  '-1.23%',
+
                   Colors.red,
                 ),
               ),
@@ -128,7 +128,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
                 () => _statCard(
                   'Tuntutan Ahli Tahun Ini',
                   'RM ${claimLineController.totalClaimLine.value.toStringAsFixed(2)}',
-                  '-1.23%',
+
                   Colors.red,
                 ),
               ),
@@ -143,19 +143,19 @@ class _AdminDashboardState extends State<AdminDashboard> {
                 () => _statCard(
                   'Jumlah Admin',
                   userController.adminUsers.length.toString(),
-                  '+1',
+
                   Colors.green,
                 ),
               ),
             ),
 
-            Expanded(child: _statCard('Jumlah AJK', '10', '+2', Colors.green)),
+            Expanded(child: _statCard('Jumlah AJK', '10', Colors.green)),
           ],
         ),
         const SizedBox(height: 8),
         Row(
           children: [
-            const Expanded(flex: 1, child: RegisteredMembersChart()),
+            Expanded(flex: 1, child: RegisteredMembersChart()),
             const SizedBox(width: 8),
             const Expanded(flex: 1, child: OverallFeeChart()),
             const SizedBox(width: 8),
@@ -166,7 +166,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
     );
   }
 
-  Widget _statCard(String title, String value, String change, Color color) {
+  Widget _statCard(String title, String value, Color color) {
     return Card(
       color: Colors.white,
       elevation: 2,
@@ -190,18 +190,6 @@ class _AdminDashboardState extends State<AdminDashboard> {
               ),
             ),
             const SizedBox(height: 4),
-            Row(
-              children: [
-                Icon(
-                  change.startsWith('-')
-                      ? Icons.arrow_downward
-                      : Icons.arrow_upward,
-                  color: color,
-                  size: 14,
-                ),
-                Text(change, style: TextStyle(fontSize: 12, color: color)),
-              ],
-            ),
           ],
         ),
       ),

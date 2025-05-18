@@ -271,4 +271,22 @@ class UserController extends GetxController {
   Future<void> signOut() async {
     await supabase.auth.signOut();
   }
+
+  // Add this method to the UserController class
+  Map<int, int> getRegistrationsByYear() {
+    Map<int, int> yearCounts = {};
+
+    for (var user in users) {
+      final year = user.userCreatedAt.year;
+      yearCounts[year] = (yearCounts[year] ?? 0) + 1;
+    }
+
+    // Make sure all years have a value, even if zero
+    final currentYear = DateTime.now().year;
+    for (int year = currentYear - 3; year <= currentYear; year++) {
+      yearCounts.putIfAbsent(year, () => 0);
+    }
+
+    return yearCounts;
+  }
 }
