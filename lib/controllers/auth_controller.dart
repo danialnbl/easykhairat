@@ -49,8 +49,30 @@ class AuthService {
         // Let SessionController handle the redirection based on session state
         SessionController().checkSession();
       }
-    } catch (e) {
-      Get.snackbar('Sign-in Error', 'Something went wrong.');
+    } catch (error) {
+      print('Sign-in error details: $error'); // Debug log
+
+      String errorMessage = 'Something went wrong.';
+      if (error is AuthException) {
+        switch (error.message) {
+          case 'Invalid login credentials':
+            errorMessage = 'Email atau kata laluan tidak sah.';
+            break;
+          case 'Email not confirmed':
+            errorMessage = 'Sila sahkan email anda terlebih dahulu.';
+            break;
+          default:
+            errorMessage = error.message;
+        }
+      }
+
+      Get.snackbar(
+        'Ralat Log Masuk',
+        errorMessage,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+        duration: const Duration(seconds: 3),
+      );
     }
   }
 
