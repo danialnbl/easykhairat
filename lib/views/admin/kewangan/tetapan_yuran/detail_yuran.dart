@@ -125,11 +125,8 @@ class DetailYuranState extends State<DetailYuran> {
                                   children: [
                                     Text(
                                       "Maklumat Yuran",
-                                      style: TextStyle(
-                                        fontSize: 20,
-                                        fontWeight: FontWeight.bold,
-                                        color: MoonColors.light.piccolo,
-                                      ),
+                                      style:
+                                          Theme.of(context).textTheme.bodyLarge,
                                     ),
                                     const SizedBox(height: 16),
                                     _buildInfoRow(
@@ -173,11 +170,7 @@ class DetailYuranState extends State<DetailYuran> {
                             children: [
                               Text(
                                 "Edit Maklumat Yuran",
-                                style: TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
-                                  color: MoonColors.light.piccolo,
-                                ),
+                                style: Theme.of(context).textTheme.bodyLarge,
                               ),
                               const SizedBox(height: 16),
                               TextFormField(
@@ -234,119 +227,127 @@ class DetailYuranState extends State<DetailYuran> {
                                 },
                               ),
                               const SizedBox(height: 24),
-                              // Replace the existing ElevatedButton with this updated version
-                              SizedBox(
-                                width: double.infinity,
-                                child: ElevatedButton(
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: MoonColors.light.piccolo,
-                                    padding: const EdgeInsets.symmetric(
-                                      vertical: 16,
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  ElevatedButton(
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor:
+                                          Theme.of(context).primaryColor,
                                     ),
-                                  ),
-                                  onPressed: () async {
-                                    print(
-                                      "Button pressed - initial",
-                                    ); // Debug print
-
-                                    if (_editFormKey.currentState!.validate()) {
+                                    onPressed: () async {
                                       print(
-                                        "Form validated successfully",
+                                        "Button pressed - initial",
                                       ); // Debug print
 
-                                      try {
-                                        final existingFee =
-                                            feeController.getFee();
+                                      if (_editFormKey.currentState!
+                                          .validate()) {
                                         print(
-                                          "Existing fee: ${existingFee?.feeId}",
+                                          "Form validated successfully",
                                         ); // Debug print
 
-                                        final updatedFee = FeeModel(
-                                          feeId: existingFee?.feeId,
-                                          feeDescription:
-                                              namaYuranController.text,
-                                          feeDue: DateTime.now().add(
-                                            const Duration(days: 30),
-                                          ),
-                                          feeType: yuranType,
-                                          feeCreatedAt:
-                                              existingFee?.feeCreatedAt ??
-                                              DateTime.now(),
-                                          feeUpdatedAt: DateTime.now(),
-                                          adminId:
-                                              1, // Replace with actual admin ID
-                                          feeAmount: double.parse(
-                                            amountController.text,
-                                          ),
-                                          feeStatus: 'Active',
-                                        );
+                                        try {
+                                          final existingFee =
+                                              feeController.getFee();
+                                          print(
+                                            "Existing fee: ${existingFee?.feeId}",
+                                          ); // Debug print
 
-                                        print(
-                                          "Updating fee with data: ${updatedFee.toString()}",
-                                        ); // Debug print
+                                          final updatedFee = FeeModel(
+                                            feeId: existingFee?.feeId,
+                                            feeDescription:
+                                                namaYuranController.text,
+                                            feeDue: DateTime.now().add(
+                                              const Duration(days: 30),
+                                            ),
+                                            feeType: yuranType,
+                                            feeCreatedAt:
+                                                existingFee?.feeCreatedAt ??
+                                                DateTime.now(),
+                                            feeUpdatedAt: DateTime.now(),
+                                            adminId:
+                                                1, // Replace with actual admin ID
+                                            feeAmount: double.parse(
+                                              amountController.text,
+                                            ),
+                                            feeStatus: 'Active',
+                                          );
 
-                                        if (existingFee != null) {
-                                          await feeController.updateFee(
-                                            updatedFee,
-                                          ); // Use await here
-                                          print("Fee updated successfully");
+                                          print(
+                                            "Updating fee with data: ${updatedFee.toString()}",
+                                          ); // Debug print
+
+                                          if (existingFee != null) {
+                                            await feeController.updateFee(
+                                              updatedFee,
+                                            ); // Use await here
+                                            print("Fee updated successfully");
+                                            Get.snackbar(
+                                              'Berjaya',
+                                              'Maklumat yuran telah dikemaskini.',
+                                              backgroundColor: Colors.green,
+                                              colorText: Colors.white,
+                                              duration: const Duration(
+                                                seconds: 3,
+                                              ),
+                                              snackPosition: SnackPosition.TOP,
+                                            );
+                                            await Future.delayed(
+                                              const Duration(seconds: 1),
+                                            ); // Small delay before navigation
+                                            navController.selectedIndex.value =
+                                                3;
+                                          } else {
+                                            await feeController.addFee(
+                                              updatedFee,
+                                            ); // Use await here
+                                            print("New fee added successfully");
+                                            Get.snackbar(
+                                              'Berjaya',
+                                              'Maklumat yuran telah ditambah.',
+                                              backgroundColor: Colors.green,
+                                              colorText: Colors.white,
+                                              duration: const Duration(
+                                                seconds: 3,
+                                              ),
+                                              snackPosition: SnackPosition.TOP,
+                                            );
+                                            await Future.delayed(
+                                              const Duration(seconds: 1),
+                                            ); // Small delay before navigation
+                                            navController.selectedIndex.value =
+                                                3;
+                                          }
+                                        } catch (e) {
+                                          print(
+                                            "Error occurred: $e",
+                                          ); // Debug print
                                           Get.snackbar(
-                                            'Berjaya',
-                                            'Maklumat yuran telah dikemaskini.',
-                                            backgroundColor: Colors.green,
+                                            'Error',
+                                            'Gagal menyimpan maklumat yuran: $e',
+                                            backgroundColor: Colors.red,
                                             colorText: Colors.white,
-                                            duration: const Duration(
-                                              seconds: 3,
-                                            ),
-                                            snackPosition: SnackPosition.TOP,
                                           );
-                                          await Future.delayed(
-                                            const Duration(seconds: 1),
-                                          ); // Small delay before navigation
-                                          navController.selectedIndex.value = 3;
-                                        } else {
-                                          await feeController.addFee(
-                                            updatedFee,
-                                          ); // Use await here
-                                          print("New fee added successfully");
-                                          Get.snackbar(
-                                            'Berjaya',
-                                            'Maklumat yuran telah ditambah.',
-                                            backgroundColor: Colors.green,
-                                            colorText: Colors.white,
-                                            duration: const Duration(
-                                              seconds: 3,
-                                            ),
-                                            snackPosition: SnackPosition.TOP,
-                                          );
-                                          await Future.delayed(
-                                            const Duration(seconds: 1),
-                                          ); // Small delay before navigation
-                                          navController.selectedIndex.value = 3;
                                         }
-                                      } catch (e) {
-                                        print(
-                                          "Error occurred: $e",
-                                        ); // Debug print
-                                        Get.snackbar(
-                                          'Error',
-                                          'Gagal menyimpan maklumat yuran: $e',
-                                          backgroundColor: Colors.red,
-                                          colorText: Colors.white,
-                                        );
                                       }
-                                    }
-                                  },
-                                  child: Text(
-                                    feeController.getFee() != null
-                                        ? 'Kemaskini'
-                                        : 'Simpan',
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 16,
+                                    },
+                                    child: Text(
+                                      feeController.getFee() != null
+                                          ? 'Kemaskini'
+                                          : 'Simpan',
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                      ),
                                     ),
                                   ),
-                                ),
+                                  const SizedBox(width: 8),
+                                  OutlinedButton(
+                                    onPressed: () {
+                                      Get.back();
+                                    },
+                                    child: const Text('Batal'),
+                                  ),
+                                ],
                               ),
                             ],
                           ),
