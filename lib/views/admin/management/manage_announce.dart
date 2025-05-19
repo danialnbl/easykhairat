@@ -303,14 +303,25 @@ class _ManageAnnounceState extends State<ManageAnnounce> {
             ),
             const SizedBox(height: 16),
             //add button
-            Align(
-              alignment: Alignment.centerRight,
-              child: ElevatedButton(
-                onPressed: () {
-                  navigationController.selectedIndex.value = 14;
-                },
-                child: const Text('Add Announcement'),
-              ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                MoonButton(
+                  leading: const Icon(
+                    MoonIcons.files_add_text_16_light,
+                    color: Colors.white,
+                  ),
+                  buttonSize: MoonButtonSize.md,
+                  onTap: () {
+                    navigationController.selectedIndex.value = 14;
+                  },
+                  label: const Text(
+                    'Add Announcement',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                  backgroundColor: MoonColors.light.roshi,
+                ),
+              ],
             ),
             const SizedBox(height: 16),
             Expanded(child: _buildTable()),
