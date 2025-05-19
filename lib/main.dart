@@ -1,12 +1,5 @@
-import 'package:easykhairat/controllers/auth_controller.dart';
-import 'package:easykhairat/controllers/fee_controller.dart';
-import 'package:easykhairat/controllers/user_controller.dart';
 import 'package:easykhairat/routes/routes.dart';
-import 'package:easykhairat/views/admin/admin_main.dart';
-import 'package:easykhairat/views/admin/kewangan/yuran/yuran_individu.dart';
-import 'package:easykhairat/views/auth/signIn.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 

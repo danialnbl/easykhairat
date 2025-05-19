@@ -19,6 +19,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:moon_design/moon_design.dart';
 import 'package:easykhairat/controllers/navigation_controller.dart';
+import 'package:easykhairat/views/auth/signIn.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class AdminMain extends StatefulWidget {
   const AdminMain({super.key});
@@ -30,6 +32,33 @@ class AdminMain extends StatefulWidget {
 class _AdminMainState extends State<AdminMain> {
   final NavigationController navController = Get.put(NavigationController());
   var expandedIndex = (-1).obs;
+  bool isAuthenticated = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkAuth();
+    // Listen for auth state changes
+    Supabase.instance.client.auth.onAuthStateChange.listen((data) {
+      final AuthChangeEvent event = data.event;
+      if (event == AuthChangeEvent.signedOut) {
+        Get.offAll(() => const SignInPage());
+      }
+    });
+  }
+
+  Future<void> _checkAuth() async {
+    final currentUser = Supabase.instance.client.auth.currentUser;
+    if (currentUser == null) {
+      Get.offAll(() => const SignInPage());
+    } else {
+      if (mounted) {
+        setState(() {
+          isAuthenticated = true;
+        });
+      }
+    }
+  }
 
   Widget _buildSidebar() {
     return Container(
@@ -239,6 +268,10 @@ class _AdminMainState extends State<AdminMain> {
 
   @override
   Widget build(BuildContext context) {
+    if (!isAuthenticated) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
     bool isWeb = MediaQuery.of(context).size.width > 800;
 
     return Scaffold(
