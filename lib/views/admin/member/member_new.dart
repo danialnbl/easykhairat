@@ -26,8 +26,6 @@ class _MemberNewState extends State<MemberNew> {
   final TextEditingController _katalaluanController = TextEditingController();
   final UserController userController = Get.find<UserController>();
 
-  Uint8List? _webImageBytes;
-
   Future<void> _selectDate(
     BuildContext context,
     TextEditingController controller,
@@ -42,24 +40,6 @@ class _MemberNewState extends State<MemberNew> {
       controller.text = DateFormat('dd-MM-yyyy').format(picked);
     }
   }
-
-  // Future<void> _pickImageWeb() async {
-  //   final ImagePicker picker = ImagePicker();
-  //   final XFile? file = await picker.pickImage(source: ImageSource.gallery);
-  //   if (file != null) {
-  //     final data = await file.readAsBytes();
-  //     setState(() {
-  //       _webImageBytes = data;
-  //     });
-  //   }
-  // }
-
-  // Widget _buildImagePreview() {
-  //   if (_webImageBytes != null) {
-  //     return Image.memory(_webImageBytes!, fit: BoxFit.cover);
-  //   }
-  //   return Center(child: Text("Tiada Gambar"));
-  // }
 
   @override
   Widget build(BuildContext context) {
@@ -156,22 +136,6 @@ class _MemberNewState extends State<MemberNew> {
                                 ),
                               ),
                               const SizedBox(height: 16),
-                              // Text("Gambar IC"),
-                              // Container(
-                              //   height: 150,
-                              //   width: 150,
-                              //   margin: EdgeInsets.symmetric(vertical: 8),
-                              //   decoration: BoxDecoration(
-                              //     border: Border.all(color: Colors.grey),
-                              //   ),
-                              //   child: _buildImagePreview(),
-                              // ),
-                              // ElevatedButton.icon(
-                              //   onPressed: _pickImageWeb,
-                              //   icon: Icon(Icons.image, color: Colors.white),
-                              //   label: Text('Pilih Gambar'),
-                              // ),
-                              // const SizedBox(height: 16),
                               TextFormField(
                                 controller: _nomborTelefonController,
                                 decoration: InputDecoration(
@@ -259,9 +223,6 @@ class _MemberNewState extends State<MemberNew> {
                                         _nomborTelefonController.clear();
                                         _nomborIcController.clear();
                                         _alamatController.clear();
-                                        setState(() {
-                                          _webImageBytes = null;
-                                        });
                                       } else {
                                         Get.snackbar(
                                           'Ralat',
@@ -280,10 +241,6 @@ class _MemberNewState extends State<MemberNew> {
                                       _namaPenuhController.clear();
                                       _emailController.clear();
                                       _tarikhLulusController.clear();
-
-                                      setState(() {
-                                        _webImageBytes = null;
-                                      });
                                     },
 
                                     child: Text("Batal"),
