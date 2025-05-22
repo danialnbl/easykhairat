@@ -11,6 +11,7 @@ import 'package:easykhairat/views/admin/kewangan/yuran/yuran_individu.dart';
 import 'package:easykhairat/views/admin/kewangan/tetapan_yuran/tetapan_yuran.dart';
 import 'package:easykhairat/views/admin/management/add_announce.dart';
 import 'package:easykhairat/views/admin/management/detail_announce.dart';
+import 'package:easykhairat/views/admin/management/laporan.dart';
 import 'package:easykhairat/views/admin/management/manage_announce.dart';
 import 'package:easykhairat/views/admin/member/maklumat_ahli.dart';
 import 'package:easykhairat/views/admin/member/member_list.dart';
@@ -291,7 +292,7 @@ class _AdminMainState extends State<AdminMain> {
                   ProsesYuran(),
                   ProsesTuntutan(),
                   ManageAnnounce(),
-                  Center(child: Text('Laporan Screen')),
+                  LaporanPage(),
                   AdminProfile(),
                   YuranIndividu(),
                   FormYuran(),
