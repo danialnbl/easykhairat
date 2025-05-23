@@ -338,6 +338,18 @@ class _LaporanPageState extends State<LaporanPage> {
             const SizedBox(height: 16),
             Row(
               children: [
+                ElevatedButton.icon(
+                  icon: const Icon(Icons.picture_as_pdf),
+                  label: const Text('Download PDF'),
+                  onPressed: exportToPDF,
+                ),
+                const SizedBox(width: 8),
+                ElevatedButton.icon(
+                  icon: const Icon(Icons.grid_on),
+                  label: const Text('Download Excel'),
+                  onPressed: exportToExcel,
+                ),
+                const SizedBox(width: 16),
                 Obx(
                   () => DropdownButton<String>(
                     value: selectedDataType.value,
@@ -357,18 +369,6 @@ class _LaporanPageState extends State<LaporanPage> {
                       }
                     },
                   ),
-                ),
-                const SizedBox(width: 16),
-                ElevatedButton.icon(
-                  icon: const Icon(Icons.picture_as_pdf),
-                  label: const Text('Download PDF'),
-                  onPressed: exportToPDF,
-                ),
-                const SizedBox(width: 8),
-                ElevatedButton.icon(
-                  icon: const Icon(Icons.grid_on),
-                  label: const Text('Download Excel'),
-                  onPressed: exportToExcel,
                 ),
               ],
             ),
