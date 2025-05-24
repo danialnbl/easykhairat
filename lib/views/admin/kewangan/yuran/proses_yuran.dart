@@ -31,6 +31,12 @@ class ProsesYuranState extends State<ProsesYuran> {
   // Add a map to store stream subscriptions
   final Map<String, StreamSubscription> _paymentStreams = {};
 
+  // Add these variables to track summary stats
+  RxInt totalMembers = 0.obs;
+  RxInt completedPayments = 0.obs;
+  RxInt pendingPayments = 0.obs;
+  RxDouble totalPendingAmount = 0.0.obs;
+
   @override
   void initState() {
     super.initState();
@@ -60,6 +66,9 @@ class ProsesYuranState extends State<ProsesYuran> {
 
     // Setup real-time monitoring for all users
     _setupRealTimePaymentMonitoring();
+
+    // Calculate summary statistics
+    _calculateSummaryStats();
   }
 
   // Setup real-time payment monitoring for all users
@@ -194,6 +203,7 @@ class ProsesYuranState extends State<ProsesYuran> {
                 : () {
                   userPaymentStatus.clear();
                   _setupRealTimePaymentMonitoring();
+                  _calculateSummaryStats();
                 },
         icon:
             feeController.isLoading.value
@@ -241,173 +251,421 @@ class ProsesYuranState extends State<ProsesYuran> {
     }).toList();
   }
 
-  Widget _buildTable() {
+  // Add a summary cards widget
+  Widget _buildSummaryCards() {
     return Obx(() {
-      final filteredUsers = getFilteredUsers();
-
-      if (userController.isLoading.value) {
-        return const Center(child: CircularProgressIndicator());
-      }
-
-      if (filteredUsers.isEmpty) {
-        return const Center(child: Text('No members found'));
-      }
-
-      return Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Table(
-          columnWidths: const {
-            0: FlexColumnWidth(2), // User ID
-            1: FlexColumnWidth(2), // Name
-            2: FlexColumnWidth(2), // IC Baru
-            3: FlexColumnWidth(3), // Alamat
-            4: FlexColumnWidth(2), // Status Bayaran
-            5: FlexColumnWidth(2), // Actions
-          },
-          border: TableBorder(
-            horizontalInside: BorderSide(color: Colors.grey.shade300, width: 1),
-          ),
-          children: [
-            // Header
-            TableRow(
-              decoration: BoxDecoration(color: MoonColors.light.roshi),
-              children: const [
-                Padding(
-                  padding: EdgeInsets.all(12.0),
-                  child: Text(
-                    'User ID',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding: EdgeInsets.all(12.0),
-                  child: Text(
-                    'Nama',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding: EdgeInsets.all(12.0),
-                  child: Text(
-                    'IC Baru',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding: EdgeInsets.all(12.0),
-                  child: Text(
-                    'Alamat',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding: EdgeInsets.all(12.0),
-                  child: Center(
-                    child: Text(
-                      'Status Bayaran',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding: EdgeInsets.all(12.0),
-                  child: Text(
-                    'Actions',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-
-            // Data rows
-            ...filteredUsers.map((user) {
-              return TableRow(
+      return Row(
+        children: [
+          // Total Members Card
+          Expanded(
+            child: Card(
+              elevation: 4,
+              child: Container(
+                padding: const EdgeInsets.all(16.0),
                 decoration: BoxDecoration(
-                  color: Colors.white,
-                  border: Border(
-                    bottom: BorderSide(color: Colors.grey.shade300, width: 1),
-                  ),
+                  color: Colors.blue.shade50,
+                  borderRadius: BorderRadius.circular(8),
                 ),
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.all(12.0),
-                    child: Text(
-                      user.userId.substring(0, 8),
-                      style: const TextStyle(color: Colors.black87),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(12.0),
-                    child: Text(
-                      user.userName,
-                      style: const TextStyle(color: Colors.black87),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(12.0),
-                    child: Text(
-                      user.userIdentification,
-                      style: const TextStyle(color: Colors.black87),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(12.0),
-                    child: Text(
-                      user.userAddress,
-                      style: const TextStyle(color: Colors.black87),
-                    ),
-                  ),
-                  // Status Bayaran - Updated to use payment status
-                  Padding(
-                    padding: const EdgeInsets.all(12.0),
-                    child: Center(child: _getPaymentStatusWidget(user.userId)),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(12.0),
-                    child: Row(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
                       children: [
-                        IconButton(
-                          icon: const Icon(
-                            Icons.visibility,
-                            color: Colors.green,
-                          ),
-                          onPressed: () {
-                            feeController.fetchYuranTertunggak(user.userId);
-                            paymentController.fetchPaymentsByUserId(
-                              user.userId,
-                            );
-                            navController.setUser(user);
-                            navController.changeIndex(9);
-                          },
+                        Icon(Icons.people, color: Colors.blue),
+                        SizedBox(width: 8),
+                        Text(
+                          'Total Ahli',
+                          style: TextStyle(color: Colors.grey),
                         ),
                       ],
                     ),
-                  ),
-                ],
-              );
-            }).toList(),
-          ],
-        ),
+                    SizedBox(height: 8),
+                    Text(
+                      '${totalMembers.value}',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          // Completed Payments Card
+          Expanded(
+            child: Card(
+              elevation: 4,
+              child: Container(
+                padding: const EdgeInsets.all(16.0),
+                decoration: BoxDecoration(
+                  color: Colors.green.shade50,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(Icons.check_circle, color: Colors.green),
+                        SizedBox(width: 8),
+                        Text('Selesai', style: TextStyle(color: Colors.grey)),
+                      ],
+                    ),
+                    SizedBox(height: 8),
+                    Text(
+                      '${completedPayments.value}',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          // Pending Payments Card
+          Expanded(
+            child: Card(
+              elevation: 4,
+              child: Container(
+                padding: const EdgeInsets.all(16.0),
+                decoration: BoxDecoration(
+                  color: Colors.red.shade50,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(Icons.warning, color: Colors.red),
+                        SizedBox(width: 8),
+                        Text(
+                          'Tertunggak',
+                          style: TextStyle(color: Colors.grey),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 8),
+                    Text(
+                      '${pendingPayments.value}',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          // Total Pending Amount Card
+          Expanded(
+            child: Card(
+              elevation: 4,
+              child: Container(
+                padding: const EdgeInsets.all(16.0),
+                decoration: BoxDecoration(
+                  color: Colors.amber.shade50,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(Icons.monetization_on, color: Colors.amber),
+                        SizedBox(width: 8),
+                        Text(
+                          'Jumlah Tertunggak',
+                          style: TextStyle(color: Colors.grey),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 8),
+                    Text(
+                      'RM ${totalPendingAmount.value.toStringAsFixed(2)}',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
       );
     });
+  }
+
+  // Enhanced search widget that matches your image
+  Widget _buildSearchBar() {
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Row(
+          children: [
+            Icon(Icons.search, color: Colors.blue),
+            SizedBox(width: 8),
+            Text(
+              "Cari & Tapis Ahli",
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            SizedBox(width: 20),
+            // Name search
+            Expanded(
+              child: Container(
+                height: 40,
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey.shade300),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Row(
+                  children: [
+                    SizedBox(width: 10),
+                    Icon(Icons.person, color: Colors.grey),
+                    SizedBox(width: 8),
+                    Expanded(
+                      child: TextField(
+                        controller: nameSearchController,
+                        decoration: InputDecoration(
+                          hintText: "Cari mengikut nama...",
+                          border: InputBorder.none,
+                        ),
+                        onChanged: (value) {
+                          setState(() {});
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            SizedBox(width: 16),
+            // IC search
+            Expanded(
+              child: Container(
+                height: 40,
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey.shade300),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Row(
+                  children: [
+                    SizedBox(width: 10),
+                    Icon(Icons.credit_card, color: Colors.grey),
+                    SizedBox(width: 8),
+                    Expanded(
+                      child: TextField(
+                        controller: icSearchController,
+                        decoration: InputDecoration(
+                          hintText: "Cari mengikut IC...",
+                          border: InputBorder.none,
+                        ),
+                        onChanged: (value) {
+                          setState(() {});
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            SizedBox(width: 16),
+            // Filter dropdown
+            Container(
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.grey.shade300),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              padding: EdgeInsets.symmetric(horizontal: 12),
+              child: Obx(
+                () => DropdownButton<String>(
+                  value: selectedFilter.value,
+                  underline: SizedBox(),
+                  items:
+                      ['Semua', 'Selesai', 'Tertunggak']
+                          .map(
+                            (status) => DropdownMenuItem(
+                              value: status,
+                              child: Text(status),
+                            ),
+                          )
+                          .toList(),
+                  onChanged: (value) {
+                    if (value != null) {
+                      selectedFilter.value = value;
+                    }
+                  },
+                ),
+              ),
+            ),
+            SizedBox(width: 16),
+            // Refresh button
+            ElevatedButton(
+              onPressed: () {
+                userPaymentStatus.clear();
+                _setupRealTimePaymentMonitoring();
+                _calculateSummaryStats();
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blue,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
+                child: Text("Refresh"),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Calculate summary statistics
+  void _calculateSummaryStats() {
+    totalMembers.value = userController.normalusers.length;
+    completedPayments.value = 0;
+    pendingPayments.value = 0;
+    totalPendingAmount.value = 0.0;
+
+    for (var user in userController.normalusers) {
+      String userId = user.userId.toString();
+      if (userPaymentStatus[userId] == true) {
+        completedPayments.value++;
+      } else {
+        pendingPayments.value++;
+        // Get fee amount from your fee controller or use default value
+        double feeAmount =
+            400.0; // Default amount if not available from controller
+        if (feeController.yuranGeneral.isNotEmpty) {
+          feeAmount =
+              double.tryParse(
+                feeController.yuranGeneral.first.feeAmount.toString(),
+              ) ??
+              400.0;
+        }
+        totalPendingAmount.value += feeAmount;
+      }
+    }
+
+    // Update UI
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
+  // Build the table showing users and their payment status
+  Widget _buildTable() {
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "Senarai Ahli",
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 16),
+            Expanded(
+              child: Obx(() {
+                var filteredUsers = getFilteredUsers();
+
+                if (filteredUsers.isEmpty) {
+                  return Center(
+                    child: Text(
+                      "Tiada ahli yang ditemui.",
+                      style: TextStyle(fontSize: 16, color: Colors.grey),
+                    ),
+                  );
+                }
+
+                return ListView.builder(
+                  itemCount: filteredUsers.length,
+                  itemBuilder: (context, index) {
+                    final user = filteredUsers[index];
+                    final userId = user.userId.toString();
+
+                    return Card(
+                      margin: EdgeInsets.only(bottom: 8),
+                      child: ListTile(
+                        leading: CircleAvatar(
+                          backgroundColor: Colors.blue.shade100,
+                          child: Icon(Icons.person, color: Colors.blue),
+                        ),
+                        title: Text(
+                          user.userName,
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        subtitle: Text(user.userIdentification),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            _getPaymentStatusWidget(userId),
+                            SizedBox(width: 16),
+                            IconButton(
+                              icon: Icon(Icons.visibility, color: Colors.blue),
+                              onPressed: () {
+                                // Navigate to user detail page or show payment history
+                                feeController.fetchYuranTertunggak(user.userId);
+                                paymentController.fetchPaymentsByUserId(
+                                  user.userId,
+                                );
+                                navController.setUser(user);
+                                navController.changeIndex(9);
+                              },
+                              tooltip: "Lihat Maklumat",
+                            ),
+                            IconButton(
+                              icon: Icon(
+                                Icons.receipt_long,
+                                color: Colors.amber,
+                              ),
+                              onPressed: () {
+                                // Show payment history or add payment
+                                feeController.fetchYuranTertunggak(user.userId);
+                                paymentController.fetchPaymentsByUserId(
+                                  user.userId,
+                                );
+                                navController.setUser(user);
+                                navController.changeIndex(9);
+                              },
+                              tooltip: "Proses Pembayaran",
+                            ),
+                          ],
+                        ),
+                        onTap: () {
+                          feeController.fetchYuranTertunggak(user.userId);
+                          paymentController.fetchPaymentsByUserId(user.userId);
+                          navController.setUser(user);
+                          navController.changeIndex(9);
+                        },
+                      ),
+                    );
+                  },
+                );
+              }),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   @override
@@ -442,63 +700,9 @@ class ProsesYuranState extends State<ProsesYuran> {
               ),
             ),
             const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: nameSearchController,
-                    decoration: InputDecoration(
-                      hintText: "Search by Name...",
-                      prefixIcon: const Icon(Icons.person),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                    onChanged: (value) {
-                      setState(() {});
-                    },
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: TextField(
-                    controller: icSearchController,
-                    decoration: InputDecoration(
-                      hintText: "Search by IC...",
-                      prefixIcon: const Icon(Icons.badge),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                    onChanged: (value) {
-                      setState(() {});
-                    },
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Obx(
-                  () => DropdownButton<String>(
-                    value: selectedFilter.value,
-                    items:
-                        ['Semua', 'Selesai', 'Tertunggak']
-                            .map(
-                              (status) => DropdownMenuItem(
-                                value: status,
-                                child: Text(status),
-                              ),
-                            )
-                            .toList(),
-                    onChanged: (value) {
-                      if (value != null) {
-                        selectedFilter.value = value;
-                      }
-                    },
-                  ),
-                ),
-                const SizedBox(width: 16),
-                _buildRefreshButton(),
-              ],
-            ),
+            _buildSummaryCards(),
+            const SizedBox(height: 16),
+            _buildSearchBar(),
             const SizedBox(height: 16),
             Expanded(child: _buildTable()),
           ],
