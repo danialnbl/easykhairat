@@ -58,20 +58,19 @@ class ProsesYuranState extends State<ProsesYuran> {
             icSearchController.text.toLowerCase(),
           );
 
-      bool matchesFilter =
-          selectedFilter.value == 'Semua' ||
-          (selectedFilter.value == 'Tertunggak' &&
-              feeController.yuranGeneral.any(
-                (fee) =>
-                    fee.feeStatus == 'Tertunggak' && fee.userId == user.userId,
-              )) ||
-          (selectedFilter.value == 'Selesai' &&
-              !feeController.yuranGeneral.any(
-                (fee) =>
-                    fee.feeStatus == 'Tertunggak' && fee.userId == user.userId,
-              ));
+      // bool matchesFilter =
+      //     selectedFilter.value == 'Semua' ||
+      //     (selectedFilter.value == 'Tertunggak' &&
+      //         feeController.yuranGeneral.any(
+      //           (fee) => fee.feeStatus == 'Tertunggak',
+      //         )) ||
+      //     (selectedFilter.value == 'Selesai' &&
+      //         !feeController.yuranGeneral.any(
+      //           (fee) => fee.feeStatus == 'Tertunggak',
+      //         ));
 
-      return matchesName && matchesIC && matchesFilter;
+      // return matchesName && matchesIC && matchesFilter;
+      return matchesName && matchesIC;
     }).toList();
   }
 
@@ -215,46 +214,44 @@ class ProsesYuranState extends State<ProsesYuran> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          if (feeController.yuranGeneral.any(
-                            (fee) =>
-                                fee.feeStatus == 'Tertunggak' &&
-                                fee.userId == user.userId,
-                          ))
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 4,
-                              ),
-                              decoration: BoxDecoration(
-                                color: Colors.red,
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                              child: const Text(
-                                'Tertunggak',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 12,
-                                ),
-                              ),
-                            )
-                          else
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 4,
-                              ),
-                              decoration: BoxDecoration(
-                                color: Colors.green,
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                              child: const Text(
-                                'Selesai',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 12,
-                                ),
-                              ),
-                            ),
+                          // if (feeController.yuranGeneral.any(
+                          //   (fee) => fee.feeStatus == 'Tertunggak',
+                          // ))
+                          //   Container(
+                          //     padding: const EdgeInsets.symmetric(
+                          //       horizontal: 8,
+                          //       vertical: 4,
+                          //     ),
+                          //     decoration: BoxDecoration(
+                          //       color: Colors.red,
+                          //       borderRadius: BorderRadius.circular(4),
+                          //     ),
+                          //     child: const Text(
+                          //       'Tertunggak',
+                          //       style: TextStyle(
+                          //         color: Colors.white,
+                          //         fontSize: 12,
+                          //       ),
+                          //     ),
+                          //   )
+                          // else
+                          //   Container(
+                          //     padding: const EdgeInsets.symmetric(
+                          //       horizontal: 8,
+                          //       vertical: 4,
+                          //     ),
+                          //     decoration: BoxDecoration(
+                          //       color: Colors.green,
+                          //       borderRadius: BorderRadius.circular(4),
+                          //     ),
+                          //     child: const Text(
+                          //       'Selesai',
+                          //       style: TextStyle(
+                          //         color: Colors.white,
+                          //         fontSize: 12,
+                          //       ),
+                          //     ),
+                          //   ),
                         ],
                       ),
                     ),

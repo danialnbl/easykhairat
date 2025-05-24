@@ -1,5 +1,3 @@
-import 'package:easykhairat/models/userModel.dart';
-
 class FeeModel {
   final int? feeId;
   final String feeDescription;
@@ -8,10 +6,7 @@ class FeeModel {
   final DateTime feeCreatedAt;
   final DateTime feeUpdatedAt;
   final int adminId;
-  final String? userId;
   final double feeAmount;
-  final String? feeStatus;
-  final User? user;
 
   FeeModel({
     this.feeId,
@@ -21,10 +16,7 @@ class FeeModel {
     required this.feeCreatedAt,
     required this.feeUpdatedAt,
     required this.adminId,
-    this.userId,
     required this.feeAmount,
-    this.feeStatus,
-    this.user,
   });
 
   factory FeeModel.fromJson(Map<String, dynamic> json) {
@@ -36,10 +28,7 @@ class FeeModel {
       feeCreatedAt: DateTime.parse(json['fee_created_at']),
       feeUpdatedAt: DateTime.parse(json['fee_updated_at']),
       adminId: json['admin_id'],
-      userId: json['user_id'],
       feeAmount: (json['fee_amount'] as num).toDouble(),
-      feeStatus: json['fee_status'],
-      user: json['users'] != null ? User.fromJson(json['users']) : null,
     );
   }
 
@@ -51,13 +40,11 @@ class FeeModel {
       'fee_created_at': feeCreatedAt.toIso8601String(),
       'fee_updated_at': feeUpdatedAt.toIso8601String(),
       'admin_id': adminId,
-      'user_id': userId,
       'fee_amount': feeAmount,
-      'fee_status': feeStatus,
     };
 
     if (feeId != null) {
-      data['fee_id'] = feeId; // Only include if not null
+      data['fee_id'] = feeId as int; // Cast to non-nullable int
     }
 
     return data;
@@ -71,7 +58,6 @@ class FeeModel {
     DateTime? feeCreatedAt,
     DateTime? feeUpdatedAt,
     int? adminId,
-    String? userId,
     double? feeAmount,
     String? feeStatus,
   }) {
@@ -83,14 +69,12 @@ class FeeModel {
       feeCreatedAt: feeCreatedAt ?? this.feeCreatedAt,
       feeUpdatedAt: feeUpdatedAt ?? this.feeUpdatedAt,
       adminId: adminId ?? this.adminId,
-      userId: userId ?? this.userId,
       feeAmount: feeAmount ?? this.feeAmount,
-      feeStatus: feeStatus ?? this.feeStatus,
     );
   }
 
   @override
   String toString() {
-    return 'FeeModel(feeId: $feeId, description: $feeDescription, due: $feeDue, type: $feeType, amount: $feeAmount, status: $feeStatus)';
+    return 'FeeModel(feeId: $feeId, description: $feeDescription, due: $feeDue, type: $feeType, amount: $feeAmount)';
   }
 }

@@ -226,12 +226,6 @@ class YuranIndividuState extends State<YuranIndividu> {
                                         paymentController
                                             .addPayment(payment)
                                             .then((_) {
-                                              // Update the fee status to "Dibayar"
-                                              feeController.updateFeeStatus(
-                                                int.parse(selectedInvoice!),
-                                                "Dibayar",
-                                              );
-
                                               // Clear the form after successful submission
                                               _formKey.currentState?.reset();
                                               amountController.clear();

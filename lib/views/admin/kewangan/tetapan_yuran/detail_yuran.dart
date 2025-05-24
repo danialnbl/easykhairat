@@ -270,7 +270,6 @@ class DetailYuranState extends State<DetailYuran> {
                                             feeAmount: double.parse(
                                               amountController.text,
                                             ),
-                                            feeStatus: 'Active',
                                           );
 
                                           print(

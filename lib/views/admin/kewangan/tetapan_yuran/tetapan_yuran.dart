@@ -13,8 +13,6 @@ class ManageFee extends StatelessWidget {
   final FeeController feeController = Get.put(FeeController());
   final NavigationController navigationController =
       Get.find<NavigationController>();
-
-  RxString selectedFilter = 'Semua Yuran'.obs;
   TextEditingController searchController = TextEditingController();
 
   @override
@@ -72,26 +70,6 @@ class ManageFee extends StatelessWidget {
                     },
                   ),
                 ),
-                const SizedBox(width: 16),
-                Obx(
-                  () => DropdownButton<String>(
-                    value: selectedFilter.value,
-                    items:
-                        ['Semua Yuran', 'Individu', 'General']
-                            .map(
-                              (status) => DropdownMenuItem(
-                                value: status,
-                                child: Text(status),
-                              ),
-                            )
-                            .toList(),
-                    onChanged: (value) {
-                      if (value != null) {
-                        selectedFilter.value = value;
-                      }
-                    },
-                  ),
-                ),
               ],
             ),
             const SizedBox(height: 16),
@@ -134,14 +112,7 @@ class ManageFee extends StatelessWidget {
                   searchController.text.toLowerCase(),
                 );
 
-            // Determine fee type based on userId
-            String feeType = fee.userId != null ? 'individu' : 'general';
-
-            bool matchesFilter =
-                selectedFilter.value == 'Semua Yuran' ||
-                feeType == selectedFilter.value.toLowerCase();
-
-            return matchesSearch && matchesFilter;
+            return matchesSearch;
           }).toList();
 
       if (feeController.isLoading.value) {
@@ -183,7 +154,6 @@ class ManageFee extends StatelessWidget {
         _TableHeaderCell('Untuk Tahun'),
         _TableHeaderCell('Jumlah (RM)'),
         _TableHeaderCell('Jana Pada'),
-        _TableHeaderCell('Ditetapkan Untuk'),
         _TableHeaderCell('Actions'),
       ],
     );
@@ -199,7 +169,6 @@ class ManageFee extends StatelessWidget {
         _TableCell(
           "${fee.feeCreatedAt.day}/${fee.feeCreatedAt.month}/${fee.feeCreatedAt.year}",
         ),
-        _TableCell(fee.user?.userName ?? "General"),
         Padding(
           padding: const EdgeInsets.all(12.0),
           child: Row(

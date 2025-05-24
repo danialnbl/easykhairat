@@ -13,7 +13,6 @@ class FeeController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    // fetchFees();
     listenForRealTimeUpdates();
   }
 
@@ -21,22 +20,12 @@ class FeeController extends GetxController {
   Future<void> fetchFees() async {
     try {
       isLoading.value = true;
-      final response = await supabase
-          .from('fees')
-          .select(
-            '*, users(*)',
-          ); // Join fees table with users table using user_id
-
-      // Debug the raw response from Supabase
-      // print("Response from Supabase: $response");
+      final response = await supabase.from('fees').select('*');
 
       final fetchedFees =
           (response as List<dynamic>)
               .map((json) => FeeModel.fromJson(json as Map<String, dynamic>))
               .toList();
-
-      // Debug the fetched fees
-      // print("Fetched fees: $fetchedFees");
 
       yuranGeneral.assignAll(fetchedFees);
     } catch (e) {
@@ -47,43 +36,66 @@ class FeeController extends GetxController {
     }
   }
 
-  // Fetch fees by user ID
+  // Fetch fees by user ID that don't have payments yet (tertunggak/outstanding)
   Future<void> fetchYuranTertunggak(String userId) async {
-    if (userId == null || userId.isEmpty) {
+    if (userId.isEmpty) {
       Get.snackbar('Error', 'User ID is invalid');
-      return; // Avoid making a query if the user ID is invalid
+      return;
     }
 
     try {
       isLoading.value = true;
+      print("Fetching outstanding fees for user ID: $userId");
 
-      // Debug the user ID being used
-      print("Fetching fees for user ID: $userId with status Tertunggak");
+      // First get all fees
+      final allFeesResponse = await supabase.from('fees').select('''
+            fee_id,
+            fee_description,
+            fee_due,
+            fee_type,
+            fee_created_at,
+            fee_updated_at,
+            admin_id,
+            fee_amount
+          ''');
 
-      final response = await supabase
-          .from('fees')
-          .select()
-          .eq('user_id', userId) // Ensures filtering by user_id
-          .eq('fee_status', 'Tertunggak'); // Ensures filtering by fee_status
+      // Then get all fee IDs that have been paid by this user
+      final paidFeesResponse = await supabase
+          .from('payments')
+          .select('fee_id')
+          .eq('user_id', userId)
+          .not('fee_id', 'is', null);
 
-      // Debug the raw response from Supabase
-      // print("Response from Supabase: $response");
-
-      // Handle the case where the response might not be in the expected format
-      if (response is List) {
-        final fetchedFees =
-            (response as List<dynamic>)
+      if (allFeesResponse is List && paidFeesResponse is List) {
+        final allFees =
+            (allFeesResponse as List<dynamic>)
                 .map((json) => FeeModel.fromJson(json as Map<String, dynamic>))
                 .toList();
 
-        yuranTertunggak.assignAll(fetchedFees);
+        final paidFeeIds =
+            (paidFeesResponse as List<dynamic>)
+                .map((payment) => payment['fee_id'] as int)
+                .toSet();
+
+        // Filter out fees that have been paid by this user
+        final outstandingFees =
+            allFees
+                .where(
+                  (fee) => fee.feeId != null && !paidFeeIds.contains(fee.feeId),
+                )
+                .toList();
+
+        yuranTertunggak.assignAll(outstandingFees);
+        print(
+          "Found ${outstandingFees.length} outstanding fees for user $userId",
+        );
       } else {
-        print("Unexpected response format: $response");
+        print("Unexpected response format");
         Get.snackbar('Error', 'Unexpected response format');
       }
     } catch (e) {
-      print("Error fetching fees by user ID and status: $e");
-      Get.snackbar('Error', 'Failed to fetch fees');
+      print("Error fetching outstanding fees: $e");
+      Get.snackbar('Error', 'Failed to fetch outstanding fees');
     } finally {
       isLoading.value = false;
     }
@@ -94,6 +106,7 @@ class FeeController extends GetxController {
     try {
       isLoading.value = true;
       await supabase.from('fees').insert(fee.toJson());
+      await fetchFees(); // Refresh the list
       Get.snackbar(
         'Berjaya',
         'Maklumat yuran telah disimpan.',
@@ -102,17 +115,21 @@ class FeeController extends GetxController {
       );
     } catch (e) {
       print("Error adding fee: $e");
-      Get.snackbar('Error', 'Failed to add fee');
+      Get.snackbar('Error', 'Failed to add fee: $e');
     } finally {
       isLoading.value = false;
     }
   }
 
   // Update a fee
-  // Replace the existing updateFee method
   Future<void> updateFee(FeeModel fee) async {
     try {
       isLoading.value = true;
+
+      if (fee.feeId == null) {
+        throw Exception('Fee ID cannot be null for update operation');
+      }
+
       final updateData = {
         'fee_description': fee.feeDescription,
         'fee_due': fee.feeDue.toIso8601String(),
@@ -120,13 +137,11 @@ class FeeController extends GetxController {
         'fee_updated_at': DateTime.now().toIso8601String(),
         'admin_id': fee.adminId,
         'fee_amount': fee.feeAmount,
-        'fee_status': fee.feeStatus,
       };
 
-      print("Updating fee with data: $updateData"); // Debug print
+      print("Updating fee with ID: ${fee.feeId} and data: $updateData");
 
       await supabase.from('fees').update(updateData).eq('fee_id', fee.feeId!);
-
       await fetchFees(); // Refresh the fees list
 
       Get.snackbar(
@@ -148,34 +163,24 @@ class FeeController extends GetxController {
     }
   }
 
-  // Update fee status
-  Future<void> updateFeeStatus(int feeId, String status) async {
-    try {
-      isLoading.value = true;
-      await supabase
-          .from('fees')
-          .update({'fee_status': status})
-          .eq('fee_id', feeId);
-      Get.snackbar('Success', 'Fee status updated');
-    } catch (e) {
-      print("Error updating fee status: $e");
-      Get.snackbar('Error', 'Failed to update fee status');
-    } finally {
-      isLoading.value = false;
-    }
-  }
-
   // Delete a fee
   Future<void> deleteFee(int feeId) async {
     try {
       isLoading.value = true;
-      // Check if feeId is valid
       print("Deleting fee with ID: $feeId");
+
       await supabase.from('fees').delete().eq('fee_id', feeId);
-      Get.snackbar('Success', 'Fee deleted');
+      await fetchFees(); // Refresh the list
+
+      Get.snackbar(
+        'Berjaya',
+        'Yuran telah dipadam',
+        backgroundColor: Colors.green,
+        colorText: Colors.white,
+      );
     } catch (e) {
       print("Error deleting fee: $e");
-      Get.snackbar('Error', 'Failed to delete fee');
+      Get.snackbar('Error', 'Failed to delete fee: $e');
     } finally {
       isLoading.value = false;
     }
@@ -208,5 +213,21 @@ class FeeController extends GetxController {
   // Get Fee
   FeeModel? getFee() {
     return selectedYuran.value;
+  }
+
+  // Clear selected fee
+  void clearSelectedFee() {
+    selectedYuran.value = null;
+  }
+
+  // Get fees by type
+  List<FeeModel> getFeesByType(String feeType) {
+    return yuranGeneral.where((fee) => fee.feeType == feeType).toList();
+  }
+
+  // Get overdue fees (fees past due date)
+  List<FeeModel> getOverdueFees() {
+    final now = DateTime.now();
+    return yuranGeneral.where((fee) => fee.feeDue.isBefore(now)).toList();
   }
 }
