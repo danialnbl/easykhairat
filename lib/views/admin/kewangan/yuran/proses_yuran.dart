@@ -31,12 +31,6 @@ class ProsesYuranState extends State<ProsesYuran> {
   // Add a map to store stream subscriptions
   final Map<String, StreamSubscription> _paymentStreams = {};
 
-  // Add these variables to track summary stats
-  RxInt totalMembers = 0.obs;
-  RxInt completedPayments = 0.obs;
-  RxInt pendingPayments = 0.obs;
-  RxDouble totalPendingAmount = 0.0.obs;
-
   @override
   void initState() {
     super.initState();
@@ -66,9 +60,6 @@ class ProsesYuranState extends State<ProsesYuran> {
 
     // Setup real-time monitoring for all users
     _setupRealTimePaymentMonitoring();
-
-    // Calculate summary statistics
-    _calculateSummaryStats();
   }
 
   // Setup real-time payment monitoring for all users
@@ -203,7 +194,6 @@ class ProsesYuranState extends State<ProsesYuran> {
                 : () {
                   userPaymentStatus.clear();
                   _setupRealTimePaymentMonitoring();
-                  _calculateSummaryStats();
                 },
         icon:
             feeController.isLoading.value
@@ -249,157 +239,6 @@ class ProsesYuranState extends State<ProsesYuran> {
 
       return matchesName && matchesIC && matchesFilter;
     }).toList();
-  }
-
-  // Add a summary cards widget
-  Widget _buildSummaryCards() {
-    return Obx(() {
-      return Row(
-        children: [
-          // Total Members Card
-          Expanded(
-            child: Card(
-              elevation: 4,
-              child: Container(
-                padding: const EdgeInsets.all(16.0),
-                decoration: BoxDecoration(
-                  color: Colors.blue.shade50,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Icon(Icons.people, color: Colors.blue),
-                        SizedBox(width: 8),
-                        Text(
-                          'Total Ahli',
-                          style: TextStyle(color: Colors.grey),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 8),
-                    Text(
-                      '${totalMembers.value}',
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-          // Completed Payments Card
-          Expanded(
-            child: Card(
-              elevation: 4,
-              child: Container(
-                padding: const EdgeInsets.all(16.0),
-                decoration: BoxDecoration(
-                  color: Colors.green.shade50,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Icon(Icons.check_circle, color: Colors.green),
-                        SizedBox(width: 8),
-                        Text('Selesai', style: TextStyle(color: Colors.grey)),
-                      ],
-                    ),
-                    SizedBox(height: 8),
-                    Text(
-                      '${completedPayments.value}',
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-          // Pending Payments Card
-          Expanded(
-            child: Card(
-              elevation: 4,
-              child: Container(
-                padding: const EdgeInsets.all(16.0),
-                decoration: BoxDecoration(
-                  color: Colors.red.shade50,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Icon(Icons.warning, color: Colors.red),
-                        SizedBox(width: 8),
-                        Text(
-                          'Tertunggak',
-                          style: TextStyle(color: Colors.grey),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 8),
-                    Text(
-                      '${pendingPayments.value}',
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-          // Total Pending Amount Card
-          Expanded(
-            child: Card(
-              elevation: 4,
-              child: Container(
-                padding: const EdgeInsets.all(16.0),
-                decoration: BoxDecoration(
-                  color: Colors.amber.shade50,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Icon(Icons.monetization_on, color: Colors.amber),
-                        SizedBox(width: 8),
-                        Text(
-                          'Jumlah Tertunggak',
-                          style: TextStyle(color: Colors.grey),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 8),
-                    Text(
-                      'RM ${totalPendingAmount.value.toStringAsFixed(2)}',
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ],
-      );
-    });
   }
 
   // Enhanced search widget that matches your image
@@ -512,7 +351,6 @@ class ProsesYuranState extends State<ProsesYuran> {
               onPressed: () {
                 userPaymentStatus.clear();
                 _setupRealTimePaymentMonitoring();
-                _calculateSummaryStats();
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.blue,
@@ -533,39 +371,6 @@ class ProsesYuranState extends State<ProsesYuran> {
         ),
       ),
     );
-  }
-
-  // Calculate summary statistics
-  void _calculateSummaryStats() {
-    totalMembers.value = userController.normalusers.length;
-    completedPayments.value = 0;
-    pendingPayments.value = 0;
-    totalPendingAmount.value = 0.0;
-
-    for (var user in userController.normalusers) {
-      String userId = user.userId.toString();
-      if (userPaymentStatus[userId] == true) {
-        completedPayments.value++;
-      } else {
-        pendingPayments.value++;
-        // Get fee amount from your fee controller or use default value
-        double feeAmount =
-            400.0; // Default amount if not available from controller
-        if (feeController.yuranGeneral.isNotEmpty) {
-          feeAmount =
-              double.tryParse(
-                feeController.yuranGeneral.first.feeAmount.toString(),
-              ) ??
-              400.0;
-        }
-        totalPendingAmount.value += feeAmount;
-      }
-    }
-
-    // Update UI
-    if (mounted) {
-      setState(() {});
-    }
   }
 
   // Build the table showing users and their payment status
@@ -699,8 +504,6 @@ class ProsesYuranState extends State<ProsesYuran> {
                 ),
               ),
             ),
-            const SizedBox(height: 16),
-            _buildSummaryCards(),
             const SizedBox(height: 16),
             _buildSearchBar(),
             const SizedBox(height: 16),
