@@ -29,19 +29,38 @@ class _LaporanPageState extends State<LaporanPage> {
   final RxString primaryType = 'Users'.obs;
   final RxString secondaryType = 'Payments'.obs;
 
+  final TextEditingController searchController = TextEditingController();
+  final RxBool isLoading = false.obs;
+
   @override
   void initState() {
     super.initState();
-    userController.fetchUsers();
-    paymentController.fetchPayments();
-    tuntutanController.fetchTuntutan();
-    familyController.fetchFamilyMembers();
+    fetchAllData();
+  }
+
+  Future<void> fetchAllData() async {
+    isLoading.value = true;
+    await userController.fetchUsers();
+    await paymentController.fetchPayments();
+    await tuntutanController.fetchTuntutan();
+    await familyController.fetchFamilyMembers();
+    isLoading.value = false;
   }
 
   List<Map<String, dynamic>> getCurrentData() {
+    // Filter data based on search if needed
+    final searchTerm = searchController.text.toLowerCase();
+
     switch (selectedDataType.value) {
       case 'Users':
         return userController.users
+            .where(
+              (u) =>
+                  searchTerm.isEmpty ||
+                  u.userName.toLowerCase().contains(searchTerm) ||
+                  u.userEmail.toLowerCase().contains(searchTerm) ||
+                  u.userIdentification.toLowerCase().contains(searchTerm),
+            )
             .map(
               (u) => {
                 'ID': u.userId ?? '',
@@ -55,6 +74,12 @@ class _LaporanPageState extends State<LaporanPage> {
             .toList();
       case 'Payments':
         return paymentController.payments
+            .where(
+              (p) =>
+                  searchTerm.isEmpty ||
+                  p.paymentDescription.toLowerCase().contains(searchTerm) ||
+                  (p.paymentType?.toLowerCase() ?? '').contains(searchTerm),
+            )
             .map(
               (p) => {
                 'ID': p.paymentId ?? '',
@@ -68,6 +93,12 @@ class _LaporanPageState extends State<LaporanPage> {
             .toList();
       case 'Claims':
         return tuntutanController.tuntutanList
+            .where(
+              (c) =>
+                  searchTerm.isEmpty ||
+                  c.claimOverallStatus.toLowerCase().contains(searchTerm) ||
+                  (c.claimType?.toLowerCase() ?? '').contains(searchTerm),
+            )
             .map(
               (c) => {
                 'ID': c.claimId ?? '',
@@ -80,6 +111,12 @@ class _LaporanPageState extends State<LaporanPage> {
             .toList();
       case 'Family':
         return familyController.familyMembers
+            .where(
+              (f) =>
+                  searchTerm.isEmpty ||
+                  f.familymemberName.toLowerCase().contains(searchTerm) ||
+                  f.familymemberRelationship.toLowerCase().contains(searchTerm),
+            )
             .map(
               (f) => {
                 'ID': f.familyId ?? '',
@@ -186,6 +223,8 @@ class _LaporanPageState extends State<LaporanPage> {
   }
 
   Future<void> exportToExcel() async {
+    isLoading.value = true;
+
     final data = getCurrentData();
     final columns = getCurrentColumns();
     final workbook = xlsio.Workbook();
@@ -215,9 +254,13 @@ class _LaporanPageState extends State<LaporanPage> {
           ..setAttribute('download', '${selectedDataType.value}_report.xlsx')
           ..click();
     html.Url.revokeObjectUrl(url);
+
+    isLoading.value = false;
   }
 
   Future<void> exportToPDF() async {
+    isLoading.value = true;
+
     final data = getCurrentData();
     final columns = getCurrentColumns();
     final pdf = pw.Document();
@@ -243,64 +286,263 @@ class _LaporanPageState extends State<LaporanPage> {
           ..setAttribute('download', '${selectedDataType.value}_report.pdf')
           ..click();
     html.Url.revokeObjectUrl(url);
+
+    isLoading.value = false;
   }
 
-  Widget buildTable() {
-    final data = getCurrentData();
-    final columns = getCurrentColumns();
-
-    if (data.isEmpty) {
-      return const Center(child: Text('No data found'));
-    }
-
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Table(
-        columnWidths: {
-          for (int i = 0; i < columns.length; i++) i: const FlexColumnWidth(2),
-        },
-        border: TableBorder(
-          horizontalInside: BorderSide(color: Colors.grey.shade300, width: 1),
-        ),
-        children: [
-          // Header
-          TableRow(
-            decoration: BoxDecoration(color: MoonColors.light.roshi),
-            children:
-                columns
-                    .map(
-                      (c) => Padding(
-                        padding: const EdgeInsets.all(12.0),
-                        child: Text(
-                          c,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                    )
-                    .toList(),
-          ),
-          // Data rows
-          ...data.map(
-            (row) => TableRow(
-              decoration: const BoxDecoration(color: Colors.white),
-              children:
-                  columns
-                      .map(
-                        (c) => Padding(
-                          padding: const EdgeInsets.all(12.0),
-                          child: Text(
-                            '${row[c]}',
-                            style: const TextStyle(color: Colors.black87),
-                          ),
-                        ),
-                      )
-                      .toList(),
+  // Enhanced search widget similar to manage_announce
+  Widget _buildSearchBar() {
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Row(
+          children: [
+            Icon(Icons.search, color: Colors.blue),
+            SizedBox(width: 8),
+            Text(
+              "Search & Filter Reports",
+              style: TextStyle(fontWeight: FontWeight.bold),
             ),
-          ),
-        ],
+            SizedBox(width: 20),
+            // Report search
+            Expanded(
+              child: Container(
+                height: 40,
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey.shade300),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Row(
+                  children: [
+                    SizedBox(width: 10),
+                    Icon(Icons.search, color: Colors.grey),
+                    SizedBox(width: 8),
+                    Expanded(
+                      child: TextField(
+                        controller: searchController,
+                        decoration: InputDecoration(
+                          hintText: "Search in reports...",
+                          border: InputBorder.none,
+                        ),
+                        onChanged: (value) {
+                          setState(() {});
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            SizedBox(width: 16),
+            // Data type filter
+            Container(
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.grey.shade300),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              padding: EdgeInsets.symmetric(horizontal: 12),
+              child: Obx(
+                () => DropdownButton<String>(
+                  value: selectedDataType.value,
+                  underline: SizedBox(),
+                  items:
+                      ['Users', 'Payments', 'Claims', 'Family']
+                          .map(
+                            (type) => DropdownMenuItem(
+                              value: type,
+                              child: Text(type),
+                            ),
+                          )
+                          .toList(),
+                  onChanged: (value) {
+                    if (value != null) {
+                      selectedDataType.value = value;
+                      setState(() {});
+                    }
+                  },
+                ),
+              ),
+            ),
+            SizedBox(width: 16),
+            // Refresh button
+            ElevatedButton(
+              onPressed: fetchAllData,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blue,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
+                child: Text("Refresh"),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Export options card
+  Widget _buildExportOptions() {
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Row(
+          children: [
+            Icon(Icons.file_download, color: Colors.green),
+            SizedBox(width: 8),
+            Text(
+              "Export Options",
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            SizedBox(width: 20),
+            Expanded(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  ElevatedButton.icon(
+                    icon: const Icon(Icons.picture_as_pdf, color: Colors.white),
+                    label: const Text('Export to PDF'),
+                    onPressed: exportToPDF,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.red,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  ElevatedButton.icon(
+                    icon: const Icon(Icons.grid_on, color: Colors.white),
+                    label: const Text('Export to Excel'),
+                    onPressed: exportToExcel,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Build the report data table card
+  Widget _buildReportDataCard() {
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  "${selectedDataType.value} Report Data",
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                Obx(
+                  () =>
+                      isLoading.value
+                          ? Container(
+                            padding: EdgeInsets.all(8),
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                          : Text(
+                            "${getCurrentData().length} records found",
+                            style: TextStyle(color: Colors.grey),
+                          ),
+                ),
+              ],
+            ),
+            SizedBox(height: 16),
+            Expanded(
+              child: Obx(() {
+                if (isLoading.value) {
+                  return Center(child: CircularProgressIndicator());
+                }
+
+                final data = getCurrentData();
+                final columns = getCurrentColumns();
+
+                if (data.isEmpty) {
+                  return Center(
+                    child: Text(
+                      "No data found for ${selectedDataType.value}.",
+                      style: TextStyle(fontSize: 16, color: Colors.grey),
+                    ),
+                  );
+                }
+
+                // Create a nicely styled table
+                return SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: SingleChildScrollView(
+                    child: DataTable(
+                      headingRowColor: MaterialStateProperty.all(
+                        Colors.blue.shade100,
+                      ),
+                      dataRowColor: MaterialStateProperty.all(Colors.white),
+                      border: TableBorder.all(
+                        color: Colors.grey.shade300,
+                        width: 1,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      columns:
+                          columns
+                              .map(
+                                (column) => DataColumn(
+                                  label: Text(
+                                    column,
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              )
+                              .toList(),
+                      rows:
+                          data
+                              .map(
+                                (row) => DataRow(
+                                  cells:
+                                      columns
+                                          .map(
+                                            (column) => DataCell(
+                                              Text('${row[column] ?? "N/A"}'),
+                                            ),
+                                          )
+                                          .toList(),
+                                ),
+                              )
+                              .toList(),
+                    ),
+                  ),
+                );
+              }),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -329,6 +571,7 @@ class _LaporanPageState extends State<LaporanPage> {
                         label: const Text("Home"),
                         onTap: () => Get.toNamed('/adminMain'),
                       ),
+                      MoonBreadcrumbItem(label: Text("Management")),
                       const MoonBreadcrumbItem(label: Text("Laporan")),
                     ],
                   ),
@@ -336,44 +579,11 @@ class _LaporanPageState extends State<LaporanPage> {
               ),
             ),
             const SizedBox(height: 16),
-            Row(
-              children: [
-                ElevatedButton.icon(
-                  icon: const Icon(Icons.picture_as_pdf),
-                  label: const Text('Download PDF'),
-                  onPressed: exportToPDF,
-                ),
-                const SizedBox(width: 8),
-                ElevatedButton.icon(
-                  icon: const Icon(Icons.grid_on),
-                  label: const Text('Download Excel'),
-                  onPressed: exportToExcel,
-                ),
-                const SizedBox(width: 16),
-                Obx(
-                  () => DropdownButton<String>(
-                    value: selectedDataType.value,
-                    items:
-                        ['Users', 'Payments', 'Claims', 'Family']
-                            .map(
-                              (type) => DropdownMenuItem(
-                                value: type,
-                                child: Text(type),
-                              ),
-                            )
-                            .toList(),
-                    onChanged: (value) {
-                      if (value != null) {
-                        selectedDataType.value = value;
-                        setState(() {});
-                      }
-                    },
-                  ),
-                ),
-              ],
-            ),
+            _buildSearchBar(),
             const SizedBox(height: 16),
-            Expanded(child: Obx(() => buildTable())),
+            _buildExportOptions(),
+            const SizedBox(height: 16),
+            Expanded(child: _buildReportDataCard()),
           ],
         ),
       ),
