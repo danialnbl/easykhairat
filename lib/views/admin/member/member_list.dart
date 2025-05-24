@@ -60,38 +60,304 @@ class MemberListState extends State<MemberList> {
     }).toList();
   }
 
-  void viewMember(dynamic user) {
-    debugPrint("View tapped for ${user.userName}");
-
-    navController.setUser(user);
-
-    navController.selectedIndex.value = 11;
-  }
-
-  Widget _detailRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4.0),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: 100,
-            child: Text(
-              '$label:',
-              style: const TextStyle(fontWeight: FontWeight.bold),
+  // Enhanced search widget similar to proses_yuran
+  Widget _buildSearchBar() {
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Row(
+          children: [
+            Icon(Icons.search, color: Colors.blue),
+            SizedBox(width: 8),
+            Text(
+              "Cari & Tapis Ahli",
+              style: TextStyle(fontWeight: FontWeight.bold),
             ),
-          ),
-          Expanded(child: Text(value)),
-        ],
+            SizedBox(width: 20),
+            // Name search
+            Expanded(
+              child: Container(
+                height: 40,
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey.shade300),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Row(
+                  children: [
+                    SizedBox(width: 10),
+                    Icon(Icons.person, color: Colors.grey),
+                    SizedBox(width: 8),
+                    Expanded(
+                      child: TextField(
+                        controller: nameSearchController,
+                        decoration: InputDecoration(
+                          hintText: "Cari mengikut nama...",
+                          border: InputBorder.none,
+                        ),
+                        onChanged: (value) {
+                          setState(() {});
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            SizedBox(width: 16),
+            // IC search
+            Expanded(
+              child: Container(
+                height: 40,
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey.shade300),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Row(
+                  children: [
+                    SizedBox(width: 10),
+                    Icon(Icons.badge, color: Colors.grey),
+                    SizedBox(width: 8),
+                    Expanded(
+                      child: TextField(
+                        controller: icSearchController,
+                        decoration: InputDecoration(
+                          hintText: "Cari mengikut IC...",
+                          border: InputBorder.none,
+                        ),
+                        onChanged: (value) {
+                          setState(() {});
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            SizedBox(width: 16),
+            // Filter dropdown
+            Container(
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.grey.shade300),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              padding: EdgeInsets.symmetric(horizontal: 12),
+              child: Obx(
+                () => DropdownButton<String>(
+                  value: selectedFilter.value,
+                  underline: SizedBox(),
+                  items:
+                      ['Semua Ahli', 'User', 'Admin']
+                          .map(
+                            (status) => DropdownMenuItem(
+                              value: status,
+                              child: Text(status),
+                            ),
+                          )
+                          .toList(),
+                  onChanged: (value) {
+                    if (value != null) {
+                      selectedFilter.value = value;
+                    }
+                  },
+                ),
+              ),
+            ),
+            SizedBox(width: 16),
+            // Refresh button
+            ElevatedButton(
+              onPressed: () {
+                userController.fetchUsers();
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blue,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
+                child: Text("Refresh"),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  void editMember(dynamic user) {
-    debugPrint("Edit tapped for ${user.userName}");
-    // Navigate to edit screen or show edit dialog
-    // This is a placeholder - implement actual navigation/edit functionality
-    Get.toNamed('/edit-member', arguments: user);
+  // Build the members list in card format similar to proses_yuran
+  Widget _buildMembersCards() {
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  "Senarai Ahli",
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                MoonButton(
+                  leading: const Icon(
+                    MoonIcons.files_add_16_light,
+                    color: Colors.white,
+                  ),
+                  buttonSize: MoonButtonSize.md,
+                  onTap: () {
+                    navController.selectedIndex.value = 2;
+                  },
+                  label: const Text(
+                    'Tambah Ahli',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                  backgroundColor: MoonColors.light.roshi,
+                ),
+              ],
+            ),
+            SizedBox(height: 16),
+            Expanded(
+              child: Obx(() {
+                if (userController.isLoading.value) {
+                  return Center(child: CircularProgressIndicator());
+                }
+
+                final filteredUsers = getFilteredUsers();
+
+                if (filteredUsers.isEmpty) {
+                  return Center(
+                    child: Text(
+                      "Tiada ahli yang ditemui.",
+                      style: TextStyle(fontSize: 16, color: Colors.grey),
+                    ),
+                  );
+                }
+
+                return ListView.builder(
+                  itemCount: filteredUsers.length,
+                  itemBuilder: (context, index) {
+                    final user = filteredUsers[index];
+
+                    Color typeColor = Colors.blue;
+                    IconData typeIcon = Icons.person;
+
+                    if (user.userType == 'admin') {
+                      typeColor = Colors.purple;
+                      typeIcon = Icons.admin_panel_settings;
+                    }
+
+                    return Card(
+                      margin: EdgeInsets.only(bottom: 8),
+                      child: ListTile(
+                        leading: CircleAvatar(
+                          backgroundColor: Colors.blue.shade100,
+                          child: Icon(Icons.person, color: Colors.blue),
+                        ),
+                        title: Text(
+                          user.userName,
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            SizedBox(height: 2),
+                            Row(
+                              children: [
+                                Icon(Icons.badge, size: 14),
+                                SizedBox(width: 4),
+                                Text(user.userIdentification),
+                              ],
+                            ),
+                            SizedBox(height: 2),
+                            Row(
+                              children: [
+                                Icon(Icons.calendar_today, size: 14),
+                                SizedBox(width: 4),
+                                Text(
+                                  "Daftar pada: ${formatDate(user.userCreatedAt)}",
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Container(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                color: typeColor,
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(typeIcon, color: Colors.white, size: 14),
+                                  SizedBox(width: 4),
+                                  Text(
+                                    user.userType.toString().capitalizeFirst!,
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            SizedBox(width: 16),
+                            IconButton(
+                              icon: Icon(Icons.visibility, color: Colors.green),
+                              onPressed: () {
+                                viewMember(user);
+                                familyController.fetchFamilyMembersByUserId(
+                                  user.userId,
+                                );
+                              },
+                              tooltip: "Lihat Maklumat",
+                            ),
+                            IconButton(
+                              icon: Icon(Icons.delete, color: Colors.red),
+                              onPressed: () => deleteMember(user),
+                              tooltip: "Padam Ahli",
+                            ),
+                          ],
+                        ),
+                        isThreeLine: true,
+                        onTap: () {
+                          viewMember(user);
+                          familyController.fetchFamilyMembersByUserId(
+                            user.userId,
+                          );
+                        },
+                      ),
+                    );
+                  },
+                );
+              }),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void viewMember(dynamic user) {
+    debugPrint("View tapped for ${user.userName}");
+    navController.setUser(user);
+    navController.selectedIndex.value = 11;
   }
 
   void deleteMember(dynamic user) {
@@ -105,204 +371,13 @@ class MemberListState extends State<MemberList> {
           TextButton(
             child: const Text('Delete'),
             onPressed: () {
-              userController.deleteUser(
-                user.userId,
-              ); // Implement this method in your controller
+              userController.deleteUser(user.userId);
               Get.back();
             },
           ),
         ],
       ),
     );
-  }
-
-  Widget _buildTable() {
-    return Obx(() {
-      final filteredUsers = getFilteredUsers();
-
-      if (userController.isLoading.value) {
-        return const Center(child: CircularProgressIndicator());
-      }
-
-      if (filteredUsers.isEmpty) {
-        return const Center(child: Text('No members found'));
-      }
-
-      return Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Table(
-          columnWidths: const {
-            0: FlexColumnWidth(2), // User ID
-            1: FlexColumnWidth(2), // Name
-            2: FlexColumnWidth(2), // IC Baru
-            3: FlexColumnWidth(2), // Tarikh Daftar
-            4: FlexColumnWidth(3), // Alamat
-            5: FlexColumnWidth(2), // Type
-            6: FlexColumnWidth(2), // Actions
-          },
-          border: TableBorder(
-            horizontalInside: BorderSide(color: Colors.grey.shade300, width: 1),
-          ),
-          children: [
-            // Header
-            TableRow(
-              decoration: BoxDecoration(color: MoonColors.light.roshi),
-              children: const [
-                Padding(
-                  padding: EdgeInsets.all(12.0),
-                  child: Text(
-                    'User ID',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding: EdgeInsets.all(12.0),
-                  child: Text(
-                    'Nama',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding: EdgeInsets.all(12.0),
-                  child: Text(
-                    'IC Baru',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding: EdgeInsets.all(12.0),
-                  child: Text(
-                    'Tarikh Daftar',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding: EdgeInsets.all(12.0),
-                  child: Text(
-                    'Alamat',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding: EdgeInsets.all(12.0),
-                  child: Text(
-                    'Type',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding: EdgeInsets.all(12.0),
-                  child: Text(
-                    'Actions',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-
-            // Data rows
-            ...filteredUsers.map((user) {
-              return TableRow(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  border: Border(
-                    bottom: BorderSide(color: Colors.grey.shade300, width: 1),
-                  ),
-                ),
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.all(12.0),
-                    child: Text(
-                      user.userId.substring(0, 8),
-                      style: const TextStyle(color: Colors.black87),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(12.0),
-                    child: Text(
-                      user.userName,
-                      style: const TextStyle(color: Colors.black87),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(12.0),
-                    child: Text(
-                      user.userIdentification,
-                      style: const TextStyle(color: Colors.black87),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(12.0),
-                    child: Text(
-                      formatDate(user.userCreatedAt),
-                      style: const TextStyle(color: Colors.black87),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(12.0),
-                    child: Text(
-                      user.userAddress,
-                      style: const TextStyle(color: Colors.black87),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(12.0),
-                    child: Text(
-                      user.userType,
-                      style: const TextStyle(color: Colors.black87),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(12.0),
-                    child: Row(
-                      children: [
-                        IconButton(
-                          icon: const Icon(
-                            Icons.visibility,
-                            color: Colors.green,
-                          ),
-                          onPressed: () {
-                            viewMember(user);
-                            familyController.fetchFamilyMembersByUserId(
-                              user.userId,
-                            );
-                          },
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.delete, color: Colors.red),
-                          onPressed: () => deleteMember(user),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              );
-            }).toList(),
-          ],
-        ),
-      );
-    });
   }
 
   @override
@@ -337,64 +412,9 @@ class MemberListState extends State<MemberList> {
               ),
             ),
             const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: nameSearchController,
-                    decoration: InputDecoration(
-                      hintText: "Search by Name...",
-                      prefixIcon: const Icon(Icons.person),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                    onChanged: (value) {
-                      setState(() {});
-                    },
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: TextField(
-                    controller: icSearchController,
-                    decoration: InputDecoration(
-                      hintText: "Search by IC...",
-                      prefixIcon: const Icon(Icons.badge),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                    onChanged: (value) {
-                      setState(() {});
-                    },
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Obx(
-                  () => DropdownButton<String>(
-                    value: selectedFilter.value,
-                    items:
-                        ['Semua Ahli', 'User', 'Admin']
-                            .map(
-                              (status) => DropdownMenuItem(
-                                value: status,
-                                child: Text(status),
-                              ),
-                            )
-                            .toList(),
-                    onChanged: (value) {
-                      if (value != null) {
-                        selectedFilter.value = value;
-                      }
-                    },
-                  ),
-                ),
-              ],
-            ),
-
+            _buildSearchBar(),
             const SizedBox(height: 16),
-            Expanded(child: _buildTable()),
+            Expanded(child: _buildMembersCards()),
           ],
         ),
       ),
