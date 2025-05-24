@@ -75,147 +75,286 @@ class _ManageAnnounceState extends State<ManageAnnounce> {
     );
   }
 
-  Widget _buildTable() {
-    return Obx(() {
-      if (announcementController.isLoading.value) {
-        return const Center(child: CircularProgressIndicator());
-      }
-
-      final filteredAnnouncements = getFilteredAnnouncements();
-
-      if (filteredAnnouncements.isEmpty) {
-        return const Center(child: Text('No announcements found'));
-      }
-
-      return Padding(
+  // Enhanced search widget similar to proses_tuntutan
+  Widget _buildSearchBar() {
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      child: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Table(
-          columnWidths: const {
-            0: FlexColumnWidth(2), // ID
-            1: FlexColumnWidth(3), // Title
-            2: FlexColumnWidth(2), // Date
-            3: FlexColumnWidth(4), // Description
-            4: FlexColumnWidth(2), // Actions
-          },
-          border: TableBorder(
-            horizontalInside: BorderSide(color: Colors.grey.shade300, width: 1),
-          ),
+        child: Row(
           children: [
-            // Header
-            TableRow(
-              decoration: BoxDecoration(color: MoonColors.light.roshi),
-              children: const [
-                Padding(
-                  padding: EdgeInsets.all(12.0),
-                  child: Text(
-                    'ID',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
+            Icon(Icons.search, color: Colors.blue),
+            SizedBox(width: 8),
+            Text(
+              "Search & Filter Announcements",
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            SizedBox(width: 20),
+            // Title search
+            Expanded(
+              child: Container(
+                height: 40,
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey.shade300),
+                  borderRadius: BorderRadius.circular(20),
                 ),
-                Padding(
-                  padding: EdgeInsets.all(12.0),
-                  child: Text(
-                    'Title',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
+                child: Row(
+                  children: [
+                    SizedBox(width: 10),
+                    Icon(Icons.title, color: Colors.grey),
+                    SizedBox(width: 8),
+                    Expanded(
+                      child: TextField(
+                        controller: titleSearchController,
+                        decoration: InputDecoration(
+                          hintText: "Search by title...",
+                          border: InputBorder.none,
+                        ),
+                        onChanged: (value) {
+                          setState(() {});
+                        },
+                      ),
                     ),
-                  ),
+                  ],
                 ),
-                Padding(
-                  padding: EdgeInsets.all(12.0),
-                  child: Text(
-                    'Date',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
+              ),
+            ),
+            SizedBox(width: 16),
+            // Date search
+            Expanded(
+              child: Container(
+                height: 40,
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey.shade300),
+                  borderRadius: BorderRadius.circular(20),
                 ),
-                Padding(
-                  padding: EdgeInsets.all(12.0),
-                  child: Text(
-                    'Type',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
+                child: Row(
+                  children: [
+                    SizedBox(width: 10),
+                    Icon(Icons.calendar_today, color: Colors.grey),
+                    SizedBox(width: 8),
+                    Expanded(
+                      child: TextField(
+                        controller: dateSearchController,
+                        decoration: InputDecoration(
+                          hintText: "Search by date...",
+                          border: InputBorder.none,
+                        ),
+                        onChanged: (value) {
+                          setState(() {});
+                        },
+                      ),
                     ),
-                  ),
+                  ],
                 ),
-                Padding(
-                  padding: EdgeInsets.all(12.0),
-                  child: Text(
-                    'Actions',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
+              ),
+            ),
+            SizedBox(width: 16),
+            // Filter dropdown
+            Container(
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.grey.shade300),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              padding: EdgeInsets.symmetric(horizontal: 12),
+              child: Obx(
+                () => DropdownButton<String>(
+                  value: selectedFilter.value,
+                  underline: SizedBox(),
+                  items:
+                      ['All Announcements', 'Important', 'General']
+                          .map(
+                            (type) => DropdownMenuItem(
+                              value: type,
+                              child: Text(type),
+                            ),
+                          )
+                          .toList(),
+                  onChanged: (value) {
+                    if (value != null) {
+                      selectedFilter.value = value;
+                    }
+                  },
+                ),
+              ),
+            ),
+            SizedBox(width: 16),
+            // Refresh button
+            ElevatedButton(
+              onPressed: () {
+                announcementController.fetchAnnouncements();
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blue,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
+                child: Text("Refresh"),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Build the announcements list in card format similar to proses_tuntutan
+  Widget _buildAnnouncementsCards() {
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  "Announcement List",
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                MoonButton(
+                  leading: const Icon(
+                    MoonIcons.files_add_text_16_light,
+                    color: Colors.white,
                   ),
+                  buttonSize: MoonButtonSize.md,
+                  onTap: () {
+                    navigationController.selectedIndex.value = 14;
+                  },
+                  label: const Text(
+                    'Add Announcement',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                  backgroundColor: MoonColors.light.roshi,
                 ),
               ],
             ),
-            ...filteredAnnouncements.map((announcement) {
-              return TableRow(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  border: Border(
-                    bottom: BorderSide(color: Colors.grey.shade300, width: 1),
-                  ),
-                ),
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.all(12.0),
-                    child: Text(announcement.announcementId.toString()),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(12.0),
-                    child: Text(announcement.announcementTitle),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(12.0),
+            SizedBox(height: 16),
+            Expanded(
+              child: Obx(() {
+                if (announcementController.isLoading.value) {
+                  return Center(child: CircularProgressIndicator());
+                }
+
+                final filteredAnnouncements = getFilteredAnnouncements();
+
+                if (filteredAnnouncements.isEmpty) {
+                  return Center(
                     child: Text(
-                      DateFormat(
-                        'dd/MM/yyyy',
-                      ).format(announcement.announcementCreatedAt),
+                      "No announcements found.",
+                      style: TextStyle(fontSize: 16, color: Colors.grey),
                     ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(12.0),
-                    child: Text(announcement.announcementType),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(12.0),
-                    child: Row(
-                      children: [
-                        IconButton(
-                          icon: const Icon(
-                            Icons.visibility,
-                            color: Colors.green,
-                          ),
-                          onPressed: () {
-                            navigationController.selectedIndex.value = 15;
-                            announcementController.setSelectedAnnouncement(
-                              announcement,
-                            );
-                          },
+                  );
+                }
+
+                return ListView.builder(
+                  itemCount: filteredAnnouncements.length,
+                  itemBuilder: (context, index) {
+                    final announcement = filteredAnnouncements[index];
+
+                    Color typeColor = Colors.grey;
+                    IconData typeIcon = Icons.announcement;
+
+                    if (announcement.announcementType == 'Important') {
+                      typeColor = Colors.red;
+                      typeIcon = Icons.priority_high;
+                    } else if (announcement.announcementType == 'General') {
+                      typeColor = Colors.blue;
+                      typeIcon = Icons.info;
+                    }
+
+                    return Card(
+                      margin: EdgeInsets.only(bottom: 8),
+                      child: ListTile(
+                        leading: CircleAvatar(
+                          backgroundColor: Colors.blue.shade100,
+                          child: Icon(Icons.campaign, color: Colors.blue),
                         ),
-                        IconButton(
-                          icon: const Icon(Icons.delete, color: Colors.red),
-                          onPressed: () => deleteAnnouncement(announcement),
+                        title: Text(
+                          "ID: ${announcement.announcementId} - ${announcement.announcementTitle}",
+                          style: TextStyle(fontWeight: FontWeight.bold),
                         ),
-                      ],
-                    ),
-                  ),
-                ],
-              );
-            }).toList(),
+                        subtitle: Row(
+                          children: [
+                            Icon(Icons.calendar_today, size: 14),
+                            SizedBox(width: 4),
+                            Text(
+                              "Created on: ${DateFormat('dd/MM/yyyy').format(announcement.announcementCreatedAt)}",
+                            ),
+                          ],
+                        ),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Container(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                color: typeColor,
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(typeIcon, color: Colors.white, size: 14),
+                                  SizedBox(width: 4),
+                                  Text(
+                                    announcement.announcementType,
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            SizedBox(width: 16),
+                            IconButton(
+                              icon: Icon(Icons.visibility, color: Colors.green),
+                              onPressed: () {
+                                navigationController.selectedIndex.value = 15;
+                                announcementController.setSelectedAnnouncement(
+                                  announcement,
+                                );
+                              },
+                              tooltip: "View Announcement",
+                            ),
+                            IconButton(
+                              icon: Icon(Icons.delete, color: Colors.red),
+                              onPressed: () => deleteAnnouncement(announcement),
+                              tooltip: "Delete Announcement",
+                            ),
+                          ],
+                        ),
+                        onTap: () {
+                          navigationController.selectedIndex.value = 15;
+                          announcementController.setSelectedAnnouncement(
+                            announcement,
+                          );
+                        },
+                      ),
+                    );
+                  },
+                );
+              }),
+            ),
           ],
         ),
-      );
-    });
+      ),
+    );
   }
 
   @override
@@ -250,81 +389,9 @@ class _ManageAnnounceState extends State<ManageAnnounce> {
               ),
             ),
             const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: titleSearchController,
-                    decoration: InputDecoration(
-                      hintText: "Search by Title...",
-                      prefixIcon: const Icon(Icons.title),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                    onChanged: (value) => setState(() {}),
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: TextField(
-                    controller: dateSearchController,
-                    decoration: InputDecoration(
-                      hintText: "Search by Date...",
-                      prefixIcon: const Icon(Icons.date_range),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                    onChanged: (value) => setState(() {}),
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Obx(
-                  () => DropdownButton<String>(
-                    value: selectedFilter.value,
-                    items:
-                        ['All Announcements', 'Important', 'General']
-                            .map(
-                              (status) => DropdownMenuItem(
-                                value: status,
-                                child: Text(status),
-                              ),
-                            )
-                            .toList(),
-                    onChanged: (value) {
-                      if (value != null) {
-                        selectedFilter.value = value;
-                      }
-                    },
-                  ),
-                ),
-              ],
-            ),
+            _buildSearchBar(),
             const SizedBox(height: 16),
-            //add button
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                MoonButton(
-                  leading: const Icon(
-                    MoonIcons.files_add_text_16_light,
-                    color: Colors.white,
-                  ),
-                  buttonSize: MoonButtonSize.md,
-                  onTap: () {
-                    navigationController.selectedIndex.value = 14;
-                  },
-                  label: const Text(
-                    'Add Announcement',
-                    style: TextStyle(color: Colors.white),
-                  ),
-                  backgroundColor: MoonColors.light.roshi,
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Expanded(child: _buildTable()),
+            Expanded(child: _buildAnnouncementsCards()),
           ],
         ),
       ),
