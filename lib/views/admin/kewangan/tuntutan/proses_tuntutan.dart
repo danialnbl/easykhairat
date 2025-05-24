@@ -23,6 +23,7 @@ class ProsesTuntutanState extends State<ProsesTuntutan> {
   );
   RxString selectedFilter = 'Semua Tuntutan'.obs;
   TextEditingController nameSearchController = TextEditingController();
+  TextEditingController claimIdSearchController = TextEditingController();
 
   @override
   void initState() {
@@ -39,8 +40,14 @@ class ProsesTuntutanState extends State<ProsesTuntutan> {
     return tuntutanController.tuntutanList.where((claim) {
       bool matchesName =
           nameSearchController.text.isEmpty ||
-          claim.userId!.toLowerCase().contains(
+          (claim.user?.userName?.toLowerCase() ?? '').contains(
             nameSearchController.text.toLowerCase(),
+          );
+
+      bool matchesClaimId =
+          claimIdSearchController.text.isEmpty ||
+          (claim.claimId?.toString() ?? '').contains(
+            claimIdSearchController.text,
           );
 
       bool matchesFilter =
@@ -48,188 +55,280 @@ class ProsesTuntutanState extends State<ProsesTuntutan> {
           claim.claimOverallStatus.toLowerCase() ==
               selectedFilter.value.toLowerCase();
 
-      return matchesName && matchesFilter;
+      return matchesName && matchesClaimId && matchesFilter;
     }).toList();
   }
 
-  Widget _buildTable() {
-    return Obx(() {
-      final filteredClaims = getFilteredClaims();
-
-      if (tuntutanController.isLoading.value) {
-        return const Center(child: CircularProgressIndicator());
-      }
-
-      if (filteredClaims.isEmpty) {
-        return const Center(child: Text('No claims found'));
-      }
-
-      return Padding(
+  // Enhanced search widget similar to proses_yuran
+  Widget _buildSearchBar() {
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      child: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Table(
-          columnWidths: const {
-            0: FlexColumnWidth(2),
-            1: FlexColumnWidth(3),
-            2: FlexColumnWidth(2),
-            3: FlexColumnWidth(2),
-            4: FlexColumnWidth(2),
-          },
-          border: TableBorder(
-            horizontalInside: BorderSide(color: Colors.grey.shade300, width: 1),
-          ),
+        child: Row(
           children: [
-            TableRow(
-              decoration: BoxDecoration(color: MoonColors.light.roshi),
-              children: const [
-                Padding(
-                  padding: EdgeInsets.all(12.0),
-                  child: Text(
-                    'Claim ID',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding: EdgeInsets.all(12.0),
-                  child: Text(
-                    'Tuntutan Oleh',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-
-                Padding(
-                  padding: EdgeInsets.all(12.0),
-                  child: Text(
-                    'Created At',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding: EdgeInsets.all(12.0),
-                  child: Center(
-                    child: Text(
-                      'Status Tuntutan',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding: EdgeInsets.all(12.0),
-                  child: Text(
-                    'Actions',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-              ],
+            Icon(Icons.search, color: Colors.blue),
+            SizedBox(width: 8),
+            Text(
+              "Cari & Tapis Tuntutan",
+              style: TextStyle(fontWeight: FontWeight.bold),
             ),
-            ...filteredClaims.map((claim) {
-              return TableRow(
+            SizedBox(width: 20),
+            // Name search
+            Expanded(
+              child: Container(
+                height: 40,
                 decoration: BoxDecoration(
-                  color: Colors.white,
-                  border: Border(
-                    bottom: BorderSide(color: Colors.grey.shade300, width: 1),
-                  ),
+                  border: Border.all(color: Colors.grey.shade300),
+                  borderRadius: BorderRadius.circular(20),
                 ),
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.all(12.0),
-                    child: Text(
-                      claim.claimId?.toString() ?? 'N/A',
-                      style: const TextStyle(color: Colors.black87),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(12.0),
-                    child: Text(
-                      claim.user?.userName ?? 'N/A',
-                      style: const TextStyle(color: Colors.black87),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(12.0),
-                    child: Text(
-                      formatDate(claim.claimCreatedAt),
-                      style: const TextStyle(color: Colors.black87),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(12.0),
-                    child: Center(
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 4,
-                            ),
-                            decoration: BoxDecoration(
-                              color:
-                                  claim.claimOverallStatus == 'Dalam Proses'
-                                      ? Colors.orange
-                                      : claim.claimOverallStatus == 'Lulus'
-                                      ? Colors.green
-                                      : claim.claimOverallStatus == 'Gagal'
-                                      ? Colors.red
-                                      : Colors.grey,
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                            child: Text(
-                              claim.claimOverallStatus,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 12,
-                              ),
-                            ),
-                          ),
-                        ],
+                child: Row(
+                  children: [
+                    SizedBox(width: 10),
+                    Icon(Icons.person, color: Colors.grey),
+                    SizedBox(width: 8),
+                    Expanded(
+                      child: TextField(
+                        controller: nameSearchController,
+                        decoration: InputDecoration(
+                          hintText: "Cari mengikut nama...",
+                          border: InputBorder.none,
+                        ),
+                        onChanged: (value) {
+                          setState(() {});
+                        },
                       ),
                     ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(12.0),
-                    child: Row(
-                      children: [
-                        IconButton(
-                          icon: const Icon(
-                            Icons.visibility,
-                            color: Colors.green,
-                          ),
-                          onPressed: () {
-                            if (claim.user != null) {
-                              claimLineController.getClaimLinesByClaimId(
-                                claim.claimId!,
-                              );
-                              tuntutanController.setTuntutan(claim);
-                              navController.setUser(claim.user!);
-                              navController.changeIndex(12);
-                            }
-                          },
+                  ],
+                ),
+              ),
+            ),
+            SizedBox(width: 16),
+            // Claim ID search
+            Expanded(
+              child: Container(
+                height: 40,
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey.shade300),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Row(
+                  children: [
+                    SizedBox(width: 10),
+                    Icon(Icons.receipt, color: Colors.grey),
+                    SizedBox(width: 8),
+                    Expanded(
+                      child: TextField(
+                        controller: claimIdSearchController,
+                        decoration: InputDecoration(
+                          hintText: "Cari mengikut ID tuntutan...",
+                          border: InputBorder.none,
                         ),
-                      ],
+                        onChanged: (value) {
+                          setState(() {});
+                        },
+                      ),
                     ),
-                  ),
-                ],
-              );
-            }).toList(),
+                  ],
+                ),
+              ),
+            ),
+            SizedBox(width: 16),
+            // Filter dropdown
+            Container(
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.grey.shade300),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              padding: EdgeInsets.symmetric(horizontal: 12),
+              child: Obx(
+                () => DropdownButton<String>(
+                  value: selectedFilter.value,
+                  underline: SizedBox(),
+                  items:
+                      ['Semua Tuntutan', 'Lulus', 'Dalam Proses', 'Gagal']
+                          .map(
+                            (status) => DropdownMenuItem(
+                              value: status,
+                              child: Text(status),
+                            ),
+                          )
+                          .toList(),
+                  onChanged: (value) {
+                    if (value != null) {
+                      selectedFilter.value = value;
+                    }
+                  },
+                ),
+              ),
+            ),
+            SizedBox(width: 16),
+            // Refresh button
+            ElevatedButton(
+              onPressed: () {
+                tuntutanController.fetchTuntutan();
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blue,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
+                child: Text("Refresh"),
+              ),
+            ),
           ],
         ),
-      );
-    });
+      ),
+    );
+  }
+
+  // Build the table showing claims in card format similar to proses_yuran
+  Widget _buildClaimsTable() {
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "Senarai Tuntutan",
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 16),
+            Expanded(
+              child: Obx(() {
+                if (tuntutanController.isLoading.value) {
+                  return Center(child: CircularProgressIndicator());
+                }
+
+                final filteredClaims = getFilteredClaims();
+
+                if (filteredClaims.isEmpty) {
+                  return Center(
+                    child: Text(
+                      "Tiada tuntutan yang ditemui.",
+                      style: TextStyle(fontSize: 16, color: Colors.grey),
+                    ),
+                  );
+                }
+
+                return ListView.builder(
+                  itemCount: filteredClaims.length,
+                  itemBuilder: (context, index) {
+                    final claim = filteredClaims[index];
+
+                    Color statusColor = Colors.grey;
+                    IconData statusIcon = Icons.info_outline;
+
+                    if (claim.claimOverallStatus == 'Dalam Proses') {
+                      statusColor = Colors.orange;
+                      statusIcon = Icons.pending_actions;
+                    } else if (claim.claimOverallStatus == 'Lulus') {
+                      statusColor = Colors.green;
+                      statusIcon = Icons.check_circle;
+                    } else if (claim.claimOverallStatus == 'Gagal') {
+                      statusColor = Colors.red;
+                      statusIcon = Icons.cancel;
+                    }
+
+                    return Card(
+                      margin: EdgeInsets.only(bottom: 8),
+                      child: ListTile(
+                        leading: CircleAvatar(
+                          backgroundColor: Colors.blue.shade100,
+                          child: Icon(Icons.receipt_long, color: Colors.blue),
+                        ),
+                        title: Text(
+                          "ID: ${claim.claimId} - ${claim.user?.userName ?? 'N/A'}",
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        subtitle: Row(
+                          children: [
+                            Icon(Icons.calendar_today, size: 14),
+                            SizedBox(width: 4),
+                            Text(
+                              "Dibuat pada: ${formatDate(claim.claimCreatedAt)}",
+                            ),
+                          ],
+                        ),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Container(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                color: statusColor,
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    statusIcon,
+                                    color: Colors.white,
+                                    size: 14,
+                                  ),
+                                  SizedBox(width: 4),
+                                  Text(
+                                    claim.claimOverallStatus,
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            SizedBox(width: 16),
+                            IconButton(
+                              icon: Icon(Icons.visibility, color: Colors.green),
+                              onPressed: () {
+                                if (claim.user != null) {
+                                  claimLineController.getClaimLinesByClaimId(
+                                    claim.claimId!,
+                                  );
+                                  tuntutanController.setTuntutan(claim);
+                                  navController.setUser(claim.user!);
+                                  navController.changeIndex(12);
+                                }
+                              },
+                              tooltip: "Lihat Tuntutan",
+                            ),
+                          ],
+                        ),
+                        onTap: () {
+                          if (claim.user != null) {
+                            claimLineController.getClaimLinesByClaimId(
+                              claim.claimId!,
+                            );
+                            tuntutanController.setTuntutan(claim);
+                            navController.setUser(claim.user!);
+                            navController.changeIndex(12);
+                          }
+                        },
+                      ),
+                    );
+                  },
+                );
+              }),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   @override
@@ -264,47 +363,9 @@ class ProsesTuntutanState extends State<ProsesTuntutan> {
               ),
             ),
             const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: nameSearchController,
-                    decoration: InputDecoration(
-                      hintText: "Search by User ID...",
-                      prefixIcon: const Icon(Icons.person),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                    onChanged: (value) {
-                      setState(() {});
-                    },
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Obx(
-                  () => DropdownButton<String>(
-                    value: selectedFilter.value,
-                    items:
-                        ['Semua Tuntutan', 'Lulus', 'Dalam Proses', 'Gagal']
-                            .map(
-                              (status) => DropdownMenuItem(
-                                value: status,
-                                child: Text(status),
-                              ),
-                            )
-                            .toList(),
-                    onChanged: (value) {
-                      if (value != null) {
-                        selectedFilter.value = value;
-                      }
-                    },
-                  ),
-                ),
-              ],
-            ),
+            _buildSearchBar(),
             const SizedBox(height: 16),
-            Expanded(child: _buildTable()),
+            Expanded(child: _buildClaimsTable()),
           ],
         ),
       ),
