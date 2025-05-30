@@ -5,7 +5,8 @@ import 'package:easykhairat/widgets/header.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:moon_design/moon_design.dart';
-import 'dart:html' as html;
+// Replace dart:html import with universal_html
+import 'package:universal_html/html.dart' as html;
 import 'dart:typed_data';
 import 'dart:convert';
 import 'package:supabase_flutter/supabase_flutter.dart';
