@@ -22,7 +22,7 @@ class _SettingsState extends State<Settings> {
     final surfaceColor = isDarkMode ? Colors.grey[800] : Colors.white;
     final textColor = isDarkMode ? Colors.white : Colors.black;
 
-    final userController = Get.find<UserController>();
+    final userController = Get.put(UserController());
 
     return Scaffold(
       backgroundColor: backgroundColor,
