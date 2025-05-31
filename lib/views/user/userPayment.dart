@@ -1,8 +1,13 @@
+import 'package:easykhairat/controllers/fee_controller.dart';
+import 'package:easykhairat/controllers/payment_controller.dart';
 import 'package:easykhairat/controllers/toyyibpay_service.dart';
+import 'package:easykhairat/models/feeModel.dart';
 import 'package:easykhairat/views/user/fpxPage.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import 'package:moon_design/moon_design.dart';
+import 'package:flutter/services.dart';
 
 class UserPayment extends StatefulWidget {
   const UserPayment({Key? key}) : super(key: key);
@@ -12,9 +17,43 @@ class UserPayment extends StatefulWidget {
 }
 
 class _UserPaymentState extends State<UserPayment> {
-  final TextEditingController paymentController = TextEditingController(
+  final TextEditingController textAmountController = TextEditingController(
     text: "0.00",
   );
+  final FeeController feeController = Get.put(FeeController());
+  final PaymentController paymentController = Get.put(PaymentController());
+
+  String? selectedFeeId;
+  final RxBool isProcessing = false.obs;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserFees();
+  }
+
+  Future<void> _loadUserFees() async {
+    // Replace '1' with actual user ID from your auth system
+    await feeController.fetchYuranTertunggak('1');
+    await paymentController.fetchPaymentsByUserId('1');
+
+    // Set default fee if available
+    if (feeController.yuranTertunggak.isNotEmpty) {
+      setState(() {
+        selectedFeeId = feeController.yuranTertunggak.first.feeId.toString();
+        textAmountController.text = feeController
+            .yuranTertunggak
+            .first
+            .feeAmount
+            .toStringAsFixed(2);
+      });
+    }
+  }
+
+  String formatDate(DateTime? date) {
+    if (date == null) return 'N/A';
+    return DateFormat('dd/MM/yyyy').format(date);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -23,199 +62,53 @@ class _UserPaymentState extends State<UserPayment> {
       body: SafeArea(
         child: Column(
           children: [
-            Padding(
-              padding: const EdgeInsets.only(left: 8, top: 8),
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: IconButton(
-                  icon: Icon(Icons.arrow_back),
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                ),
+            // App bar
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              decoration: BoxDecoration(
+                color: MoonColors.light.goku,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 2,
+                    offset: Offset(0, 1),
+                  ),
+                ],
+              ),
+              child: Row(
+                children: [
+                  IconButton(
+                    icon: Icon(Icons.arrow_back),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Bayaran Yuran',
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
+                ],
               ),
             ),
+
+            // Main content
             Expanded(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 16,
-                ),
+                padding: const EdgeInsets.all(16),
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Container(
-                      decoration: BoxDecoration(
-                        borderRadius: const BorderRadius.vertical(
-                          top: Radius.circular(16),
-                        ),
-                      ),
-                      padding: const EdgeInsets.all(16),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Your Account',
-                                  style: TextStyle(
-                                    fontSize: 22,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.black,
-                                  ),
-                                ),
-                                const SizedBox(height: 20),
-                                Card(
-                                  color: MoonColors.light.goku,
-                                  elevation: 2,
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(16),
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          'Pakej 1 Tahun',
-                                          style: TextStyle(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.bold,
-                                            color: Colors.black,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 4),
-                                        Text(
-                                          '8a1b120c-c4a7-448b-9f78-047b5080eb1d',
-                                          style: TextStyle(
-                                            fontSize: 14,
-                                            color: Colors.grey,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 16),
-                                        Text(
-                                          'Total Due (RM):',
-                                          style: TextStyle(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.bold,
-                                            color: Colors.black,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 4),
-                                        Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            Text(
-                                              'Pay before 11 March 2025',
-                                              style: TextStyle(
-                                                fontSize: 12,
-                                                color: Colors.grey,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                        const SizedBox(height: 4),
-                                        MoonTextInput(
-                                          controller: paymentController,
-                                          textInputSize: MoonTextInputSize.md,
-                                          obscureText: false,
-                                          backgroundColor:
-                                              MoonColors.light.goku,
-                                          cursorColor: MoonColors.light.trunks,
-                                          initialValue: "0.00",
-                                          textColor: Colors.black,
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(height: 20),
-                                Text(
-                                  'Minimum payment is RM2.00',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: Colors.grey,
-                                  ),
-                                ),
-                                const SizedBox(height: 20),
-                                Center(
-                                  child: MoonFilledButton(
-                                    borderRadius: BorderRadius.circular(50),
-                                    buttonSize: MoonButtonSize.md,
-                                    onTap: () async {
-                                      try {
-                                        final toyyibPayService =
-                                            ToyyibPayService();
+                    // Payment summary card
+                    _buildPaymentSummaryCard(),
 
-                                        // Remove any "RM" prefix and trim spaces
-                                        String paymentText =
-                                            paymentController.text
-                                                .replaceAll(
-                                                  RegExp(r'[^\d.]'),
-                                                  '',
-                                                )
-                                                .trim();
+                    const SizedBox(height: 24),
 
-                                        // Convert cleaned string to double
-                                        double? payment = double.tryParse(
-                                          paymentText,
-                                        );
+                    // Fees selection
+                    _buildFeesSection(),
 
-                                        if (payment == null || payment < 2.0) {
-                                          throw Exception(
-                                            'Minimum payment amount is RM2.00',
-                                          );
-                                        }
+                    const SizedBox(height: 24),
 
-                                        // Generate the bill
-                                        String?
-                                        billCode = await toyyibPayService.createBill(
-                                          billTitle: 'Booking Payment',
-                                          billDescription:
-                                              'Payment for booking ID: 123456',
-                                          billAmount: (payment * 100)
-                                              .toStringAsFixed(0),
-                                          userEmail:
-                                              "danialnabil0208@gmail.com",
-                                          userPhone: "01123138061",
-                                          categoryCode:
-                                              'r53xplxf', // Replace with your category code
-                                        );
-
-                                        if (billCode != null) {
-                                          // Navigate to the payment page
-                                          Get.to(
-                                            () =>
-                                                PaymentPage(billCode: billCode),
-                                          );
-                                        } else {
-                                          throw Exception(
-                                            'Failed to create bill. Please try again later.',
-                                          );
-                                        }
-                                      } catch (error) {
-                                        ScaffoldMessenger.of(
-                                          context,
-                                        ).showSnackBar(
-                                          SnackBar(
-                                            content: Text(
-                                              'Payment failed: $error',
-                                            ),
-                                            backgroundColor: Colors.red,
-                                          ),
-                                        );
-                                      }
-                                    },
-                                    label: const Text("MAKE PAYMENT"),
-                                    isFullWidth: true,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+                    // Payment history
+                    _buildPaymentHistorySection(),
                   ],
                 ),
               ),
@@ -224,5 +117,525 @@ class _UserPaymentState extends State<UserPayment> {
         ),
       ),
     );
+  }
+
+  Widget _buildPaymentSummaryCard() {
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Ringkasan Bayaran',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 20),
+
+            // Selected fee details
+            Obx(() {
+              final selectedFee =
+                  selectedFeeId != null
+                      ? feeController.yuranTertunggak.firstWhereOrNull(
+                        (fee) => fee.feeId.toString() == selectedFeeId,
+                      )
+                      : null;
+
+              if (selectedFee == null) {
+                if (feeController.isLoading.value) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+
+                return Container(
+                  padding: const EdgeInsets.all(24),
+                  decoration: BoxDecoration(
+                    color: Colors.green.shade50,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.green.shade200),
+                  ),
+                  child: Center(
+                    child: Column(
+                      children: [
+                        Icon(Icons.check_circle, color: Colors.green, size: 48),
+                        const SizedBox(height: 16),
+                        Text(
+                          "Tiada Yuran Tertunggak",
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.green.shade700,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          "Anda tidak mempunyai sebarang yuran untuk dibayar pada masa ini.",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(color: Colors.green.shade600),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }
+
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildInfoRow("Jenis Yuran", selectedFee.feeDescription),
+                  _buildInfoRow("Tarikh Akhir", formatDate(selectedFee.feeDue)),
+                  _buildInfoRow(
+                    "Jumlah",
+                    "RM ${selectedFee.feeAmount.toStringAsFixed(2)}",
+                  ),
+
+                  const SizedBox(height: 20),
+
+                  // Amount input
+                  Text(
+                    'Jumlah Bayaran (RM)',
+                    style: TextStyle(fontWeight: FontWeight.w500),
+                  ),
+                  const SizedBox(height: 8),
+
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: Colors.grey.shade300),
+                    ),
+                    child: TextFormField(
+                      controller: textAmountController,
+                      decoration: InputDecoration(
+                        labelText: "Jumlah Bayaran",
+                        hintText: "0.00",
+                        prefixIcon: Icon(Icons.attach_money),
+                        border: InputBorder.none,
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 14,
+                        ),
+                        helperText: 'Tetapkan jumlah yang ingin dibayar',
+                        helperStyle: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                      style: TextStyle(fontSize: 16, color: Colors.black),
+                      cursorColor: Colors.blue,
+                      keyboardType: TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
+                      inputFormatters: [
+                        FilteringTextInputFormatter.allow(
+                          RegExp(r'^\d+\.?\d{0,2}'),
+                        ),
+                      ],
+                      onChanged: (value) {
+                        // Format the value as currency while typing
+                        if (value.isNotEmpty) {
+                          final double? amount = double.tryParse(value);
+                          if (amount != null) {
+                            // Only update if it's a valid number to prevent cursor jumping
+                            if (value != amount.toStringAsFixed(2)) {
+                              textAmountController.value =
+                                  TextEditingController.fromValue(
+                                    TextEditingValue(
+                                      text: amount.toStringAsFixed(2),
+                                      selection: TextSelection.collapsed(
+                                        offset: value.length,
+                                      ),
+                                    ),
+                                  ).value;
+                            }
+                          }
+                        }
+                      },
+                    ),
+                  ),
+
+                  const SizedBox(height: 8),
+                  Text(
+                    'Minimum bayaran adalah RM2.00',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.grey,
+                      fontStyle: FontStyle.italic,
+                    ),
+                  ),
+
+                  const SizedBox(height: 24),
+
+                  // Payment button
+                  Obx(
+                    () => MoonFilledButton(
+                      borderRadius: BorderRadius.circular(12),
+                      buttonSize: MoonButtonSize.md,
+                      onTap:
+                          isProcessing.value
+                              ? null
+                              : () => _processPayment(selectedFee),
+                      isFullWidth: true,
+                      // The issue is with the 'disabled' property - it's not supported in MoonFilledButton
+                      // Instead, pass null to onTap to disable the button
+                      label: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          if (isProcessing.value)
+                            Container(
+                              width: 20,
+                              height: 20,
+                              margin: const EdgeInsets.only(right: 12),
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  Colors.white,
+                                ),
+                              ),
+                            ),
+                          Text(
+                            isProcessing.value
+                                ? "MEMPROSES..."
+                                : "BAYAR SEKARANG",
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              );
+            }),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInfoRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 120,
+            child: Text(label, style: TextStyle(color: Colors.grey[600])),
+          ),
+          Expanded(
+            child: Text(value, style: TextStyle(fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFeesSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(Icons.receipt_long, color: Colors.blue),
+            const SizedBox(width: 8),
+            Text(
+              'Pilih Yuran',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+
+        Obx(() {
+          if (feeController.isLoading.value) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          if (feeController.yuranTertunggak.isEmpty) {
+            return Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.blue.shade50,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.blue.shade200),
+              ),
+              child: Center(
+                child: Text(
+                  "Tiada yuran tertunggak",
+                  style: TextStyle(color: Colors.blue.shade700),
+                ),
+              ),
+            );
+          }
+
+          return Column(
+            children:
+                feeController.yuranTertunggak.map((fee) {
+                  bool isSelected = selectedFeeId == fee.feeId.toString();
+                  bool isOverdue = fee.feeDue.isBefore(DateTime.now());
+
+                  return Container(
+                    margin: const EdgeInsets.only(bottom: 12),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color:
+                            isSelected
+                                ? Colors.blue
+                                : isOverdue
+                                ? Colors.red.shade300
+                                : Colors.grey.shade300,
+                        width: isSelected ? 2 : 1,
+                      ),
+                      color:
+                          isSelected
+                              ? Colors.blue.shade50
+                              : isOverdue
+                              ? Colors.red.shade50
+                              : Colors.white,
+                    ),
+                    child: InkWell(
+                      onTap: () {
+                        setState(() {
+                          selectedFeeId = fee.feeId.toString();
+                          textAmountController.text = fee.feeAmount
+                              .toStringAsFixed(2);
+                        });
+                      },
+                      borderRadius: BorderRadius.circular(12),
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Row(
+                          children: [
+                            // Radio button
+                            Radio<String>(
+                              value: fee.feeId.toString(),
+                              groupValue: selectedFeeId,
+                              onChanged: (value) {
+                                setState(() {
+                                  selectedFeeId = value;
+                                  textAmountController.text = fee.feeAmount
+                                      .toStringAsFixed(2);
+                                });
+                              },
+                              activeColor: Colors.blue,
+                            ),
+
+                            // Fee details
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    fee.feeDescription,
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w500,
+                                      fontSize: 16,
+                                      color:
+                                          isSelected
+                                              ? Colors.blue.shade700
+                                              : isOverdue
+                                              ? Colors.red.shade700
+                                              : Colors.black87,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    "Tarikh Akhir: ${formatDate(fee.feeDue)}",
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      color:
+                                          isOverdue
+                                              ? Colors.red.shade800
+                                              : null,
+                                    ),
+                                  ),
+                                  if (isOverdue)
+                                    Container(
+                                      margin: const EdgeInsets.only(top: 8),
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 8,
+                                        vertical: 2,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: Colors.red.shade100,
+                                        borderRadius: BorderRadius.circular(4),
+                                      ),
+                                      child: Text(
+                                        "LEWAT TEMPOH",
+                                        style: TextStyle(
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.red.shade700,
+                                        ),
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            ),
+
+                            // Amount
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 8,
+                              ),
+                              decoration: BoxDecoration(
+                                color:
+                                    isSelected
+                                        ? Colors.blue.shade100
+                                        : Colors.orange.shade100,
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: Text(
+                                "RM ${fee.feeAmount.toStringAsFixed(2)}",
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color:
+                                      isSelected
+                                          ? Colors.blue.shade700
+                                          : Colors.orange.shade700,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                }).toList(),
+          );
+        }),
+      ],
+    );
+  }
+
+  Widget _buildPaymentHistorySection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(Icons.history, color: Colors.green),
+            const SizedBox(width: 8),
+            Text(
+              'Sejarah Pembayaran',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+
+        // Use a different approach to access the controller
+        // to avoid naming confusion
+        GetX<PaymentController>(
+          builder: (controller) {
+            if (controller.isLoading.value) {
+              return const Center(child: CircularProgressIndicator());
+            }
+
+            if (controller.payments.isEmpty) {
+              return Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade100,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.grey.shade300),
+                ),
+                child: Center(
+                  child: Column(
+                    children: [
+                      Icon(Icons.history, size: 48, color: Colors.grey),
+                      const SizedBox(height: 8),
+                      Text(
+                        "Tiada rekod pembayaran",
+                        style: TextStyle(color: Colors.grey.shade700),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }
+
+            return Card(
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+                side: BorderSide(color: Colors.grey.shade200),
+              ),
+              child: ListView.separated(
+                shrinkWrap: true,
+                physics: NeverScrollableScrollPhysics(),
+                itemCount: controller.payments.length,
+                separatorBuilder: (context, index) => Divider(height: 1),
+                itemBuilder: (context, index) {
+                  final payment = controller.payments[index];
+
+                  return ListTile(
+                    leading: CircleAvatar(
+                      backgroundColor: Colors.green.shade100,
+                      child: Icon(Icons.check, color: Colors.green, size: 20),
+                    ),
+                    title: Text(payment.paymentDescription),
+                    subtitle: Text(formatDate(payment.paymentCreatedAt)),
+                    trailing: Text(
+                      "RM ${payment.paymentValue.toStringAsFixed(2)}",
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.green,
+                      ),
+                    ),
+                  );
+                },
+              ),
+            );
+          },
+        ),
+      ],
+    );
+  }
+
+  Future<void> _processPayment(FeeModel fee) async {
+    try {
+      isProcessing.value = true;
+
+      // Remove any "RM" prefix and trim spaces
+      String paymentText =
+          textAmountController.text.replaceAll(RegExp(r'[^\d.]'), '').trim();
+
+      // Convert cleaned string to double
+      double? payment = double.tryParse(paymentText);
+
+      if (payment == null || payment < 2.0) {
+        throw Exception('Minimum payment amount is RM2.00');
+      }
+
+      // Generate the bill
+      final toyyibPayService = ToyyibPayService();
+      String? billCode = await toyyibPayService.createBill(
+        billTitle: 'Payment for ${fee.feeDescription}',
+        billDescription: 'Payment for Fee ID: ${fee.feeId}',
+        billAmount: (payment * 100).toStringAsFixed(0),
+        userEmail: "user@example.com", // Replace with actual user email
+        userPhone: "0123456789", // Replace with actual user phone
+        categoryCode: 'r53xplxf', // Replace with your category code
+      );
+
+      if (billCode != null) {
+        // Navigate to the payment page
+        Get.to(() => PaymentPage(billCode: billCode));
+      } else {
+        throw Exception('Failed to create bill. Please try again later.');
+      }
+    } catch (error) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Payment failed: $error'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      isProcessing.value = false;
+    }
   }
 }
