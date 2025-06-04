@@ -7,6 +7,7 @@ class PaymentModel {
   final int feeId;
   final String? userId;
   final String? paymentType;
+  final String? referenceId;
 
   PaymentModel({
     this.paymentId,
@@ -17,11 +18,12 @@ class PaymentModel {
     required this.feeId,
     this.userId,
     this.paymentType,
+    this.referenceId,
   });
 
   factory PaymentModel.fromJson(Map<String, dynamic> json) {
     return PaymentModel(
-      paymentId: json['payment_id'], // No changes needed here
+      paymentId: json['payment_id'],
       paymentValue: (json['payment_value'] as num).toDouble(),
       paymentDescription: json['payment_description'],
       paymentCreatedAt: DateTime.parse(json['payment_created_at']),
@@ -29,6 +31,7 @@ class PaymentModel {
       feeId: json['fee_id'],
       userId: json['user_id'],
       paymentType: json['payment_type'],
+      referenceId: json['reference_id'],
     );
   }
 
@@ -44,7 +47,11 @@ class PaymentModel {
     };
 
     if (paymentId != null) {
-      data['payment_id'] = paymentId; // Only include if not null
+      data['payment_id'] = paymentId;
+    }
+
+    if (referenceId != null) {
+      data['reference_id'] = referenceId;
     }
 
     return data;
@@ -52,6 +59,6 @@ class PaymentModel {
 
   @override
   String toString() {
-    return 'PaymentModel(paymentId: $paymentId, value: $paymentValue, description: $paymentDescription, userId: $userId, feeId: $feeId, paymentType: $paymentType)';
+    return 'PaymentModel(paymentId: $paymentId, value: $paymentValue, description: $paymentDescription, userId: $userId, feeId: $feeId, paymentType: $paymentType, referenceId: $referenceId)';
   }
 }

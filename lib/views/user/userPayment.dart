@@ -1,6 +1,7 @@
 import 'package:easykhairat/controllers/fee_controller.dart';
 import 'package:easykhairat/controllers/payment_controller.dart';
 import 'package:easykhairat/controllers/toyyibpay_service.dart';
+import 'package:easykhairat/controllers/user_controller.dart';
 import 'package:easykhairat/models/feeModel.dart';
 import 'package:easykhairat/views/user/fpxPage.dart';
 import 'package:flutter/material.dart';
@@ -8,6 +9,7 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:moon_design/moon_design.dart';
 import 'package:flutter/services.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class UserPayment extends StatefulWidget {
   const UserPayment({Key? key}) : super(key: key);
@@ -33,20 +35,25 @@ class _UserPaymentState extends State<UserPayment> {
   }
 
   Future<void> _loadUserFees() async {
-    // Replace '1' with actual user ID from your auth system
-    await feeController.fetchYuranTertunggak('1');
-    await paymentController.fetchPaymentsByUserId('1');
+    final currentUserId = Supabase.instance.client.auth.currentUser?.id;
+    if (currentUserId != null) {
+      // Use the current user ID
+      await feeController.fetchYuranTertunggak(currentUserId);
+      await paymentController.fetchPaymentsByUserId(currentUserId);
 
-    // Set default fee if available
-    if (feeController.yuranTertunggak.isNotEmpty) {
-      setState(() {
-        selectedFeeId = feeController.yuranTertunggak.first.feeId.toString();
-        textAmountController.text = feeController
-            .yuranTertunggak
-            .first
-            .feeAmount
-            .toStringAsFixed(2);
-      });
+      // Set default fee if available
+      if (feeController.yuranTertunggak.isNotEmpty) {
+        setState(() {
+          selectedFeeId = feeController.yuranTertunggak.first.feeId.toString();
+          textAmountController.text = feeController
+              .yuranTertunggak
+              .first
+              .feeAmount
+              .toStringAsFixed(2);
+        });
+      }
+    } else {
+      Get.snackbar('Error', 'User not authenticated');
     }
   }
 
@@ -610,20 +617,104 @@ class _UserPaymentState extends State<UserPayment> {
         throw Exception('Minimum payment amount is RM2.00');
       }
 
+      // Get current user from Supabase
+      final supabaseUser = Supabase.instance.client.auth.currentUser;
+      if (supabaseUser == null) {
+        throw Exception('User not authenticated');
+      }
+
+      final currentUserId = supabaseUser.id;
+
+      // Get user details from your controller to ensure the user exists
+      final userController = Get.put(UserController());
+      final user = await userController.fetchUserById(currentUserId);
+
+      if (user == null) {
+        throw Exception('User profile not found');
+      }
+
+      print(
+        'Processing payment for user: ${user.userName} (ID: ${user.userId})',
+      );
+
       // Generate the bill
       final toyyibPayService = ToyyibPayService();
       String? billCode = await toyyibPayService.createBill(
         billTitle: 'Payment for ${fee.feeDescription}',
         billDescription: 'Payment for Fee ID: ${fee.feeId}',
         billAmount: (payment * 100).toStringAsFixed(0),
-        userEmail: "user@example.com", // Replace with actual user email
-        userPhone: "0123456789", // Replace with actual user phone
-        categoryCode: 'r53xplxf', // Replace with your category code
+        userEmail: user.userEmail, // Use actual user email
+        userPhone:
+            user.userPhoneNo ?? "0123456789", // Use actual phone if available
+        categoryCode: 'r53xplxf',
       );
 
       if (billCode != null) {
-        // Navigate to the payment page
-        Get.to(() => PaymentPage(billCode: billCode));
+        // Store session data locally before navigation
+        final currentSession = Supabase.instance.client.auth.currentSession;
+
+        // Navigate to the payment page with all required parameters
+        final paymentResult = await Get.to(
+          () => PaymentPage(
+            billCode: billCode,
+            feeId: fee.feeId!,
+            userId: currentUserId,
+            amount: payment,
+            description: 'Payment for ${fee.feeDescription}',
+          ),
+        );
+
+        // After returning from payment page, check if we need to restore session
+        if (Supabase.instance.client.auth.currentSession == null) {
+          print('Session lost after payment, attempting to restore');
+
+          // Try to restore session using persisted refresh token
+          try {
+            await Supabase.instance.client.auth.setSession(
+              currentSession!.refreshToken.toString(),
+            );
+          } catch (e) {
+            print('Error restoring session: $e');
+          }
+        }
+
+        // If still no session, try refreshing
+        if (Supabase.instance.client.auth.currentSession == null ||
+            Supabase.instance.client.auth.currentSession!.isExpired) {
+          try {
+            await Supabase.instance.client.auth.refreshSession();
+          } catch (e) {
+            print('Error refreshing session: $e');
+            // Don't immediately redirect to login, try to finish this workflow first
+          }
+        }
+
+        // If payment was successful, continue regardless of session state
+        if (paymentResult == true) {
+          // Refresh the fees and payment history
+          try {
+            await _loadUserFees();
+
+            // Show success message
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Pembayaran berjaya!'),
+                backgroundColor: Colors.green,
+              ),
+            );
+          } catch (e) {
+            print('Error after successful payment: $e');
+            // Even if there's an error loading fees, the payment was successful
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  'Pembayaran berjaya, tetapi gagal untuk mengemaskini yuran.',
+                ),
+                backgroundColor: Colors.orange,
+              ),
+            );
+          }
+        }
       } else {
         throw Exception('Failed to create bill. Please try again later.');
       }

@@ -7,17 +7,47 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   const supabaseUrl = 'https://djeeipnokclsjabwadoq.supabase.co';
-  // Replace this with your actual Supabase anon key
   const supabaseKey =
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRqZWVpcG5va2Nsc2phYndhZG9xIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDA0MTE4NDUsImV4cCI6MjA1NTk4Nzg0NX0.sk1UM2xXnUmk6N0jV5UCytHNmWgX9CA6f1uI102uijg';
 
-  await Supabase.initialize(url: supabaseUrl, anonKey: supabaseKey);
+  // Corrected initialization using the available parameters from your FlutterAuthClientOptions
+  await Supabase.initialize(
+    url: supabaseUrl,
+    anonKey: supabaseKey,
+    // Configure auth options correctly
+    authOptions: const FlutterAuthClientOptions(
+      authFlowType: AuthFlowType.pkce, // Use PKCE auth flow for better security
+      autoRefreshToken: true, // Auto refresh the token when needed
+      detectSessionInUri:
+          true, // Auto detect sessions in URI (handles deep links)
+    ),
+  );
 
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  @override
+  void initState() {
+    super.initState();
+
+    // Check if the user is already authenticated
+    final isAuthenticated =
+        Supabase.instance.client.auth.currentSession != null;
+    if (isAuthenticated) {
+      // If authenticated, ensure we go to home not login
+      Future.delayed(Duration.zero, () {
+        Get.offAllNamed(AppRoutes.home);
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
