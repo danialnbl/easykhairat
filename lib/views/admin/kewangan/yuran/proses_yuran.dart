@@ -426,14 +426,45 @@ class ProsesYuranState extends State<ProsesYuran> {
                             SizedBox(width: 16),
                             IconButton(
                               icon: Icon(Icons.visibility, color: Colors.blue),
-                              onPressed: () {
-                                // Navigate to user detail page or show payment history
-                                feeController.fetchYuranTertunggak(user.userId);
-                                paymentController.fetchPaymentsByUserId(
-                                  user.userId,
-                                );
-                                navController.setUser(user);
-                                navController.changeIndex(9);
+                              onPressed: () async {
+                                try {
+                                  // Set user first
+                                  navController.setUser(user);
+
+                                  // Convert userId to string and ensure it's not empty
+                                  final userIdStr = user.userId.toString();
+                                  if (userIdStr.isEmpty) {
+                                    throw "ID pengguna tidak sah";
+                                  }
+
+                                  // Load required data (await both operations)
+                                  await Future.wait([
+                                    feeController.fetchYuranTertunggak(
+                                      userIdStr,
+                                    ),
+                                    paymentController.fetchPaymentsByUserId(
+                                      user.userId,
+                                    ),
+                                  ]);
+
+                                  // Close loading dialog
+                                  Get.back();
+
+                                  // Navigate to yuran individu page
+                                  navController.changeIndex(9);
+                                } catch (e) {
+                                  // Close loading dialog if there's an error
+                                  Get.back();
+
+                                  // Show error message
+                                  Get.snackbar(
+                                    'Ralat',
+                                    'Gagal memuat data: $e',
+                                    backgroundColor: Colors.red,
+                                    colorText: Colors.white,
+                                    duration: const Duration(seconds: 3),
+                                  );
+                                }
                               },
                               tooltip: "Lihat Maklumat",
                             ),
@@ -442,24 +473,90 @@ class ProsesYuranState extends State<ProsesYuran> {
                                 Icons.receipt_long,
                                 color: Colors.amber,
                               ),
-                              onPressed: () {
-                                // Show payment history or add payment
-                                feeController.fetchYuranTertunggak(user.userId);
-                                paymentController.fetchPaymentsByUserId(
-                                  user.userId,
-                                );
-                                navController.setUser(user);
-                                navController.changeIndex(9);
+                              onPressed: () async {
+                                try {
+                                  
+                                  // Set user first
+                                  navController.setUser(user);
+
+                                  // Convert userId to string and ensure it's not empty
+                                  final userIdStr = user.userId.toString();
+                                  if (userIdStr.isEmpty) {
+                                    throw "ID pengguna tidak sah";
+                                  }
+
+                                  // Load required data (await both operations)
+                                  await Future.wait([
+                                    feeController.fetchYuranTertunggak(
+                                      userIdStr,
+                                    ),
+                                    paymentController.fetchPaymentsByUserId(
+                                      user.userId,
+                                    ),
+                                  ]);
+
+                                  // Close loading dialog
+                                  Get.back();
+
+                                  // Navigate to yuran individu page
+                                  navController.changeIndex(9);
+                                } catch (e) {
+                                  // Close loading dialog if there's an error
+                                  Get.back();
+
+                                  // Show error message
+                                  Get.snackbar(
+                                    'Ralat',
+                                    'Gagal memuat data: $e',
+                                    backgroundColor: Colors.red,
+                                    colorText: Colors.white,
+                                    duration: const Duration(seconds: 3),
+                                  );
+                                }
                               },
                               tooltip: "Proses Pembayaran",
                             ),
                           ],
                         ),
-                        onTap: () {
-                          feeController.fetchYuranTertunggak(user.userId);
-                          paymentController.fetchPaymentsByUserId(user.userId);
-                          navController.setUser(user);
-                          navController.changeIndex(9);
+                        onTap: () async {
+                          try {
+                            
+
+                            // Set user first
+                            navController.setUser(user);
+
+                            // Convert userId to string and ensure it's not empty
+                            final userIdStr = user.userId.toString();
+                            if (userIdStr.isEmpty) {
+                              throw "ID pengguna tidak sah";
+                            }
+
+                            // Load required data (await both operations)
+                            await Future.wait([
+                              feeController.fetchYuranTertunggak(userIdStr),
+                              paymentController.fetchPaymentsByUserId(
+                                user.userId,
+                              ),
+                            ]);
+
+                            // Close loading dialog
+                            Get.back();
+
+                            // Navigate to yuran individu page
+                            navController.changeIndex(9);
+                          } catch (e) {
+                            // Close loading dialog if there's an error
+                            Get.back();
+
+                            // Show error message
+                            Get.snackbar(
+                              'Ralat',
+                              'Gagal memuat data: $e',
+                              backgroundColor: Colors.red,
+                              colorText: Colors.white,
+                              duration: const Duration(seconds: 3),
+                            );
+                          }
                         },
                       ),
                     );

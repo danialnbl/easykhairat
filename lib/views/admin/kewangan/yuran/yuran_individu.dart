@@ -791,21 +791,98 @@ class YuranIndividuState extends State<YuranIndividu> {
                   elevation: 4,
                   child: Padding(
                     padding: const EdgeInsets.all(16.0),
-                    child: MoonBreadcrumb(
-                      visibleItemCount: 5,
-                      items: [
-                        MoonBreadcrumbItem(
-                          label: const Text("Home"),
-                          onTap: () => Get.toNamed('/adminMain'),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: MoonBreadcrumb(
+                            visibleItemCount: 5,
+                            items: [
+                              MoonBreadcrumbItem(
+                                label: const Text("Home"),
+                                onTap: () => Get.toNamed('/adminMain'),
+                              ),
+                              MoonBreadcrumbItem(label: const Text("Kewangan")),
+                              MoonBreadcrumbItem(
+                                label: const Text("Proses Yuran"),
+                                onTap:
+                                    () => navController.selectedIndex.value = 4,
+                              ),
+                              MoonBreadcrumbItem(
+                                label: const Text("Yuran Individu"),
+                              ),
+                              MoonBreadcrumbItem(
+                                label: Text(
+                                  "${navController.getUser()?.userName}",
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                        MoonBreadcrumbItem(label: const Text("Kewangan")),
-                        MoonBreadcrumbItem(
-                          label: const Text("Proses Yuran"),
-                          onTap: () => navController.selectedIndex.value = 4,
-                        ),
-                        MoonBreadcrumbItem(label: const Text("Yuran Individu")),
-                        MoonBreadcrumbItem(
-                          label: Text("${navController.getUser()?.userName}"),
+                        // Add refresh button here
+                        Obx(
+                          () =>
+                              feeController.isLoading.value ||
+                                      paymentController.isLoading.value
+                                  ? Container(
+                                    padding: const EdgeInsets.all(8),
+                                    width: 40,
+                                    height: 40,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      valueColor: AlwaysStoppedAnimation<Color>(
+                                        Colors.blue,
+                                      ),
+                                    ),
+                                  )
+                                  : Tooltip(
+                                    message: "Muat semula data",
+                                    child: IconButton(
+                                      icon: const Icon(
+                                        Icons.refresh,
+                                        color: Colors.blue,
+                                      ),
+                                      onPressed: () async {
+                                        // Show a loading indicator
+                                        final userId =
+                                            navController
+                                                .getUser()
+                                                ?.userId
+                                                .toString() ??
+                                            "";
+                                        if (userId.isEmpty) {
+                                          Get.snackbar(
+                                            'Error',
+                                            'ID pengguna tidak sah',
+                                          );
+                                          return;
+                                        }
+
+                                        // Refresh all data at once
+                                        await Future.wait([
+                                          feeController.fetchYuranTertunggak(
+                                            userId,
+                                          ),
+                                          paymentController
+                                              .fetchPaymentsByUserId(
+                                                navController
+                                                        .getUser()
+                                                        ?.userId
+                                                        .toString() ??
+                                                    "",
+                                              ),
+                                          feeController.fetchFees(),
+                                        ]);
+
+                                        Get.snackbar(
+                                          'Selesai',
+                                          'Data telah dikemaskini',
+                                          backgroundColor: Colors.green,
+                                          colorText: Colors.white,
+                                          duration: const Duration(seconds: 2),
+                                        );
+                                      },
+                                    ),
+                                  ),
                         ),
                       ],
                     ),
