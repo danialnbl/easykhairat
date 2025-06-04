@@ -118,4 +118,44 @@ class TuntutanController extends GetxController {
       (tuntutan) => tuntutan.claimId == claimId,
     );
   }
+
+  // Add this method to your TuntutanController class
+
+  Future<ClaimModel?> createTuntutan({
+    required String userId,
+    required String claimType,
+  }) async {
+    try {
+      final newClaim = ClaimModel(
+        userId: userId,
+        claimOverallStatus: 'Dalam Proses',
+        claimType: claimType,
+        claimCreatedAt: DateTime.now(),
+        claimUpdatedAt: DateTime.now(),
+      );
+
+      final response =
+          await supabase
+              .from('claims')
+              .insert(newClaim.toJson())
+              .select()
+              .single();
+
+      // Create a claim model from the response
+      final createdClaim = ClaimModel.fromJson(response);
+
+      // Refresh the tuntutan list
+      await fetchTuntutan();
+
+      return createdClaim;
+    } catch (e) {
+      print('Error creating tuntutan: $e');
+      Get.snackbar(
+        'Error',
+        'Failed to create claim: ${e.toString()}',
+        backgroundColor: Colors.red.shade100,
+      );
+      return null;
+    }
+  }
 }
