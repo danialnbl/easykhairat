@@ -219,7 +219,7 @@ class _AddAnnouncementState extends State<AddAnnouncement> {
                                   border: OutlineInputBorder(),
                                 ),
                                 items:
-                                    ['General', 'Important']
+                                    ['General', 'Death']
                                         .map(
                                           (type) => DropdownMenuItem(
                                             value: type,
