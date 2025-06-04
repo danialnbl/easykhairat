@@ -66,44 +66,68 @@ class _UserPaymentState extends State<UserPayment> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: MoonColors.light.gohan,
-      body: SafeArea(
-        child: Column(
-          children: [
-            // App bar
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              decoration: BoxDecoration(
-                color: MoonColors.light.goku,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
-                    blurRadius: 2,
-                    offset: Offset(0, 1),
-                  ),
-                ],
-              ),
-              child: Row(
-                children: [
-                  IconButton(
-                    icon: Icon(Icons.arrow_back),
-                    onPressed: () => Navigator.pop(context),
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    'Bayaran Yuran',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                  ),
-                ],
+      body: Column(
+        children: [
+          // Enhanced header
+          Container(
+            width: double.infinity,
+            decoration: BoxDecoration(
+              color: MoonColors.light.bulma,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 4,
+                  offset: Offset(0, 2),
+                ),
+              ],
+            ),
+            child: SafeArea(
+              bottom: false,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16.0,
+                  vertical: 12.0,
+                ),
+                child: Row(
+                  children: [
+                    IconButton(
+                      icon: Icon(Icons.arrow_back, color: Colors.white),
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Bayaran Yuran',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
+          ),
 
-            // Main content
-            Expanded(
+          // Main content with pull-to-refresh
+          Expanded(
+            child: RefreshIndicator(
+              onRefresh: _refreshPaymentData,
+              color: MoonColors.light.bulma,
+              backgroundColor: Colors.white,
+              displacement: 20,
+              strokeWidth: 3,
               child: SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
                 padding: const EdgeInsets.all(16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    // Info header card
+                    _buildInfoHeader(),
+
+                    const SizedBox(height: 20),
+
                     // Payment summary card
                     _buildPaymentSummaryCard(),
 
@@ -120,8 +144,8 @@ class _UserPaymentState extends State<UserPayment> {
                 ),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -602,6 +626,41 @@ class _UserPaymentState extends State<UserPayment> {
     );
   }
 
+  Widget _buildInfoHeader() {
+    return Card(
+      color: MoonColors.light.bulma.withOpacity(0.1),
+      elevation: 0,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  MoonIcons.generic_info_16_light,
+                  color: MoonColors.light.bulma,
+                ),
+                SizedBox(width: 8),
+                Text(
+                  'Bayaran Yuran Khairat',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
+            SizedBox(height: 8),
+            Text(
+              'Sila pilih yuran yang ingin dibayar dan masukkan jumlah bayaran. '
+              'Pembayaran akan diproses melalui FPX.',
+              style: TextStyle(fontSize: 14),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Future<void> _processPayment(FeeModel fee) async {
     try {
       isProcessing.value = true;
@@ -727,6 +786,74 @@ class _UserPaymentState extends State<UserPayment> {
       );
     } finally {
       isProcessing.value = false;
+    }
+  }
+
+  Future<void> _refreshPaymentData() async {
+    try {
+      setState(() {
+        isProcessing.value = true;
+      });
+
+      final currentUserId = Supabase.instance.client.auth.currentUser?.id;
+      if (currentUserId != null) {
+        // Create a list of futures to execute in parallel
+        final futures = [
+          // Refresh fee data
+          feeController.fetchYuranTertunggak(currentUserId),
+
+          // Refresh payment history
+          paymentController.fetchPaymentsByUserId(currentUserId),
+        ];
+
+        // Wait for all refreshes to complete
+        await Future.wait(futures);
+
+        // Set default fee if available
+        if (feeController.yuranTertunggak.isNotEmpty) {
+          setState(() {
+            selectedFeeId =
+                feeController.yuranTertunggak.first.feeId.toString();
+            textAmountController.text = feeController
+                .yuranTertunggak
+                .first
+                .feeAmount
+                .toStringAsFixed(2);
+          });
+        } else {
+          setState(() {
+            selectedFeeId = null;
+            textAmountController.text = "0.00";
+          });
+        }
+
+        // Show success feedback
+        Get.snackbar(
+          'Refreshed',
+          'Payment data updated successfully',
+          backgroundColor: Colors.green.shade100,
+          colorText: Colors.green.shade800,
+          snackPosition: SnackPosition.BOTTOM,
+          margin: EdgeInsets.all(16),
+          duration: Duration(seconds: 2),
+          icon: Icon(Icons.check_circle, color: Colors.green.shade800),
+        );
+      }
+    } catch (error) {
+      print('Error refreshing payment data: $error');
+      Get.snackbar(
+        'Refresh Failed',
+        'Please check your connection and try again',
+        backgroundColor: Colors.red.shade100,
+        colorText: Colors.red.shade800,
+        snackPosition: SnackPosition.BOTTOM,
+        margin: EdgeInsets.all(16),
+        icon: Icon(Icons.error, color: Colors.red.shade800),
+      );
+    } finally {
+      setState(() {
+        isProcessing.value = false;
+      });
     }
   }
 }
