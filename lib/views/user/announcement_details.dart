@@ -1,4 +1,5 @@
 import 'package:easykhairat/models/announcementModel.dart';
+import 'package:easykhairat/views/user/home.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -22,8 +23,8 @@ class AnnouncementDetailsPage extends StatelessWidget {
     final String date = _formatDate(announcement.announcementCreatedAt);
 
     Share.share(
-      '[$type] $title\n\n$desc\n\nPosted on $date via EasyKhairat App',
-      subject: 'Announcement from EasyKhairat: $title',
+      '[$type] $title\n\n$desc\n\nDiterbitkan pada $date melalui Aplikasi EasyKhairat',
+      subject: 'Pengumuman dari EasyKhairat: $title',
     );
   }
 
@@ -59,7 +60,7 @@ class AnnouncementDetailsPage extends StatelessWidget {
           ),
           child: IconButton(
             icon: Icon(Icons.arrow_back, color: primaryColor),
-            onPressed: () => Get.back(),
+            onPressed: () => Get.to(HomePageWidget()),
           ),
         ),
         actions: [
@@ -118,7 +119,7 @@ class AnnouncementDetailsPage extends StatelessWidget {
                                   ),
                                   SizedBox(height: 8),
                                   Text(
-                                    'Image not available',
+                                    'Imej tidak tersedia',
                                     style: TextStyle(color: Colors.grey[600]),
                                   ),
                                 ],
@@ -159,7 +160,9 @@ class AnnouncementDetailsPage extends StatelessWidget {
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: Text(
-                        announcement.announcementType.toUpperCase(),
+                        isDeath
+                            ? 'KEMATIAN'
+                            : announcement.announcementType.toUpperCase(),
                         style: TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
@@ -293,7 +296,7 @@ class AnnouncementDetailsPage extends StatelessWidget {
                                 ),
                                 SizedBox(width: 8),
                                 Text(
-                                  'Important Information',
+                                  'Maklumat Penting',
                                   style: TextStyle(
                                     fontWeight: FontWeight.bold,
                                     fontSize: 16,
@@ -304,8 +307,8 @@ class AnnouncementDetailsPage extends StatelessWidget {
                             ),
                             SizedBox(height: 8),
                             Text(
-                              'Please join us for the funeral prayer. Your presence and '
-                              'prayers would be a great comfort to the bereaved family.',
+                              'Sila sertai kami untuk solat jenazah. Kehadiran dan '
+                              'doa anda akan menjadi penghibur kepada keluarga si mati.',
                               style: TextStyle(
                                 fontSize: 14,
                                 color: Colors.red.shade900,
@@ -338,10 +341,10 @@ class AnnouncementDetailsPage extends StatelessWidget {
           children: [
             Expanded(
               child: MoonButton(
-                onTap: () => Get.back(),
+                onTap: () => Get.to(HomePageWidget()),
                 backgroundColor: Colors.grey.shade100,
                 textColor: Colors.black87,
-                label: Text("Back to Home"),
+                label: Text("Kembali"),
                 borderRadius: BorderRadius.circular(50),
                 buttonSize: MoonButtonSize.lg,
                 showBorder: true,
@@ -360,7 +363,7 @@ class AnnouncementDetailsPage extends StatelessWidget {
                   children: [
                     Icon(Icons.share, size: 18),
                     SizedBox(width: 8),
-                    Text("Share"),
+                    Text("Kongsi"),
                   ],
                 ),
                 borderRadius: BorderRadius.circular(50),

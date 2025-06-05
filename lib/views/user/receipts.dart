@@ -29,6 +29,11 @@ class _ReceiptsState extends State<Receipts> {
   final RxString currentUserId = ''.obs;
   StreamSubscription? _paymentsSubscription;
 
+  // Add search and filter variables
+  final TextEditingController _searchController = TextEditingController();
+  final RxString _searchQuery = ''.obs;
+  final RxString _filterBy = 'All'.obs;
+
   @override
   void initState() {
     super.initState();
@@ -97,21 +102,63 @@ class _ReceiptsState extends State<Receipts> {
 
   @override
   void dispose() {
+    _searchController.dispose();
     _paymentsSubscription?.cancel();
     super.dispose();
   }
 
+  List<PaymentModel> get filteredPayments {
+    List<PaymentModel> result = paymentController.payments;
+
+    // Apply search filter
+    if (_searchQuery.value.isNotEmpty) {
+      result =
+          result
+              .where(
+                (payment) =>
+                    payment.paymentDescription.toLowerCase().contains(
+                      _searchQuery.value.toLowerCase(),
+                    ) ||
+                    payment.paymentId.toString().contains(_searchQuery.value) ||
+                    (payment.paymentType?.toLowerCase().contains(
+                          _searchQuery.value.toLowerCase(),
+                        ) ??
+                        false),
+              )
+              .toList();
+    }
+
+    // Apply type filter
+    if (_filterBy.value != 'All') {
+      result =
+          result
+              .where((payment) => payment.paymentType == _filterBy.value)
+              .toList();
+    }
+
+    return result;
+  }
+
   @override
   Widget build(BuildContext context) {
+    final accentColor = Colors.teal;
+    final textColor = Colors.black;
+    final backgroundColor = Colors.grey[100];
+    final surfaceColor = Colors.white;
+
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
-        backgroundColor: MoonColors.light.gohan,
+        backgroundColor: backgroundColor,
         body: SafeArea(
           child: Column(
             children: [
+              // Logo and Header Section
               Padding(
-                padding: const EdgeInsets.only(left: 16.0, top: 16.0),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16.0,
+                  vertical: 16.0,
+                ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -121,101 +168,21 @@ class _ReceiptsState extends State<Receipts> {
                       height: 50.0,
                       fit: BoxFit.fitWidth,
                     ),
-                    Padding(
-                      padding: const EdgeInsets.only(right: 16.0),
-                      child: badges.Badge(
-                        position: badges.BadgePosition.topEnd(top: -5, end: -5),
-                        badgeContent: Text(
-                          '3',
-                          style: TextStyle(color: Colors.white, fontSize: 10),
-                        ),
-                        child: IconButton(
-                          icon: Icon(
-                            Icons.notifications,
-                            color: Colors.grey[700],
-                          ),
-                          onPressed: () {
-                            showMenu(
-                              color: Colors.white,
-                              context: context,
-                              position: RelativeRect.fromLTRB(
-                                MediaQuery.of(context).size.width - 150,
-                                80,
-                                16,
-                                0,
-                              ),
-                              items: [
-                                PopupMenuItem(
-                                  child: ListTile(
-                                    // Make this more compact
-                                    contentPadding: EdgeInsets.symmetric(
-                                      horizontal: 4.0,
-                                    ),
-                                    dense: true,
-                                    leading: Padding(
-                                      padding: const EdgeInsets.only(
-                                        left: 4.0,
-                                      ), // reduced padding
-                                      child: Icon(
-                                        Icons.check,
-                                        color: MoonColors.light.bulma,
-                                        size: 20,
-                                      ),
-                                    ),
-                                    title: Text(
-                                      'Mark all as read',
-                                      style: TextStyle(
-                                        color: MoonColors.light.bulma,
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 12, // smaller font
-                                      ),
-                                    ),
-                                    tileColor: MoonColors.light.beerus,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                    onTap: () {
-                                      Navigator.pop(context);
-                                    },
-                                  ),
-                                ),
-                                // Make the other menu items smaller too
-                                PopupMenuItem(
-                                  height: 40, // Shorter height
-                                  child: Text(
-                                    'Tuntutan Approved',
-                                    style: TextStyle(fontSize: 13),
-                                  ),
-                                ),
-                                PopupMenuItem(
-                                  height: 40, // Shorter height
-                                  child: Text(
-                                    'Sila Bayar Yuran Tertunggak',
-                                    style: TextStyle(fontSize: 13),
-                                  ),
-                                ),
-                                PopupMenuItem(
-                                  height: 40, // Shorter height
-                                  child: Text(
-                                    'Ahli keluarga baharu ditambah',
-                                    style: TextStyle(fontSize: 13),
-                                  ),
-                                ),
-                              ],
-                            );
-                          },
-                        ),
-                      ),
+                    IconButton(
+                      icon: Icon(Icons.refresh, color: accentColor),
+                      onPressed: _loadUserPayments,
+                      tooltip: 'Refresh',
                     ),
                   ],
                 ),
               ),
-              SizedBox(height: 16),
+
+              // Page Title Section
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24.0),
                 child: Row(
                   children: [
-                    Icon(Icons.receipt_long, color: MoonColors.light.piccolo),
+                    Icon(Icons.receipt_long, color: accentColor),
                     SizedBox(width: 12),
                     Expanded(
                       child: Text(
@@ -223,33 +190,112 @@ class _ReceiptsState extends State<Receipts> {
                         style: TextStyle(
                           fontSize: 22,
                           fontWeight: FontWeight.bold,
-                          color: Colors.black87,
+                          color: textColor,
                         ),
                         overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    Obx(
+                      () => badges.Badge(
+                        badgeContent: Text(
+                          paymentController.payments.length.toString(),
+                          style: TextStyle(color: Colors.white, fontSize: 12),
+                        ),
+                        badgeStyle: badges.BadgeStyle(
+                          badgeColor: accentColor,
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 5,
+                          ),
+                        ),
                       ),
                     ),
                   ],
                 ),
               ),
               SizedBox(height: 16),
+
+              // Search and Filter section
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24.0,
+                  vertical: 8.0,
+                ),
+                child: Column(
+                  children: [
+                    // Search TextField
+                    TextField(
+                      controller: _searchController,
+                      decoration: InputDecoration(
+                        hintText: 'Cari resit...',
+                        prefixIcon: Icon(Icons.search, color: Colors.grey),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: Colors.grey.shade300),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: Colors.grey.shade300),
+                        ),
+                        contentPadding: EdgeInsets.symmetric(vertical: 12),
+                        filled: true,
+                        fillColor: surfaceColor,
+                      ),
+                      onChanged: (value) => _searchQuery.value = value,
+                    ),
+                    SizedBox(height: 12),
+
+                    // Filter Chips
+                    SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Obx(
+                        () => Row(
+                          children: [
+                            _buildFilterChip('All', 'Semua', accentColor),
+                            _buildFilterChip('FPX', 'Online', accentColor),
+                            _buildFilterChip('Tunai', 'Tunai', accentColor),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(height: 8),
+
+              // Receipts List
               Expanded(
                 child: Obx(() {
                   if (paymentController.isLoading.value) {
-                    return Center(child: CircularProgressIndicator());
+                    return Center(
+                      child: CircularProgressIndicator(color: accentColor),
+                    );
                   }
 
-                  if (paymentController.payments.isEmpty) {
-                    return _buildEmptyState();
+                  final payments = filteredPayments;
+
+                  if (payments.isEmpty) {
+                    if (paymentController.payments.isEmpty) {
+                      return _buildEmptyState(accentColor);
+                    } else {
+                      return _buildNoResultsState();
+                    }
                   }
 
                   return RefreshIndicator(
+                    color: accentColor,
                     onRefresh: _loadUserPayments,
                     child: ListView.builder(
                       padding: EdgeInsets.symmetric(horizontal: 16),
-                      itemCount: paymentController.payments.length,
+                      itemCount: payments.length,
                       itemBuilder: (context, index) {
-                        final payment = paymentController.payments[index];
-                        return _buildPaymentCard(payment);
+                        final payment = payments[index];
+                        return _buildPaymentCard(
+                          payment,
+                          accentColor,
+                          surfaceColor,
+                          textColor,
+                        );
                       },
                     ),
                   );
@@ -262,7 +308,8 @@ class _ReceiptsState extends State<Receipts> {
     );
   }
 
-  Widget _buildEmptyState() {
+  // Updated Empty State Widget
+  Widget _buildEmptyState(Color accentColor) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -270,14 +317,10 @@ class _ReceiptsState extends State<Receipts> {
           Container(
             padding: EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: MoonColors.light.beerus,
+              color: accentColor.withOpacity(0.1),
               shape: BoxShape.circle,
             ),
-            child: Icon(
-              Icons.receipt_long,
-              size: 60,
-              color: MoonColors.light.hit,
-            ),
+            child: Icon(Icons.receipt_long, size: 60, color: accentColor),
           ),
           SizedBox(height: 24),
           Text(
@@ -302,18 +345,56 @@ class _ReceiptsState extends State<Receipts> {
     );
   }
 
-  Widget _buildPaymentCard(PaymentModel payment) {
-    Color statusColor = Colors.green;
-    IconData statusIcon = Icons.check_circle;
+  Widget _buildNoResultsState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.search_off, size: 60, color: Colors.grey[400]),
+          SizedBox(height: 16),
+          Text(
+            'Tiada hasil carian',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Colors.grey[700],
+            ),
+          ),
+          SizedBox(height: 8),
+          Text(
+            'Sila cuba carian yang lain',
+            style: TextStyle(color: Colors.grey[600]),
+          ),
+        ],
+      ),
+    );
+  }
 
+  // Replace your _buildPaymentCard with this enhanced version
+  Widget _buildPaymentCard(
+    PaymentModel payment,
+    Color accentColor,
+    Color surfaceColor,
+    Color textColor,
+  ) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12.0),
       child: Card(
-        elevation: 2,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        elevation: 3,
+        surfaceTintColor: Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: BorderSide(color: Colors.grey.shade200),
+        ),
         child: InkWell(
           borderRadius: BorderRadius.circular(16),
-          onTap: () => _showReceiptDetails(payment),
+          onTap:
+              () => _showReceiptDetails(
+                payment,
+                accentColor,
+                surfaceColor,
+                textColor,
+              ),
           child: Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(
@@ -323,20 +404,20 @@ class _ReceiptsState extends State<Receipts> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // First column - wrap this in Expanded to prevent overflow
                     Expanded(
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Container(
-                            padding: EdgeInsets.all(8),
+                            padding: EdgeInsets.all(10),
                             decoration: BoxDecoration(
-                              color: MoonColors.light.beerus,
+                              color: accentColor.withOpacity(0.1),
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: Icon(
-                              Icons.receipt,
-                              color: MoonColors.light.hit,
+                              _getPaymentIcon(payment.paymentType),
+                              color: accentColor,
+                              size: 20,
                             ),
                           ),
                           SizedBox(width: 12),
@@ -349,13 +430,14 @@ class _ReceiptsState extends State<Receipts> {
                                   style: TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.bold,
+                                    color: textColor,
                                   ),
                                   overflow: TextOverflow.ellipsis,
                                   maxLines: 2,
                                 ),
-                                SizedBox(height: 4), // Added spacing
+                                SizedBox(height: 4),
                                 Text(
-                                  formatDate(payment.paymentCreatedAt),
+                                  'ID: #${payment.paymentId}',
                                   style: TextStyle(
                                     fontSize: 12,
                                     color: Colors.grey[600],
@@ -368,7 +450,6 @@ class _ReceiptsState extends State<Receipts> {
                       ),
                     ),
                     SizedBox(width: 8),
-                    // Second column - payment amount
                     Container(
                       padding: EdgeInsets.symmetric(
                         horizontal: 12,
@@ -389,32 +470,38 @@ class _ReceiptsState extends State<Receipts> {
                   ],
                 ),
                 SizedBox(height: 12),
-                Divider(height: 1), // Reduced height
-                SizedBox(height: 8), // Control spacing
+                Divider(height: 1, thickness: 1, color: Colors.grey.shade200),
+                SizedBox(height: 8),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Expanded(
-                      child: Row(
-                        children: [
-                          Icon(statusIcon, color: statusColor, size: 16),
-                          SizedBox(width: 4),
-                          Flexible(
-                            child: Text(
-                              'Pembayaran Diterima',
-                              style: TextStyle(
-                                color: statusColor,
-                                fontSize: 12,
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                            ),
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.calendar_today,
+                          color: Colors.grey[600],
+                          size: 14,
+                        ),
+                        SizedBox(width: 4),
+                        Text(
+                          formatDate(payment.paymentCreatedAt),
+                          style: TextStyle(
+                            color: Colors.grey[600],
+                            fontSize: 12,
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
-                    Text(
-                      payment.paymentType ?? 'Unknown',
-                      style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                    Container(
+                      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: accentColor.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        payment.paymentType ?? 'Unknown',
+                        style: TextStyle(fontSize: 12, color: accentColor),
+                      ),
                     ),
                   ],
                 ),
@@ -426,125 +513,227 @@ class _ReceiptsState extends State<Receipts> {
     );
   }
 
-  void _showReceiptDetails(PaymentModel payment) {
+  // Add this helper method
+  IconData _getPaymentIcon(String? paymentType) {
+    if (paymentType == null) return Icons.receipt;
+
+    switch (paymentType.toLowerCase()) {
+      case 'cash':
+        return Icons.payments;
+      case 'online banking':
+        return Icons.account_balance;
+      default:
+        return Icons.receipt;
+    }
+  }
+
+  // Enhance the receipt details modal
+  void _showReceiptDetails(
+    PaymentModel payment,
+    Color accentColor,
+    Color surfaceColor,
+    Color textColor,
+  ) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
+      transitionAnimationController: AnimationController(
+        vsync: Navigator.of(context),
+        duration: Duration(milliseconds: 400),
+      ),
       builder:
-          (context) => Container(
+          (context) => AnimatedContainer(
+            duration: Duration(milliseconds: 500),
+            curve: Curves.easeOut,
             height: MediaQuery.of(context).size.height * 0.75,
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: surfaceColor,
               borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black26,
+                  blurRadius: 10,
+                  spreadRadius: 0,
+                ),
+              ],
             ),
-            padding: EdgeInsets.all(24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            child: Stack(
               children: [
-                Center(
-                  child: Container(
-                    width: 50,
-                    height: 5,
-                    decoration: BoxDecoration(
-                      color: Colors.grey[300],
-                      borderRadius: BorderRadius.circular(10),
-                    ),
+                // X close button
+                Positioned(
+                  top: 20,
+                  right: 20,
+                  child: IconButton(
+                    icon: Icon(Icons.close, color: Colors.grey[600]),
+                    onPressed: () => Navigator.of(context).pop(),
                   ),
                 ),
-                SizedBox(height: 24),
-                Center(
-                  child: Text(
-                    'Resit Pembayaran',
-                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                  ),
-                ),
-                SizedBox(height: 12),
-                Center(
-                  child: Container(
-                    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    decoration: BoxDecoration(
-                      color: Colors.green.withOpacity(0.15),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Text(
-                      'RM ${payment.paymentValue.toStringAsFixed(2)}',
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.green[700],
+                Padding(
+                  padding: EdgeInsets.all(24),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Center(
+                        child: Container(
+                          width: 50,
+                          height: 5,
+                          decoration: BoxDecoration(
+                            color: Colors.grey[300],
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
-                ),
-                SizedBox(height: 24),
-                Expanded(
-                  child: SingleChildScrollView(
-                    child: Container(
-                      padding: EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: Colors.grey[100],
-                        borderRadius: BorderRadius.circular(16),
+                      SizedBox(height: 24),
+                      Center(
+                        child: Text(
+                          'Resit Pembayaran',
+                          style: TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: textColor,
+                          ),
+                        ),
                       ),
-                      child: Column(
+                      SizedBox(height: 12),
+                      Center(
+                        child: Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 8,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.green.withOpacity(0.15),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Text(
+                            'RM ${payment.paymentValue.toStringAsFixed(2)}',
+                            style: TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.green[700],
+                            ),
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: 24),
+
+                      // Status indicator
+                      Center(
+                        child: Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 6,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.green.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Container(
+                                width: 8,
+                                height: 8,
+                                decoration: BoxDecoration(
+                                  color: Colors.green,
+                                  shape: BoxShape.circle,
+                                ),
+                              ),
+                              SizedBox(width: 6),
+                              Text(
+                                'Pembayaran Berjaya',
+                                style: TextStyle(
+                                  color: Colors.green[700],
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: 24),
+                      Expanded(
+                        child: SingleChildScrollView(
+                          physics: BouncingScrollPhysics(),
+                          child: Container(
+                            padding: EdgeInsets.all(20),
+                            decoration: BoxDecoration(
+                              color: Colors.grey[100],
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            child: Column(
+                              children: [
+                                _buildDetailRow(
+                                  'ID Pembayaran',
+                                  '#${payment.paymentId}',
+                                ),
+                                Divider(height: 24),
+                                _buildDetailRow(
+                                  'Penerangan',
+                                  payment.paymentDescription,
+                                ),
+                                Divider(height: 24),
+                                _buildDetailRow(
+                                  'Tarikh',
+                                  formatDate(payment.paymentCreatedAt),
+                                ),
+                                Divider(height: 24),
+                                _buildDetailRow(
+                                  'Masa',
+                                  DateFormat(
+                                    'hh:mm a',
+                                  ).format(payment.paymentCreatedAt),
+                                ),
+                                Divider(height: 24),
+                                _buildDetailRow(
+                                  'Kaedah Pembayaran',
+                                  payment.paymentType ?? 'Unknown',
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: 20),
+                      Row(
                         children: [
-                          _buildDetailRow(
-                            'ID Pembayaran',
-                            '#${payment.paymentId}',
+                          Expanded(
+                            child: ElevatedButton.icon(
+                              icon: Icon(Icons.download),
+                              label: Text('Muat Turun'),
+                              style: ElevatedButton.styleFrom(
+                                padding: EdgeInsets.symmetric(vertical: 16),
+                                backgroundColor: accentColor,
+                                foregroundColor: Colors.white,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                              onPressed:
+                                  () => _downloadReceipt(context, payment),
+                            ),
                           ),
-                          Divider(height: 16),
-                          _buildDetailRow(
-                            'Penerangan',
-                            payment.paymentDescription,
-                          ),
-                          Divider(height: 16),
-                          _buildDetailRow(
-                            'Tarikh',
-                            formatDate(payment.paymentCreatedAt),
-                          ),
-                          Divider(height: 16),
-                          _buildDetailRow(
-                            'Kaedah Pembayaran',
-                            payment.paymentType ?? 'Unknown',
+                          SizedBox(width: 12),
+                          Expanded(
+                            child: ElevatedButton.icon(
+                              icon: Icon(Icons.share),
+                              label: Text('Kongsi'),
+                              style: ElevatedButton.styleFrom(
+                                padding: EdgeInsets.symmetric(vertical: 16),
+                                backgroundColor: Colors.grey[200],
+                                foregroundColor: Colors.black87,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                              onPressed: () => _shareReceipt(context, payment),
+                            ),
                           ),
                         ],
                       ),
-                    ),
+                    ],
                   ),
-                ),
-                SizedBox(height: 16),
-                Row(
-                  children: [
-                    Expanded(
-                      child: ElevatedButton.icon(
-                        icon: Icon(Icons.download),
-                        label: Text('Muat Turun'),
-                        style: ElevatedButton.styleFrom(
-                          padding: EdgeInsets.symmetric(vertical: 14),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                        onPressed: () => _downloadReceipt(context, payment),
-                      ),
-                    ),
-                    SizedBox(width: 12),
-                    Expanded(
-                      child: ElevatedButton.icon(
-                        icon: Icon(Icons.share),
-                        label: Text('Kongsi'),
-                        style: ElevatedButton.styleFrom(
-                          padding: EdgeInsets.symmetric(vertical: 14),
-                          backgroundColor: MoonColors.light.beerus,
-                          foregroundColor: Colors.black87,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                        onPressed: () => _shareReceipt(context, payment),
-                      ),
-                    ),
-                  ],
                 ),
               ],
             ),
@@ -796,5 +985,28 @@ class _ReceiptsState extends State<Receipts> {
         colorText: Colors.white,
       );
     }
+  }
+
+  // Add this helper method to your class
+  Widget _buildFilterChip(String value, String label, Color accentColor) {
+    return Padding(
+      padding: const EdgeInsets.only(right: 8.0),
+      child: ChoiceChip(
+        label: Text(
+          label,
+          style: TextStyle(
+            color: _filterBy.value == value ? Colors.white : Colors.grey[700],
+          ),
+        ),
+        selected: _filterBy.value == value,
+        selectedColor: accentColor,
+        backgroundColor: Colors.grey[200],
+        onSelected: (selected) {
+          if (selected) {
+            _filterBy.value = value;
+          }
+        },
+      ),
+    );
   }
 }
