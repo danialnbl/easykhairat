@@ -48,23 +48,23 @@ class _HomePageWidgetState extends State<HomePageWidget> {
           () => BottomNavigationBar(
             backgroundColor: Colors.white,
             items: const <BottomNavigationBarItem>[
-              BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+              BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Halaman'),
               // BottomNavigationBarItem(
               //   icon: Icon(MoonIcons.shop_wallet_16_light),
               //   label: 'Payment',
               // ),
               BottomNavigationBarItem(
                 icon: Icon(MoonIcons.generic_bet_16_light),
-                label: 'Receipts',
+                label: 'Resit',
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.settings),
-                label: 'Settings',
+                label: 'Tetapan',
               ),
             ],
             currentIndex: navController.selectedIndex.value,
             unselectedItemColor: MoonColors.light.bulma,
-            selectedItemColor: Colors.blue,
+            selectedItemColor: Color(0xFF2BAAAD),
             showUnselectedLabels: true,
             onTap: navController.changeIndex,
           ),
@@ -90,85 +90,85 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                 height: 50.0,
                 fit: BoxFit.fitWidth,
               ),
-              Padding(
-                padding: const EdgeInsets.only(right: 16.0),
-                child: badges.Badge(
-                  position: badges.BadgePosition.topEnd(top: -5, end: -5),
-                  badgeContent: Text(
-                    '3',
-                    style: TextStyle(color: Colors.white, fontSize: 10),
-                  ),
-                  child: IconButton(
-                    icon: Icon(Icons.notifications, color: Colors.grey[700]),
-                    onPressed: () {
-                      showMenu(
-                        color: Colors.white,
-                        context: context,
-                        position: RelativeRect.fromLTRB(
-                          MediaQuery.of(context).size.width - 150,
-                          80,
-                          16,
-                          0,
-                        ),
-                        items: [
-                          PopupMenuItem(
-                            child: ListTile(
-                              leading: Padding(
-                                padding: const EdgeInsets.only(
-                                  left: 8.0,
-                                ), // Move icon to the right
-                                child: Icon(
-                                  Icons.check,
-                                  color:
-                                      MoonColors
-                                          .light
-                                          .bulma, // Change icon color
-                                  size: 20,
-                                ),
-                              ),
-                              title: Padding(
-                                padding: const EdgeInsets.only(
-                                  left: 8.0,
-                                ), // Move text to the right
-                                child: Text(
-                                  'Mark all as read',
-                                  style: TextStyle(
-                                    color:
-                                        MoonColors
-                                            .light
-                                            .bulma, // Change text color
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                              tileColor:
-                                  MoonColors
-                                      .light
-                                      .beerus, // Change ListTile background color
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(
-                                  8,
-                                ), // Optional: Add rounded corners
-                              ),
-                              onTap: () {
-                                // Logic to mark all notifications as read
-                                Navigator.pop(context); // Close the menu
-                              },
-                            ),
-                          ),
-                          PopupMenuItem(child: Text('Tuntutan Approved')),
-                          PopupMenuItem(
-                            child: Text('Sila Bayar Yuran Tertunggak'),
-                          ),
-                          PopupMenuItem(
-                            child: Text('Ahli keluarga baharu ditambah'),
-                          ),
-                        ],
-                      );
-                    },
-                  ),
-                ),
-              ),
+              // Padding(
+              //   padding: const EdgeInsets.only(right: 16.0),
+              //   child: badges.Badge(
+              //     position: badges.BadgePosition.topEnd(top: -5, end: -5),
+              //     badgeContent: Text(
+              //       '3',
+              //       style: TextStyle(color: Colors.white, fontSize: 10),
+              //     ),
+              //     child: IconButton(
+              //       icon: Icon(Icons.notifications, color: Colors.grey[700]),
+              //       onPressed: () {
+              //         showMenu(
+              //           color: Colors.white,
+              //           context: context,
+              //           position: RelativeRect.fromLTRB(
+              //             MediaQuery.of(context).size.width - 150,
+              //             80,
+              //             16,
+              //             0,
+              //           ),
+              //           items: [
+              //             PopupMenuItem(
+              //               child: ListTile(
+              //                 leading: Padding(
+              //                   padding: const EdgeInsets.only(
+              //                     left: 8.0,
+              //                   ), // Move icon to the right
+              //                   child: Icon(
+              //                     Icons.check,
+              //                     color:
+              //                         MoonColors
+              //                             .light
+              //                             .bulma, // Change icon color
+              //                     size: 20,
+              //                   ),
+              //                 ),
+              //                 title: Padding(
+              //                   padding: const EdgeInsets.only(
+              //                     left: 8.0,
+              //                   ), // Move text to the right
+              //                   child: Text(
+              //                     'Mark all as read',
+              //                     style: TextStyle(
+              //                       color:
+              //                           MoonColors
+              //                               .light
+              //                               .bulma, // Change text color
+              //                       fontWeight: FontWeight.bold,
+              //                     ),
+              //                   ),
+              //                 ),
+              //                 tileColor:
+              //                     MoonColors
+              //                         .light
+              //                         .beerus, // Change ListTile background color
+              //                 shape: RoundedRectangleBorder(
+              //                   borderRadius: BorderRadius.circular(
+              //                     8,
+              //                   ), // Optional: Add rounded corners
+              //                 ),
+              //                 onTap: () {
+              //                   // Logic to mark all notifications as read
+              //                   Navigator.pop(context); // Close the menu
+              //                 },
+              //               ),
+              //             ),
+              //             PopupMenuItem(child: Text('Tuntutan Approved')),
+              //             PopupMenuItem(
+              //               child: Text('Sila Bayar Yuran Tertunggak'),
+              //             ),
+              //             PopupMenuItem(
+              //               child: Text('Ahli keluarga baharu ditambah'),
+              //             ),
+              //           ],
+              //         );
+              //       },
+              //     ),
+              //   ),
+              // ),
               // IconButton(icon: Icon(Icons.notifications), onPressed: () {}),
             ],
           ),
@@ -214,10 +214,7 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                         Row(
                           children: [
                             Expanded(
-                              child: _buildCard(
-                                title: 'Total Due',
-                                subtitle: 'Pay before 8 April 2025',
-                              ),
+                              child: _buildCard(title: 'Jumlah Tunggakan'),
                             ),
                           ],
                         ),
@@ -225,7 +222,7 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                         Row(
                           children: [
                             Text(
-                              'General',
+                              'Ciri Utama',
                               style: GoogleFonts.roboto(
                                 fontSize: 24,
                                 fontWeight: FontWeight.bold,
@@ -235,140 +232,64 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                         ),
                         const SizedBox(height: 16),
                         // Improve the quick action grid with more visual appeal
-                        Container(
-                          decoration: ShapeDecoration(
-                            color: Colors.white,
-                            shadows: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.05),
-                                blurRadius: 10,
-                                spreadRadius: 1,
-                                offset: Offset(0, 2),
+                        LayoutBuilder(
+                          builder: (context, constraints) {
+                            return Container(
+                              decoration: ShapeDecoration(
+                                color: Colors.white,
+                                shadows: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.05),
+                                    blurRadius: 10,
+                                    spreadRadius: 1,
+                                    offset: Offset(0, 2),
+                                  ),
+                                ],
+                                shape: MoonSquircleBorder(
+                                  borderRadius: BorderRadius.circular(
+                                    16,
+                                  ).squircleBorderRadius(context),
+                                ),
                               ),
-                            ],
-                            shape: MoonSquircleBorder(
-                              borderRadius: BorderRadius.circular(
-                                16,
-                              ).squircleBorderRadius(context),
-                            ),
-                          ),
-                          width: double.infinity,
-                          child: GridView.count(
-                            shrinkWrap: true,
-                            physics: NeverScrollableScrollPhysics(),
-                            crossAxisCount: 3,
-                            childAspectRatio: 1.1,
-                            crossAxisSpacing: 12,
-                            mainAxisSpacing: 12,
-                            padding: EdgeInsets.all(16),
-                            children: [
-                              _buildQuickActionTile(
-                                icon: MoonIcons.generic_bet_16_light,
-                                label: "Receipt",
-                                onTap: () => navController.changeIndex(1),
+                              width: double.infinity,
+                              child: GridView.count(
+                                shrinkWrap: true,
+                                physics: NeverScrollableScrollPhysics(),
+                                crossAxisCount: 3,
+                                childAspectRatio:
+                                    constraints.maxWidth /
+                                    (constraints.maxWidth * 1.1),
+                                crossAxisSpacing: 12,
+                                mainAxisSpacing: 12,
+                                padding: EdgeInsets.all(16),
+                                children: [
+                                  _buildQuickActionTile(
+                                    icon: MoonIcons.generic_bet_16_light,
+                                    label: "Resit Pembayaran",
+                                    onTap: () => navController.changeIndex(1),
+                                  ),
+                                  _buildQuickActionTile(
+                                    icon: Icons.payment,
+                                    label: "Bayar Sekarang",
+                                    onTap: () => Get.to(() => UserPayment()),
+                                  ),
+                                  _buildQuickActionTile(
+                                    icon: Icons.receipt_long_outlined,
+                                    label: "Tuntutan",
+                                    onTap:
+                                        () =>
+                                            Get.to(() => CreateTuntutanPage()),
+                                  ),
+                                ],
                               ),
-                              // _buildQuickActionTile(
-                              //   icon: MoonIcons.media_headphones_16_light,
-                              //   label: "Support",
-                              //   onTap: () {
-                              //     // Show support dialog
-                              //     Get.dialog(
-                              //       AlertDialog(
-                              //         shape: RoundedRectangleBorder(
-                              //           borderRadius: BorderRadius.circular(16),
-                              //         ),
-                              //         title: Row(
-                              //           children: [
-                              //             Icon(
-                              //               Icons.support_agent,
-                              //               color: MoonColors.light.bulma,
-                              //             ),
-                              //             SizedBox(width: 10),
-                              //             Text('Contact Support'),
-                              //           ],
-                              //         ),
-                              //         content: Column(
-                              //           mainAxisSize: MainAxisSize.min,
-                              //           children: [
-                              //             ListTile(
-                              //               leading: CircleAvatar(
-                              //                 backgroundColor: MoonColors
-                              //                     .light
-                              //                     .bulma
-                              //                     .withOpacity(0.1),
-                              //                 child: Icon(
-                              //                   Icons.phone,
-                              //                   color: MoonColors.light.bulma,
-                              //                 ),
-                              //               ),
-                              //               title: Text('Call Admin'),
-                              //               subtitle: Text('012-345-6789'),
-                              //               onTap: () {
-                              //                 // Implement call functionality
-                              //                 Get.back();
-                              //               },
-                              //             ),
-                              //             Divider(),
-                              //             ListTile(
-                              //               leading: CircleAvatar(
-                              //                 backgroundColor: MoonColors
-                              //                     .light
-                              //                     .bulma
-                              //                     .withOpacity(0.1),
-                              //                 child: Icon(
-                              //                   Icons.email,
-                              //                   color: MoonColors.light.bulma,
-                              //                 ),
-                              //               ),
-                              //               title: Text('Email'),
-                              //               subtitle: Text(
-                              //                 'support@easykhairat.com',
-                              //               ),
-                              //               onTap: () {
-                              //                 // Implement email functionality
-                              //                 Get.back();
-                              //               },
-                              //             ),
-                              //           ],
-                              //         ),
-                              //         actions: [
-                              //           MoonButton(
-                              //             onTap: () => Get.back(),
-                              //             backgroundColor: Colors.grey[200],
-                              //             textColor: Colors.black87,
-                              //             label: Text("Close"),
-                              //             borderRadius: BorderRadius.circular(
-                              //               50,
-                              //             ),
-                              //             buttonSize: MoonButtonSize.md,
-                              //           ),
-                              //         ],
-                              //       ),
-                              //     );
-                              //   },
-                              // ),
-                              _buildQuickActionTile(
-                                icon: Icons.payment,
-                                label: "Pay Now",
-                                onTap: () => Get.to(() => UserPayment()),
-                                highlight: true,
-                              ),
-                              _buildQuickActionTile(
-                                icon: Icons.receipt_long_outlined,
-                                label: "Tuntutan",
-                                onTap:
-                                    () => Get.to(
-                                      () => CreateTuntutanPage(),
-                                    ), // Updated reference
-                              ),
-                            ],
-                          ),
+                            );
+                          },
                         ),
                         const SizedBox(height: 16),
                         Row(
                           children: [
                             Text(
-                              'Death Announecements',
+                              'Pengumuman Kematian',
                               style: GoogleFonts.roboto(
                                 fontSize: 24,
                                 fontWeight: FontWeight.bold,
@@ -469,7 +390,7 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                                               ),
                                           child: Container(
                                             decoration: ShapeDecoration(
-                                              color: MoonColors.light.beerus,
+                                              color: Colors.white,
                                               shape: MoonSquircleBorder(
                                                 borderRadius:
                                                     BorderRadius.circular(
@@ -575,7 +496,7 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                                                                   ),
                                                             ),
                                                             child: Text(
-                                                              'Death Notice',
+                                                              'Pengumuman Kematian',
                                                               style: TextStyle(
                                                                 color:
                                                                     Colors
@@ -674,7 +595,7 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                         Row(
                           children: [
                             Text(
-                              'Announcements',
+                              'Pengumuman',
                               style: GoogleFonts.roboto(
                                 fontSize: 24,
                                 fontWeight: FontWeight.bold,
@@ -769,8 +690,7 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                                               ),
                                           child: Container(
                                             decoration: ShapeDecoration(
-                                              color: MoonColors.light.bulma
-                                                  .withOpacity(0.2),
+                                              color: Colors.white,
                                               shape: MoonSquircleBorder(
                                                 borderRadius:
                                                     BorderRadius.circular(
@@ -882,7 +802,7 @@ class _HomePageWidgetState extends State<HomePageWidget> {
     );
   }
 
-  Widget _buildCard({required String title, required String subtitle}) {
+  Widget _buildCard({required String title}) {
     final FeeController feeController = Get.put(FeeController());
     final supabase = Supabase.instance.client;
     final userId = supabase.auth.currentUser?.id ?? '';
@@ -893,104 +813,76 @@ class _HomePageWidgetState extends State<HomePageWidget> {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       elevation: 3,
       shadowColor: Colors.black.withOpacity(0.2),
-      color: Colors.white,
+      color: Color(0xFF2BAAAD), // Changed to main teal color
       child: Padding(
-        padding: const EdgeInsets.all(18.0),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              padding: EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: MoonColors.light.bulma.withOpacity(0.1),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                Icons.account_balance_wallet,
-                color: MoonColors.light.bulma,
-                size: 24,
+            // Title in white with increased font size
+            Text(
+              title,
+              style: GoogleFonts.roboto(
+                fontSize: 16, // Increased font size
+                fontWeight: FontWeight.w500,
+                color: Colors.white, // High contrast white text
               ),
             ),
-            SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: GoogleFonts.roboto(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black87,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  Obx(() {
-                    double totalDue = 0;
-                    for (var fee in feeController.yuranTertunggak) {
-                      totalDue += fee.feeAmount;
-                    }
+            const SizedBox(height: 8),
+            // Row for amount and button
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                // Amount in white with larger font
+                Obx(() {
+                  double totalDue = 0;
+                  for (var fee in feeController.yuranTertunggak) {
+                    totalDue += fee.feeAmount;
+                  }
 
-                    return Row(
-                      children: [
-                        Text(
-                          'RM ${totalDue.toStringAsFixed(2)}',
-                          style: GoogleFonts.roboto(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            color:
-                                totalDue > 0
-                                    ? Colors.red.shade700
-                                    : Colors.green.shade700,
-                          ),
-                        ),
-                        SizedBox(width: 8),
-                        if (totalDue > 0)
-                          Container(
-                            padding: EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 2,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Colors.red.shade100,
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: Text(
-                              'Overdue',
-                              style: TextStyle(
-                                color: Colors.red.shade800,
-                                fontSize: 11,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                      ],
-                    );
-                  }),
-                ],
-              ),
-            ),
-            Center(
-              child: MoonButton(
-                onTap: () => Get.to(() => UserPayment()),
-                backgroundColor: Color(0xFF12A09B),
-                textColor: MoonColors.light.gohan,
-                borderRadius: BorderRadius.circular(50),
-                buttonSize: MoonButtonSize.md,
-                label: Row(
-                  children: [
-                    Icon(Icons.payment, size: 16),
-                    SizedBox(width: 4),
-                    Text(
-                      "Pay Now",
-                      style: TextStyle(fontWeight: FontWeight.bold),
+                  return Text(
+                    'RM ${totalDue.toStringAsFixed(2)}',
+                    style: GoogleFonts.roboto(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white, // Changed to white text
                     ),
-                  ],
+                  );
+                }),
+                // Pay Bill button with rounded corners and contrasting color
+                ElevatedButton(
+                  onPressed: () => Get.to(() => UserPayment()),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor:
+                        Colors.white, // White background for contrast
+                    foregroundColor: Color(0xFF2BAAAD), // Teal text
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 10,
+                    ), // Slightly larger padding
+                  ),
+                  child: Text(
+                    'Bayar Yuran',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ), // Larger text
+                  ),
                 ),
-                showBorder: false,
-                showScaleEffect: true,
-              ),
+              ],
             ),
+            // const SizedBox(height: 8),
+            // // Subtitle in lighter white/gray
+            // Text(
+            //   subtitle,
+            //   style: GoogleFonts.roboto(
+            //     fontSize: 12,
+            //     color: Colors.white70, // Slightly transparent white
+            //   ),
+            // ),
           ],
         ),
       ),
