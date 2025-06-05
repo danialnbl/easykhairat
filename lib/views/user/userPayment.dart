@@ -72,7 +72,7 @@ class _UserPaymentState extends State<UserPayment> {
           Container(
             width: double.infinity,
             decoration: BoxDecoration(
-              color: MoonColors.light.bulma,
+              color: Color(0xFF2BAAAD),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withOpacity(0.1),
@@ -547,7 +547,11 @@ class _UserPaymentState extends State<UserPayment> {
       children: [
         Row(
           children: [
-            Icon(Icons.history, color: Colors.green),
+            CircleAvatar(
+              backgroundColor: Colors.green.withOpacity(0.1),
+              radius: 14,
+              child: Icon(Icons.history, color: Colors.green, size: 16),
+            ),
             const SizedBox(width: 8),
             Text(
               'Sejarah Pembayaran',
@@ -557,67 +561,182 @@ class _UserPaymentState extends State<UserPayment> {
         ),
         const SizedBox(height: 16),
 
-        // Use a different approach to access the controller
-        // to avoid naming confusion
+        // Use GetX with payment controller
         GetX<PaymentController>(
           builder: (controller) {
             if (controller.isLoading.value) {
-              return const Center(child: CircularProgressIndicator());
+              return const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(24.0),
+                  child: CircularProgressIndicator(),
+                ),
+              );
             }
 
             if (controller.payments.isEmpty) {
-              return Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade100,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.grey.shade300),
+              return Card(
+                elevation: 2,
+                margin: EdgeInsets.zero,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
                 ),
-                child: Center(
-                  child: Column(
-                    children: [
-                      Icon(Icons.history, size: 48, color: Colors.grey),
-                      const SizedBox(height: 8),
-                      Text(
-                        "Tiada rekod pembayaran",
-                        style: TextStyle(color: Colors.grey.shade700),
-                      ),
-                    ],
+                child: Container(
+                  padding: const EdgeInsets.all(24),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade50,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Center(
+                    child: Column(
+                      children: [
+                        CircleAvatar(
+                          backgroundColor: Colors.grey.shade200,
+                          radius: 32,
+                          child: Icon(
+                            Icons.history,
+                            size: 32,
+                            color: Colors.grey.shade400,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          "Tiada rekod pembayaran",
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.grey.shade600,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          "Semua rekod pembayaran anda akan dipaparkan di sini",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.grey.shade500,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               );
             }
 
             return Card(
-              elevation: 0,
+              elevation: 2,
+              margin: EdgeInsets.zero,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-                side: BorderSide(color: Colors.grey.shade200),
+                borderRadius: BorderRadius.circular(16),
               ),
-              child: ListView.separated(
-                shrinkWrap: true,
-                physics: NeverScrollableScrollPhysics(),
-                itemCount: controller.payments.length,
-                separatorBuilder: (context, index) => Divider(height: 1),
-                itemBuilder: (context, index) {
-                  final payment = controller.payments[index];
-
-                  return ListTile(
-                    leading: CircleAvatar(
-                      backgroundColor: Colors.green.shade100,
-                      child: Icon(Icons.check, color: Colors.green, size: 20),
+              child: Column(
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.vertical(
+                      top: Radius.circular(16),
                     ),
-                    title: Text(payment.paymentDescription),
-                    subtitle: Text(formatDate(payment.paymentCreatedAt)),
-                    trailing: Text(
-                      "RM ${payment.paymentValue.toStringAsFixed(2)}",
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.green,
+                    child: Container(
+                      width: double.infinity,
+                      padding: EdgeInsets.symmetric(
+                        vertical: 12,
+                        horizontal: 16,
+                      ),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            Colors.green.shade500,
+                            Colors.green.shade700,
+                          ],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                      ),
+                      child: Text(
+                        'Transaksi Terkini',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
                       ),
                     ),
-                  );
-                },
+                  ),
+                  ListView.separated(
+                    shrinkWrap: true,
+                    physics: NeverScrollableScrollPhysics(),
+                    itemCount: controller.payments.length,
+                    separatorBuilder:
+                        (context, index) =>
+                            Divider(height: 1, indent: 16, endIndent: 16),
+                    itemBuilder: (context, index) {
+                      final payment = controller.payments[index];
+                      return ListTile(
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 4,
+                        ),
+                        leading: CircleAvatar(
+                          backgroundColor: Colors.green.shade50,
+                          child: Icon(
+                            Icons.check_circle,
+                            color: Colors.green.shade600,
+                            size: 20,
+                          ),
+                        ),
+                        title: Text(
+                          payment.paymentDescription,
+                          style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 15,
+                          ),
+                        ),
+                        subtitle: Row(
+                          children: [
+                            Icon(
+                              Icons.calendar_today,
+                              size: 12,
+                              color: Colors.grey.shade600,
+                            ),
+                            SizedBox(width: 4),
+                            Text(
+                              formatDate(payment.paymentCreatedAt),
+                              style: TextStyle(fontSize: 13),
+                            ),
+                          ],
+                        ),
+                        trailing: Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 6,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.green.shade50,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            "RM ${payment.paymentValue.toStringAsFixed(2)}",
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.green.shade700,
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(12.0),
+                    child: Text(
+                      'Menunjukkan ${controller.payments.length} transaksi terkini',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey.shade600,
+                        fontStyle: FontStyle.italic,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ],
               ),
             );
           },
@@ -628,34 +747,58 @@ class _UserPaymentState extends State<UserPayment> {
 
   Widget _buildInfoHeader() {
     return Card(
-      color: MoonColors.light.bulma.withOpacity(0.1),
-      elevation: 0,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(
+      elevation: 3,
+      margin: EdgeInsets.zero,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Colors.teal, Colors.teal.shade700],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Row(
+            children: [
+              CircleAvatar(
+                backgroundColor: Colors.white24,
+                radius: 20,
+                child: Icon(
                   MoonIcons.generic_info_16_light,
-                  color: MoonColors.light.bulma,
+                  color: Colors.white,
+                  size: 20,
                 ),
-                SizedBox(width: 8),
-                Text(
-                  'Bayaran Yuran Khairat',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Bayaran Yuran Khairat',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                    SizedBox(height: 4),
+                    Text(
+                      'Sila pilih yuran yang ingin dibayar dan masukkan jumlah bayaran. '
+                      'Pembayaran akan diproses melalui FPX.',
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: Colors.white.withOpacity(0.9),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-            SizedBox(height: 8),
-            Text(
-              'Sila pilih yuran yang ingin dibayar dan masukkan jumlah bayaran. '
-              'Pembayaran akan diproses melalui FPX.',
-              style: TextStyle(fontSize: 14),
-            ),
-          ],
+              ),
+            ],
+          ),
         ),
       ),
     );

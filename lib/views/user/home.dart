@@ -64,7 +64,7 @@ class _HomePageWidgetState extends State<HomePageWidget> {
             ],
             currentIndex: navController.selectedIndex.value,
             unselectedItemColor: MoonColors.light.bulma,
-            selectedItemColor: Colors.blue,
+            selectedItemColor: Color(0xFF2BAAAD),
             showUnselectedLabels: true,
             onTap: navController.changeIndex,
           ),
