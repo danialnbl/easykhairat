@@ -41,11 +41,41 @@ class _MyAppState extends State<MyApp> {
     // Check if the user is already authenticated
     final isAuthenticated =
         Supabase.instance.client.auth.currentSession != null;
+
     if (isAuthenticated) {
-      // If authenticated, ensure we go to home not login
-      Future.delayed(Duration.zero, () {
-        Get.offAllNamed(AppRoutes.home);
-      });
+      // Get the current user ID
+      final userId = Supabase.instance.client.auth.currentUser?.id;
+
+      if (userId != null) {
+        // Check user type from the database
+        Supabase.instance.client
+            .from('users')
+            .select('user_type')
+            .eq('user_id', userId)
+            .single()
+            .then((userData) {
+              final userType = userData['user_type'] as String?;
+
+              // Redirect based on user type
+              Future.delayed(Duration.zero, () {
+                if (userType == 'admin') {
+                  Get.offAllNamed(AppRoutes.adminMain);
+                } else if (userType == 'user') {
+                  Get.offAllNamed(AppRoutes.home);
+                } else {
+                  // Default route or handle unknown user type
+                  Get.offAllNamed(AppRoutes.initial);
+                }
+              });
+            })
+            .catchError((error) {
+              print('Error fetching user type: $error');
+              // Handle error, possibly redirect to login
+              Future.delayed(Duration.zero, () {
+                Get.offAllNamed(AppRoutes.initial);
+              });
+            });
+      }
     }
   }
 
