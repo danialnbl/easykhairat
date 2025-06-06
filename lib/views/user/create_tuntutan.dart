@@ -11,6 +11,12 @@ import 'package:intl/intl.dart';
 import 'package:moon_design/moon_design.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+final primaryColor = Color(0xFF2BAAAD);
+final secondaryColor = Color(0xFF35C2C5);
+final accentColor = Color(0xFF1D7F82);
+final lightAccentColor = Color(0xFFE0F7F8);
+final backgroundColor = Color(0xFFF5FCFC);
+
 class CreateTuntutanPage extends StatefulWidget {
   const CreateTuntutanPage({Key? key}) : super(key: key);
 
@@ -290,12 +296,19 @@ class _CreateTuntutanPageState extends State<CreateTuntutanPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: MoonColors.light.gohan,
+      backgroundColor: backgroundColor,
       appBar: AppBar(
-        title: Text(isCreatingNew ? 'Buat Tuntutan Baru' : 'Senarai Tuntutan'),
-        backgroundColor: MoonColors.light.bulma,
+        title: Text(
+          isCreatingNew ? 'Buat Tuntutan Baru' : 'Senarai Tuntutan',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        backgroundColor: primaryColor,
         foregroundColor: Colors.white,
-        elevation: 0,
+        elevation: 2,
+        shadowColor: primaryColor.withOpacity(0.5),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(bottom: Radius.circular(16)),
+        ),
       ),
       body:
           isCreatingNew
@@ -368,9 +381,16 @@ class _CreateTuntutanPageState extends State<CreateTuntutanPage> {
                     isCreatingNew = true;
                   });
                 },
-                label: Text('Buat Tuntutan'),
+                label: Text(
+                  'Buat Tuntutan',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
                 icon: Icon(Icons.add),
-                backgroundColor: MoonColors.light.bulma,
+                backgroundColor: primaryColor,
+                elevation: 4,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
               ),
     );
   }
@@ -378,9 +398,30 @@ class _CreateTuntutanPageState extends State<CreateTuntutanPage> {
   Widget _buildStepperView() {
     return Theme(
       data: Theme.of(context).copyWith(
-        colorScheme: Theme.of(
-          context,
-        ).colorScheme.copyWith(primary: MoonColors.light.bulma),
+        colorScheme: Theme.of(context).colorScheme.copyWith(
+          primary: primaryColor,
+          secondary: secondaryColor,
+        ),
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: primaryColor,
+            foregroundColor: Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            padding: EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+          ),
+        ),
+        outlinedButtonTheme: OutlinedButtonThemeData(
+          style: OutlinedButton.styleFrom(
+            foregroundColor: primaryColor,
+            side: BorderSide(color: primaryColor),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            padding: EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+          ),
+        ),
       ),
       child: Stepper(
         currentStep: _currentStep,
@@ -512,7 +553,30 @@ class _CreateTuntutanPageState extends State<CreateTuntutanPage> {
             },
           ),
           SizedBox(height: 16),
-          if (isLoading) Center(child: CircularProgressIndicator()),
+          if (isLoading)
+            Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  SizedBox(
+                    width: 40,
+                    height: 40,
+                    child: CircularProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation<Color>(primaryColor),
+                      strokeWidth: 3,
+                    ),
+                  ),
+                  SizedBox(height: 16),
+                  Text(
+                    'Memproses...',
+                    style: TextStyle(
+                      color: primaryColor,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+            ),
           SizedBox(height: 16),
           Text(
             'Nota: Setelah mencipta tuntutan asas, anda akan diminta untuk menambahkan butiran perbelanjaan.',
@@ -607,11 +671,25 @@ class _CreateTuntutanPageState extends State<CreateTuntutanPage> {
                   keyboardType: TextInputType.numberWithOptions(decimal: true),
                   decoration: InputDecoration(
                     labelText: 'Jumlah (RM)',
+                    labelStyle: TextStyle(color: primaryColor),
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: primaryColor),
                     ),
-                    prefixIcon: Icon(Icons.attach_money),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(
+                        color: primaryColor.withOpacity(0.5),
+                      ),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: primaryColor, width: 2),
+                    ),
+                    prefixIcon: Icon(Icons.attach_money, color: primaryColor),
                     hintText: 'Cth: 1000.00',
+                    fillColor: lightAccentColor.withOpacity(0.1),
+                    filled: true,
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
@@ -634,11 +712,19 @@ class _CreateTuntutanPageState extends State<CreateTuntutanPage> {
                 ElevatedButton.icon(
                   onPressed: isLoading ? null : _addClaimLine,
                   icon: Icon(Icons.add),
-                  label: Text('Tambah Perbelanjaan'),
+                  label: Text(
+                    'Tambah Perbelanjaan',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: MoonColors.light.hit,
+                    backgroundColor: primaryColor,
                     foregroundColor: Colors.white,
-                    minimumSize: Size(double.infinity, 48),
+                    minimumSize: Size(double.infinity, 50),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    elevation: 2,
+                    shadowColor: primaryColor.withOpacity(0.5),
                   ),
                 ),
               ],
@@ -1115,35 +1201,36 @@ class _CreateTuntutanPageState extends State<CreateTuntutanPage> {
 
     switch (status.toLowerCase()) {
       case 'lulus':
-        chipColor = Colors.green;
+        chipColor = Colors.green[600]!;
         break;
       case 'gagal':
-        chipColor = Colors.red;
+        chipColor = Colors.red[600]!;
         break;
       case 'dalam proses':
       default:
-        chipColor = Colors.orange;
+        chipColor = Colors.orange[600]!;
         break;
     }
 
     return Container(
-      padding: EdgeInsets.symmetric(
-        horizontal: 8,
-        vertical: 4,
-      ), // Reduced padding
-      constraints: BoxConstraints(maxWidth: 100), // Add max width constraint
+      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
         color: chipColor,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: chipColor.withOpacity(0.4),
+            blurRadius: 4,
+            offset: Offset(0, 2),
+          ),
+        ],
       ),
       child: Text(
         status,
-        textAlign: TextAlign.center, // Center the text
-        overflow: TextOverflow.ellipsis, // Add ellipsis if text is too long
         style: TextStyle(
           color: textColor,
           fontWeight: FontWeight.bold,
-          fontSize: 11, // Slightly smaller font
+          fontSize: 12,
         ),
       ),
     );

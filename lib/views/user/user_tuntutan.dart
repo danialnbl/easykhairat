@@ -8,6 +8,12 @@ import 'package:moon_design/moon_design.dart';
 import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+final primaryColor = Color(0xFF2BAAAD);
+final secondaryColor = Color(0xFF35C2C5);
+final accentColor = Color(0xFF1D7F82);
+final lightAccentColor = Color(0xFFE0F7F8);
+final backgroundColor = Color(0xFFF5FCFC);
+
 class UserTuntutanPage extends StatefulWidget {
   final int claimId;
 
@@ -74,12 +80,19 @@ class _UserTuntutanPageState extends State<UserTuntutanPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: MoonColors.light.gohan,
+      backgroundColor: backgroundColor,
       appBar: AppBar(
-        title: Text('Maklumat Tuntutan'),
-        backgroundColor: MoonColors.light.bulma,
+        title: Text(
+          'Maklumat Tuntutan',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        backgroundColor: primaryColor,
         foregroundColor: Colors.white,
-        elevation: 0,
+        elevation: 2,
+        shadowColor: primaryColor.withOpacity(0.5),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(bottom: Radius.circular(16)),
+        ),
       ),
       body: RefreshIndicator(
         onRefresh: () => _loadClaimDetails(),
@@ -186,10 +199,19 @@ class _UserTuntutanPageState extends State<UserTuntutanPage> {
                       ElevatedButton.icon(
                         onPressed: () => _showAddClaimLineDialog(),
                         icon: Icon(Icons.add),
-                        label: Text('Tambah Butiran'),
+                        label: Text(
+                          'Tambah Butiran',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: MoonColors.light.bulma,
+                          backgroundColor: primaryColor,
                           foregroundColor: Colors.white,
+                          minimumSize: Size(double.infinity, 48),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          elevation: 2,
+                          shadowColor: primaryColor.withOpacity(0.5),
                         ),
                       ),
                     ],
@@ -278,11 +300,19 @@ class _UserTuntutanPageState extends State<UserTuntutanPage> {
                     child: ElevatedButton.icon(
                       onPressed: () => _showAddClaimLineDialog(),
                       icon: Icon(Icons.add),
-                      label: Text('Tambah Butiran'),
+                      label: Text(
+                        'Tambah Butiran',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: MoonColors.light.bulma,
+                        backgroundColor: primaryColor,
                         foregroundColor: Colors.white,
                         minimumSize: Size(double.infinity, 48),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        elevation: 2,
+                        shadowColor: primaryColor.withOpacity(0.5),
                       ),
                     ),
                   ),
@@ -465,7 +495,20 @@ class _UserTuntutanPageState extends State<UserTuntutanPage> {
 
     Get.dialog(
       AlertDialog(
-        title: Text('Tambah Butiran Tuntutan'),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Row(
+          children: [
+            Icon(Icons.add_circle_outline, color: primaryColor),
+            SizedBox(width: 10),
+            Text(
+              'Tambah Butiran',
+              style: TextStyle(
+                color: primaryColor,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -474,8 +517,24 @@ class _UserTuntutanPageState extends State<UserTuntutanPage> {
                 controller: reasonController,
                 decoration: InputDecoration(
                   labelText: 'Keterangan',
+                  labelStyle: TextStyle(color: primaryColor),
                   hintText: 'Contoh: Kos pengkebumian',
-                  border: OutlineInputBorder(),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(
+                      color: primaryColor.withOpacity(0.5),
+                    ),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: primaryColor, width: 2),
+                  ),
+                  prefixIcon: Icon(Icons.description, color: primaryColor),
+                  fillColor: lightAccentColor.withOpacity(0.1),
+                  filled: true,
                 ),
                 maxLines: 2,
               ),
@@ -484,9 +543,24 @@ class _UserTuntutanPageState extends State<UserTuntutanPage> {
                 controller: amountController,
                 decoration: InputDecoration(
                   labelText: 'Jumlah (RM)',
+                  labelStyle: TextStyle(color: primaryColor),
                   hintText: 'Contoh: 500.00',
-                  border: OutlineInputBorder(),
-                  prefixText: 'RM ',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(
+                      color: primaryColor.withOpacity(0.5),
+                    ),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: primaryColor, width: 2),
+                  ),
+                  prefixIcon: Icon(Icons.attach_money, color: primaryColor),
+                  fillColor: lightAccentColor.withOpacity(0.1),
+                  filled: true,
                 ),
                 keyboardType: TextInputType.numberWithOptions(decimal: true),
               ),
@@ -494,7 +568,10 @@ class _UserTuntutanPageState extends State<UserTuntutanPage> {
           ),
         ),
         actions: [
-          TextButton(onPressed: () => Get.back(), child: Text('Batal')),
+          TextButton(
+            onPressed: () => Get.back(),
+            child: Text('Batal', style: TextStyle(color: Colors.grey[700])),
+          ),
           ElevatedButton(
             onPressed: () async {
               if (reasonController.text.isEmpty ||
@@ -530,9 +607,19 @@ class _UserTuntutanPageState extends State<UserTuntutanPage> {
                 );
               }
             },
-            child: Text('Tambah'),
+            child: Text(
+              'Tambah',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
             style: ElevatedButton.styleFrom(
-              backgroundColor: MoonColors.light.bulma,
+              backgroundColor: primaryColor,
+              foregroundColor: Colors.white,
+              minimumSize: Size(100, 40),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              elevation: 2,
+              shadowColor: primaryColor.withOpacity(0.5),
             ),
           ),
         ],

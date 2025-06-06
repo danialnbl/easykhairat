@@ -35,11 +35,11 @@ class _FamilyProfileState extends State<FamilyProfile> {
         _currentUserId = user.id;
         await _familyController.fetchFamilyMembersByUserId(_currentUserId!);
       } else {
-        Get.snackbar('Error', 'User not logged in');
+        Get.snackbar('Ralat', 'Pengguna belum log masuk');
         // Navigate to login page or handle as needed
       }
     } catch (e) {
-      Get.snackbar('Error', 'Failed to get user: $e');
+      Get.snackbar('Ralat', 'Gagal mendapatkan maklumat pengguna: $e');
     } finally {
       setState(() {
         _isLoading = false;
@@ -56,24 +56,48 @@ class _FamilyProfileState extends State<FamilyProfile> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text('Add Family Member'),
+          title: Text(
+            'Tambah Ahli Keluarga',
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 TextField(
                   controller: nameController,
-                  decoration: InputDecoration(labelText: 'Full Name'),
+                  decoration: InputDecoration(
+                    labelText: 'Nama Penuh',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    prefixIcon: Icon(Icons.person),
+                  ),
                 ),
+                SizedBox(height: 16),
                 TextField(
                   controller: idController,
                   decoration: InputDecoration(
-                    labelText: 'Identification Number',
+                    labelText: 'Nombor Kad Pengenalan',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    prefixIcon: Icon(Icons.badge),
                   ),
                 ),
+                SizedBox(height: 16),
                 TextField(
                   controller: relationshipController,
-                  decoration: InputDecoration(labelText: 'Relationship'),
+                  decoration: InputDecoration(
+                    labelText: 'Hubungan',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    prefixIcon: Icon(Icons.people),
+                  ),
                 ),
               ],
             ),
@@ -81,14 +105,21 @@ class _FamilyProfileState extends State<FamilyProfile> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: Text('Cancel'),
+              child: Text('Batal'),
+              style: TextButton.styleFrom(foregroundColor: Colors.grey),
             ),
             ElevatedButton(
               onPressed: () {
                 if (nameController.text.isEmpty ||
                     idController.text.isEmpty ||
                     relationshipController.text.isEmpty) {
-                  Get.snackbar('Error', 'All fields are required');
+                  Get.snackbar(
+                    'Maklumat Tidak Lengkap',
+                    'Sila isikan semua maklumat yang diperlukan',
+                    backgroundColor: Colors.red.shade50,
+                    colorText: Colors.red.shade900,
+                    icon: Icon(Icons.warning, color: Colors.red),
+                  );
                   return;
                 }
 
@@ -104,7 +135,14 @@ class _FamilyProfileState extends State<FamilyProfile> {
                 _familyController.addFamilyMember(newMember);
                 Navigator.pop(context);
               },
-              child: Text('Add'),
+              child: Text('Tambah Ahli'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: MoonColors.light.hit,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
             ),
           ],
         );
@@ -122,7 +160,7 @@ class _FamilyProfileState extends State<FamilyProfile> {
             children: [
               ListTile(
                 leading: Icon(Icons.edit),
-                title: Text('Edit Member'),
+                title: Text('Kemaskini Ahli'),
                 onTap: () {
                   Navigator.pop(context);
                   _showEditFamilyMemberDialog(member);
@@ -130,10 +168,7 @@ class _FamilyProfileState extends State<FamilyProfile> {
               ),
               ListTile(
                 leading: Icon(Icons.delete, color: Colors.red),
-                title: Text(
-                  'Delete Member',
-                  style: TextStyle(color: Colors.red),
-                ),
+                title: Text('Buang Ahli', style: TextStyle(color: Colors.red)),
                 onTap: () {
                   Navigator.pop(context);
                   _showDeleteConfirmation(member);
@@ -159,24 +194,24 @@ class _FamilyProfileState extends State<FamilyProfile> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text('Edit Family Member'),
+          title: Text('Kemaskini Ahli Keluarga'),
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 TextField(
                   controller: nameController,
-                  decoration: InputDecoration(labelText: 'Full Name'),
+                  decoration: InputDecoration(labelText: 'Nama Penuh'),
                 ),
                 TextField(
                   controller: idController,
                   decoration: InputDecoration(
-                    labelText: 'Identification Number',
+                    labelText: 'Nombor Kad Pengenalan',
                   ),
                 ),
                 TextField(
                   controller: relationshipController,
-                  decoration: InputDecoration(labelText: 'Relationship'),
+                  decoration: InputDecoration(labelText: 'Hubungan'),
                 ),
               ],
             ),
@@ -184,14 +219,14 @@ class _FamilyProfileState extends State<FamilyProfile> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: Text('Cancel'),
+              child: Text('Batal'),
             ),
             ElevatedButton(
               onPressed: () {
                 if (nameController.text.isEmpty ||
                     idController.text.isEmpty ||
                     relationshipController.text.isEmpty) {
-                  Get.snackbar('Error', 'All fields are required');
+                  Get.snackbar('Ralat', 'Semua maklumat diperlukan');
                   return;
                 }
 
@@ -205,7 +240,7 @@ class _FamilyProfileState extends State<FamilyProfile> {
                 _familyController.updateFamilyMember(updatedMember);
                 Navigator.pop(context);
               },
-              child: Text('Update'),
+              child: Text('Kemaskini'),
             ),
           ],
         );
@@ -218,14 +253,14 @@ class _FamilyProfileState extends State<FamilyProfile> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text('Delete Family Member'),
+          title: Text('Buang Ahli Keluarga'),
           content: Text(
-            'Are you sure you want to delete ${member.familymemberName}?',
+            'Adakah anda pasti mahu membuang ${member.familymemberName}?',
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: Text('Cancel'),
+              child: Text('Batal'),
             ),
             TextButton(
               onPressed: () {
@@ -235,7 +270,7 @@ class _FamilyProfileState extends State<FamilyProfile> {
                 Navigator.pop(context);
               },
               style: TextButton.styleFrom(foregroundColor: Colors.red),
-              child: Text('Delete'),
+              child: Text('Buang'),
             ),
           ],
         );
@@ -247,99 +282,139 @@ class _FamilyProfileState extends State<FamilyProfile> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: MoonColors.light.gohan,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: Colors.black87),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: Text(
+          'Ahli Keluarga',
+          style: TextStyle(color: Colors.black87, fontWeight: FontWeight.bold),
+        ),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.info_outline, color: Colors.black87),
+            onPressed: () {
+              Get.snackbar(
+                'Tentang Profil Keluarga',
+                'Tambah dan urus ahli keluarga anda di sini.',
+                duration: Duration(seconds: 3),
+              );
+            },
+          ),
+        ],
+      ),
       body: SafeArea(
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(left: 8, top: 8),
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: IconButton(
-                  icon: Icon(Icons.arrow_back),
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                ),
-              ),
-            ),
-            Expanded(
-              child:
-                  _isLoading
+        child:
+            _isLoading
+                ? Center(child: CircularProgressIndicator())
+                : Obx(() {
+                  return _familyController.isLoading.value
                       ? Center(child: CircularProgressIndicator())
-                      : Obx(() {
-                        return _familyController.isLoading.value
-                            ? Center(child: CircularProgressIndicator())
-                            : _familyController.familyMembers.isEmpty
-                            ? Center(
-                              child: Text(
-                                'No family members added yet.',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  color: Colors.grey,
+                      : _familyController.familyMembers.isEmpty
+                      ? Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.family_restroom,
+                              size: 80,
+                              color: Colors.grey.shade400,
+                            ),
+                            SizedBox(height: 16),
+                            Text(
+                              'Tiada ahli keluarga lagi',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.grey.shade700,
+                              ),
+                            ),
+                            SizedBox(height: 8),
+                            Text(
+                              'Tambah ahli keluarga anda dengan menekan butang +',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.grey.shade600,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                            SizedBox(height: 24),
+                            ElevatedButton.icon(
+                              icon: Icon(Icons.add),
+                              label: Text('Tambah Ahli Keluarga'),
+                              style: ElevatedButton.styleFrom(
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 10,
                                 ),
                               ),
-                            )
-                            : SingleChildScrollView(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 16,
+                              onPressed: _showAddFamilyMemberDialog,
+                            ),
+                          ],
+                        ),
+                      )
+                      : SingleChildScrollView(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 16,
+                        ),
+                        child: Column(
+                          children: [
+                            Container(
+                              decoration: BoxDecoration(
+                                borderRadius: const BorderRadius.vertical(
+                                  top: Radius.circular(16),
+                                ),
                               ),
-                              child: Column(
+                              padding: const EdgeInsets.all(16),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Container(
-                                    decoration: BoxDecoration(
-                                      borderRadius: const BorderRadius.vertical(
-                                        top: Radius.circular(16),
-                                      ),
-                                    ),
-                                    padding: const EdgeInsets.all(16),
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
-                                        Expanded(
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Text(
-                                                'Family Members',
-                                                style: TextStyle(
-                                                  fontSize: 22,
-                                                  fontWeight: FontWeight.bold,
-                                                  color: Colors.black,
-                                                ),
-                                              ),
-                                            ],
+                                        Text(
+                                          'Senarai Ahli Keluarga',
+                                          style: TextStyle(
+                                            fontSize: 22,
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.black,
                                           ),
                                         ),
                                       ],
                                     ),
                                   ),
-                                  ..._familyController.familyMembers.map((
-                                    member,
-                                  ) {
-                                    return _buildFamilyMember(
-                                      member.familymemberName,
-                                      member.familymemberRelationship,
-                                      "active",
-                                      onTap:
-                                          () => _showEditDeleteOptions(member),
-                                    );
-                                  }).toList(),
                                 ],
                               ),
-                            );
-                      }),
-            ),
-          ],
-        ),
+                            ),
+                            ..._familyController.familyMembers.map((member) {
+                              return _buildFamilyMember(
+                                member.familymemberName,
+                                member.familymemberRelationship,
+                                "aktif",
+                                onTap: () => _showEditDeleteOptions(member),
+                              );
+                            }).toList(),
+                          ],
+                        ),
+                      );
+                }),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _showAddFamilyMemberDialog,
-        child: const Icon(Icons.add),
-        tooltip: 'Add family member',
-      ),
+      floatingActionButton:
+          _familyController.familyMembers.isEmpty
+              ? null
+              : FloatingActionButton.extended(
+                onPressed: _showAddFamilyMemberDialog,
+                icon: const Icon(Icons.person_add),
+                label: const Text('Tambah Ahli'),
+                backgroundColor: MoonColors.light.hit,
+              ),
     );
   }
 
@@ -348,38 +423,88 @@ class _FamilyProfileState extends State<FamilyProfile> {
     String relationship,
     String status, {
     Color surfaceColor = Colors.white,
-    Color textColor = Colors.black,
+    Color textColor = Colors.black87,
     double bottomPadding = 12,
     VoidCallback? onTap,
   }) {
     return Padding(
-      padding: EdgeInsets.fromLTRB(16, 12, 16, bottomPadding),
-      child: Container(
-        decoration: BoxDecoration(
-          color: surfaceColor,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.grey.shade300),
-          boxShadow: const [
-            BoxShadow(
-              color: Colors.black26,
-              blurRadius: 5,
-              offset: Offset(0, 2),
-            ),
-          ],
-        ),
-        child: MoonMenuItem(
-          backgroundColor: surfaceColor,
-          label: Text(name, style: TextStyle(fontSize: 16, color: textColor)),
-          content: Text(
-            relationship,
-            style: TextStyle(fontSize: 12, color: textColor),
-          ),
-          trailing: Text(
-            status,
-            style: TextStyle(fontSize: 12, color: textColor),
-          ),
-          borderRadius: BorderRadius.circular(12),
+      padding: EdgeInsets.fromLTRB(16, 8, 16, bottomPadding),
+      child: Card(
+        elevation: 2,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        child: InkWell(
           onTap: onTap,
+          borderRadius: BorderRadius.circular(16),
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Row(
+              children: [
+                Container(
+                  width: 50,
+                  height: 50,
+                  decoration: BoxDecoration(
+                    color: MoonColors.light.beerus.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(25),
+                  ),
+                  child: Center(
+                    child: Text(
+                      name.isNotEmpty ? name[0].toUpperCase() : "?",
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: MoonColors.light.hit,
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        name,
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: textColor,
+                        ),
+                      ),
+                      SizedBox(height: 4),
+                      Text(
+                        relationship,
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey.shade700,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color:
+                        status.toLowerCase() == "active"
+                            ? Colors.green.withOpacity(0.1)
+                            : Colors.grey.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    status,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color:
+                          status.toLowerCase() == "active"
+                              ? Colors.green
+                              : Colors.grey,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );
