@@ -266,28 +266,28 @@ class _SignInPageState extends State<SignInPage> {
                             const SizedBox(height: 16),
 
                             // Guest mode button
-                            SizedBox(
-                              width: isWeb ? 200 : double.infinity,
-                              child: OutlinedButton(
-                                onPressed: () => Get.to(() => HomePageWidget()),
-                                style: OutlinedButton.styleFrom(
-                                  side: BorderSide(color: Colors.grey[400]!),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(25.0),
-                                  ),
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 12,
-                                  ),
-                                ),
-                                child: Text(
-                                  'Continue as Guest',
-                                  style: GoogleFonts.poppins(
-                                    color: Colors.grey[600],
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              ),
-                            ),
+                            // SizedBox(
+                            //   width: isWeb ? 200 : double.infinity,
+                            //   child: OutlinedButton(
+                            //     onPressed: () => Get.to(() => HomePageWidget()),
+                            //     style: OutlinedButton.styleFrom(
+                            //       side: BorderSide(color: Colors.grey[400]!),
+                            //       shape: RoundedRectangleBorder(
+                            //         borderRadius: BorderRadius.circular(25.0),
+                            //       ),
+                            //       padding: const EdgeInsets.symmetric(
+                            //         vertical: 12,
+                            //       ),
+                            //     ),
+                            //     child: Text(
+                            //       'Continue as Guest',
+                            //       style: GoogleFonts.poppins(
+                            //         color: Colors.grey[600],
+                            //         fontWeight: FontWeight.w500,
+                            //       ),
+                            //     ),
+                            //   ),
+                            // ),
                           ],
                         ),
                       ),
