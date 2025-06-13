@@ -112,7 +112,7 @@ class _AdminMainState extends State<AdminMain> {
                   ),
                   _buildNavItem(Icons.receipt_long, "Laporan", 7),
                   _buildExpandableNavItem(Icons.settings, "Tetapan", 8, [
-                    _buildSubNavItem("Profile", 8),
+                    _buildSubNavItem("Profil", 8),
                     MoonMenuItem(
                       onTap: () {
                         showDialog(

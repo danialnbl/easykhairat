@@ -148,7 +148,7 @@ class _AddAnnouncementState extends State<AddAnnouncement> {
                     child: MoonBreadcrumb(
                       items: [
                         MoonBreadcrumbItem(
-                          label: Text("Laman Utama"),
+                          label: Text("Home"),
                           onTap: () => Get.toNamed('/adminMain'),
                         ),
                         MoonBreadcrumbItem(

@@ -163,7 +163,7 @@ class _ManageAnnounceState extends State<ManageAnnounce> {
                   value: selectedFilter.value,
                   underline: SizedBox(),
                   items:
-                      ['Semua Pengumuman', 'Penting', 'Umum']
+                      ['Semua Pengumuman', 'Kematian', 'Umum']
                           .map(
                             (type) => DropdownMenuItem(
                               value: type,
@@ -378,7 +378,7 @@ class _ManageAnnounceState extends State<ManageAnnounce> {
                   child: MoonBreadcrumb(
                     items: [
                       MoonBreadcrumbItem(
-                        label: Text("Utama"),
+                        label: Text("Home"),
                         onTap: () => Get.toNamed('/adminMain'),
                       ),
                       MoonBreadcrumbItem(label: Text("Pengurusan")),

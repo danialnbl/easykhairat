@@ -69,7 +69,7 @@ class _AdminProfileState extends State<AdminProfile> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               AppHeader(
-                title: "Admin Profile",
+                title: "Profil Pentadbir",
                 notificationCount: 3,
                 onNotificationPressed: () {},
               ),
@@ -92,7 +92,7 @@ class _AdminProfileState extends State<AdminProfile> {
                         ),
                         MoonBreadcrumbItem(
                           label: Text(
-                            "Profile",
+                            "Profil",
                             style: const TextStyle(color: Colors.black),
                           ),
                         ),
@@ -105,7 +105,7 @@ class _AdminProfileState extends State<AdminProfile> {
               isLoading
                   ? const Center(child: CircularProgressIndicator())
                   : currentUser == null
-                  ? const Center(child: Text("No user data available"))
+                  ? const Center(child: Text("Tiada data pengguna tersedia"))
                   : Form(
                     key: formKey,
                     child: Card(
@@ -120,7 +120,7 @@ class _AdminProfileState extends State<AdminProfile> {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text(
-                                  "Maklumat Admin",
+                                  "Maklumat Pentadbir",
                                   style: TextStyle(
                                     fontSize: 18,
                                     fontWeight: FontWeight.bold,
@@ -170,15 +170,15 @@ class _AdminProfileState extends State<AdminProfile> {
                                   emailController
                                     ..text = currentUser?.userEmail ?? "",
                               decoration: const InputDecoration(
-                                labelText: 'Email',
+                                labelText: 'Emel',
                                 border: OutlineInputBorder(),
                               ),
                               enabled: isEditing,
                               validator: (value) {
                                 if (value?.isEmpty ?? true)
-                                  return 'Sila masukkan email';
+                                  return 'Sila masukkan emel';
                                 if (!GetUtils.isEmail(value!))
-                                  return 'Sila masukkan email yang sah';
+                                  return 'Sila masukkan emel yang sah';
                                 return null;
                               },
                             ),
@@ -328,7 +328,7 @@ class _AdminProfileState extends State<AdminProfile> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Text(
-                  'Edit Profile',
+                  'Sunting Profil',
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                   textAlign: TextAlign.center,
                 ),
@@ -336,27 +336,27 @@ class _AdminProfileState extends State<AdminProfile> {
                 TextFormField(
                   controller: nameController,
                   decoration: const InputDecoration(
-                    labelText: 'Name',
+                    labelText: 'Nama',
                     border: OutlineInputBorder(),
                   ),
                   validator:
                       (value) =>
                           value?.isEmpty ?? true
-                              ? 'Please enter your name'
+                              ? 'Sila masukkan nama anda'
                               : null,
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: emailController,
                   decoration: const InputDecoration(
-                    labelText: 'Email',
+                    labelText: 'Emel',
                     border: OutlineInputBorder(),
                   ),
                   validator: (value) {
                     if (value?.isEmpty ?? true)
-                      return 'Please enter your email';
+                      return 'Sila masukkan emel anda';
                     if (!GetUtils.isEmail(value!))
-                      return 'Please enter a valid email';
+                      return 'Sila masukkan emel yang sah';
                     return null;
                   },
                 ),
@@ -364,40 +364,40 @@ class _AdminProfileState extends State<AdminProfile> {
                 TextFormField(
                   controller: phoneController,
                   decoration: const InputDecoration(
-                    labelText: 'Phone Number',
+                    labelText: 'Nombor Telefon',
                     border: OutlineInputBorder(),
                   ),
                   validator:
                       (value) =>
                           value?.isEmpty ?? true
-                              ? 'Please enter your phone number'
+                              ? 'Sila masukkan nombor telefon anda'
                               : null,
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: addressController,
                   decoration: const InputDecoration(
-                    labelText: 'Address',
+                    labelText: 'Alamat',
                     border: OutlineInputBorder(),
                   ),
                   maxLines: 3,
                   validator:
                       (value) =>
                           value?.isEmpty ?? true
-                              ? 'Please enter your address'
+                              ? 'Sila masukkan alamat anda'
                               : null,
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: icController,
                   decoration: const InputDecoration(
-                    labelText: 'IC Number',
+                    labelText: 'Nombor Kad Pengenalan',
                     border: OutlineInputBorder(),
                   ),
                   validator:
                       (value) =>
                           value?.isEmpty ?? true
-                              ? 'Please enter your IC number'
+                              ? 'Sila masukkan nombor kad pengenalan anda'
                               : null,
                 ),
                 const SizedBox(height: 24),
@@ -419,28 +419,28 @@ class _AdminProfileState extends State<AdminProfile> {
                           Get.back();
                           fetchCurrentUser(); // Refresh the profile data
                           Get.snackbar(
-                            'Success',
-                            'Profile updated successfully',
+                            'Berjaya',
+                            'Profil berjaya dikemaskini',
                             backgroundColor: Colors.green,
                             colorText: Colors.white,
                           );
                         }
                       } catch (e) {
                         Get.snackbar(
-                          'Error',
-                          'Failed to update profile',
+                          'Ralat',
+                          'Gagal mengemaskini profil',
                           backgroundColor: Colors.red,
                           colorText: Colors.white,
                         );
                       }
                     }
                   },
-                  child: const Text('Save Changes'),
+                  child: const Text('Simpan Perubahan'),
                 ),
                 const SizedBox(height: 16),
                 TextButton(
                   onPressed: () => Get.back(),
-                  child: const Text('Cancel'),
+                  child: const Text('Batal'),
                 ),
               ],
             ),
