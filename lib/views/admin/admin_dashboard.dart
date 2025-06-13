@@ -55,12 +55,10 @@ class _AdminDashboardState extends State<AdminDashboard> {
       double total =
           await feeController.calculateTotalOutstandingFeesForAllUsers();
       totalOutstandingFees.value = total;
-      print("Total outstanding fees: RM ${total.toStringAsFixed(2)}");
     } catch (e) {
-      print("Error calculating total outstanding fees: $e");
       Get.snackbar(
         'Error',
-        'Failed to calculate outstanding fees',
+        'Gagal mengira yuran tertunggak',
         backgroundColor: Colors.red,
         colorText: Colors.white,
       );
@@ -78,7 +76,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               AppHeader(
-                title: "Dashboard Overview",
+                title: "Ringkasan Papan Pemuka",
                 notificationCount: 3,
                 onNotificationPressed: () {},
               ),
@@ -182,7 +180,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
             Expanded(
               child: Obx(
                 () => _statCard(
-                  'Tuntutan Ahli Tahun Ini',
+                  'Tuntutan Ahli Tahun Ini (Diluluskan)',
                   'RM ${claimLineController.totalClaimLine.value.toStringAsFixed(2)}',
                   Colors.red,
                 ),

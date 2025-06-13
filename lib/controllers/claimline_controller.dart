@@ -119,8 +119,10 @@ class ClaimLineController extends GetxController {
           .from('claim_line')
           .delete()
           .eq('claimLine_id', deleteClaimLine.claimLineId.toString());
-      
-      await getClaimLinesByClaimId(deleteClaimLine.claimId ?? 0); // Refresh claim lines list
+
+      await getClaimLinesByClaimId(
+        deleteClaimLine.claimId ?? 0,
+      ); // Refresh claim lines list
       await fetchClaimLines(); // Refresh main list
       Get.snackbar(
         'Berjaya',
@@ -130,7 +132,7 @@ class ClaimLineController extends GetxController {
     } catch (e) {
       print("Error deleting claim line: $e");
       Get.snackbar(
-        'Ralat', 
+        'Ralat',
         'Gagal memadam tuntutan',
         snackPosition: SnackPosition.TOP,
       );
@@ -159,6 +161,46 @@ class ClaimLineController extends GetxController {
       print("Total Claim Line: ${totalClaimLine.value}");
     } catch (e) {
       print("Error fetching total claim line: $e");
+      totalClaimLine.value = 0.0;
+    }
+  }
+
+  // Add this method to ClaimLineController
+  Future<void> fetchTotalApprovedClaimLine() async {
+    try {
+      // Get claim IDs of claims with "Lulus" status
+      final approvedClaims = await supabase
+          .from('claims')
+          .select('claim_id')
+          .eq('claim_overallStatus', 'Lulus');
+
+      // Extract the claim IDs
+      List<dynamic> approvedClaimIds = [];
+      for (var claim in approvedClaims) {
+        approvedClaimIds.add(claim['claim_id']);
+      }
+
+      // If there are no approved claims, set total to 0
+      if (approvedClaimIds.isEmpty) {
+        totalClaimLine.value = 0.0;
+        return;
+      }
+
+      // Get claim lines for approved claims only
+      final response = await supabase
+          .from('claim_line')
+          .select('claimLine_totalPrice')
+          .filter('claim_id', 'in', approvedClaimIds);
+
+      double total = 0.0;
+      for (var item in response) {
+        total += (item['claimLine_totalPrice'] ?? 0).toDouble();
+      }
+
+      totalClaimLine.value = total;
+      print("Total Approved Claim Line: ${totalClaimLine.value}");
+    } catch (e) {
+      print("Error fetching total approved claim line: $e");
       totalClaimLine.value = 0.0;
     }
   }

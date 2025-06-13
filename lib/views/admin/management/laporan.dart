@@ -7,6 +7,8 @@ import 'package:easykhairat/controllers/user_controller.dart';
 import 'package:easykhairat/controllers/payment_controller.dart';
 import 'package:easykhairat/controllers/tuntutan_controller.dart';
 import 'package:easykhairat/controllers/family_controller.dart';
+import 'package:easykhairat/controllers/fee_controller.dart';
+import 'package:easykhairat/controllers/claimline_controller.dart';
 import 'package:moon_design/moon_design.dart';
 import 'package:syncfusion_flutter_xlsio/xlsio.dart' as xlsio;
 import 'package:pdf/widgets.dart' as pw;
@@ -24,6 +26,10 @@ class _LaporanPageState extends State<LaporanPage> {
   final paymentController = Get.put(PaymentController());
   final tuntutanController = Get.put(TuntutanController());
   final familyController = Get.put(FamilyController());
+  final FeeController feeController = Get.put(FeeController());
+  final ClaimLineController claimLineController = Get.put(
+    ClaimLineController(),
+  );
 
   final RxString selectedDataType = 'Pengguna'.obs;
   final RxString primaryType = 'Pengguna'.obs;
@@ -31,11 +37,31 @@ class _LaporanPageState extends State<LaporanPage> {
 
   final TextEditingController searchController = TextEditingController();
   final RxBool isLoading = false.obs;
+  final RxDouble totalOutstandingFees = 0.0.obs;
+
+  // Add these variables at the top of your _LaporanPageState class
+  final RxString selectedMonth = 'Semua'.obs;
+  final RxInt selectedYear = DateTime.now().year.obs;
 
   @override
   void initState() {
     super.initState();
     fetchAllData();
+    calculateTotalOutstandingFees();
+    paymentController.fetchTotalPayments();
+    // Replace fetchTotalClaimLine with fetchTotalApprovedClaimLine
+    claimLineController.fetchTotalApprovedClaimLine();
+  }
+
+  // Add this method to calculate total outstanding fees
+  void calculateTotalOutstandingFees() async {
+    try {
+      double total =
+          await feeController.calculateTotalOutstandingFeesForAllUsers();
+      totalOutstandingFees.value = total;
+    } catch (e) {
+      print("Error calculating total outstanding fees: $e");
+    }
   }
 
   Future<void> fetchAllData() async {
@@ -45,6 +71,44 @@ class _LaporanPageState extends State<LaporanPage> {
     await tuntutanController.fetchTuntutan();
     await familyController.fetchFamilyMembers();
     isLoading.value = false;
+  }
+
+  // Add this method to get all months
+  List<String> getAllMonths() {
+    return [
+      'Semua',
+      'Januari',
+      'Februari',
+      'Mac',
+      'April',
+      'Mei',
+      'Jun',
+      'Julai',
+      'Ogos',
+      'September',
+      'Oktober',
+      'November',
+      'Disember',
+    ];
+  }
+
+  // Add this method to get the month number from name
+  int getMonthNumber(String monthName) {
+    final months = {
+      'Januari': 1,
+      'Februari': 2,
+      'Mac': 3,
+      'April': 4,
+      'Mei': 5,
+      'Jun': 6,
+      'Julai': 7,
+      'Ogos': 8,
+      'September': 9,
+      'Oktober': 10,
+      'November': 11,
+      'Disember': 12,
+    };
+    return months[monthName] ?? 0;
   }
 
   List<Map<String, dynamic>> getCurrentData() {
@@ -74,12 +138,27 @@ class _LaporanPageState extends State<LaporanPage> {
             .toList();
       case 'Pembayaran':
         return paymentController.payments
-            .where(
-              (p) =>
+            .where((p) {
+              // First apply text search filter
+              bool matchesSearch =
                   searchTerm.isEmpty ||
                   p.paymentDescription.toLowerCase().contains(searchTerm) ||
-                  (p.paymentType?.toLowerCase() ?? '').contains(searchTerm),
-            )
+                  (p.paymentType?.toLowerCase() ?? '').contains(searchTerm);
+
+              // Then apply month filter if a specific month is selected
+              bool matchesMonth = true;
+              if (selectedMonth.value != 'Semua') {
+                final paymentDate = DateTime.parse(
+                  p.paymentCreatedAt.toString(),
+                );
+                final monthNum = getMonthNumber(selectedMonth.value);
+                matchesMonth =
+                    paymentDate.month == monthNum &&
+                    paymentDate.year == selectedYear.value;
+              }
+
+              return matchesSearch && matchesMonth;
+            })
             .map(
               (p) => {
                 'ID': p.paymentId ?? '',
@@ -93,12 +172,25 @@ class _LaporanPageState extends State<LaporanPage> {
             .toList();
       case 'Tuntutan':
         return tuntutanController.tuntutanList
-            .where(
-              (c) =>
+            .where((c) {
+              // First apply text search filter
+              bool matchesSearch =
                   searchTerm.isEmpty ||
                   c.claimOverallStatus.toLowerCase().contains(searchTerm) ||
-                  (c.claimType?.toLowerCase() ?? '').contains(searchTerm),
-            )
+                  (c.claimType?.toLowerCase() ?? '').contains(searchTerm);
+
+              // Then apply month filter if a specific month is selected
+              bool matchesMonth = true;
+              if (selectedMonth.value != 'Semua') {
+                final claimDate = DateTime.parse(c.claimCreatedAt.toString());
+                final monthNum = getMonthNumber(selectedMonth.value);
+                matchesMonth =
+                    claimDate.month == monthNum &&
+                    claimDate.year == selectedYear.value;
+              }
+
+              return matchesSearch && matchesMonth;
+            })
             .map(
               (c) => {
                 'ID': c.claimId ?? '',
@@ -126,6 +218,15 @@ class _LaporanPageState extends State<LaporanPage> {
                 'Hubungan': f.familymemberRelationship,
                 'Tarikh': f.familyCreatedAt.toString().split(' ').first,
               },
+            )
+            .toList();
+      case 'Kewangan':
+        return getFinancialData()
+            .where(
+              (f) =>
+                  searchTerm.isEmpty ||
+                  f['Kategori'].toString().toLowerCase().contains(searchTerm) ||
+                  f['Keterangan'].toString().toLowerCase().contains(searchTerm),
             )
             .toList();
       default:
@@ -297,93 +398,186 @@ class _LaporanPageState extends State<LaporanPage> {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Row(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(Icons.search, color: Colors.blue),
-            SizedBox(width: 8),
-            Text(
-              "Carian & Tapis Laporan",
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-            SizedBox(width: 20),
-            // Report search
-            Expanded(
-              child: Container(
-                height: 40,
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey.shade300),
-                  borderRadius: BorderRadius.circular(20),
+            Row(
+              children: [
+                Icon(Icons.search, color: Colors.blue),
+                SizedBox(width: 8),
+                Text(
+                  "Carian & Tapis Laporan",
+                  style: TextStyle(fontWeight: FontWeight.bold),
                 ),
-                child: Row(
-                  children: [
-                    SizedBox(width: 10),
-                    Icon(Icons.search, color: Colors.grey),
-                    SizedBox(width: 8),
-                    Expanded(
-                      child: TextField(
-                        controller: searchController,
-                        decoration: InputDecoration(
-                          hintText: "Cari dalam laporan...",
-                          border: InputBorder.none,
-                        ),
-                        onChanged: (value) {
-                          setState(() {});
-                        },
-                      ),
+                SizedBox(width: 20),
+                // Report search
+                Expanded(
+                  child: Container(
+                    height: 40,
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey.shade300),
+                      borderRadius: BorderRadius.circular(20),
                     ),
-                  ],
-                ),
-              ),
-            ),
-            SizedBox(width: 16),
-            // Data type filter
-            Container(
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.grey.shade300),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              padding: EdgeInsets.symmetric(horizontal: 12),
-              child: Obx(
-                () => DropdownButton<String>(
-                  value: selectedDataType.value,
-                  underline: SizedBox(),
-                  items:
-                      ['Pengguna', 'Pembayaran', 'Tuntutan', 'Keluarga']
-                          .map(
-                            (type) => DropdownMenuItem(
-                              value: type,
-                              child: Text(type),
+                    child: Row(
+                      children: [
+                        SizedBox(width: 10),
+                        Icon(Icons.search, color: Colors.grey),
+                        SizedBox(width: 8),
+                        Expanded(
+                          child: TextField(
+                            controller: searchController,
+                            decoration: InputDecoration(
+                              hintText: "Cari dalam laporan...",
+                              border: InputBorder.none,
                             ),
-                          )
-                          .toList(),
-                  onChanged: (value) {
-                    if (value != null) {
-                      selectedDataType.value = value;
-                      setState(() {});
-                    }
-                  },
+                            onChanged: (value) {
+                              setState(() {});
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
-              ),
+                SizedBox(width: 16),
+                // Data type filter
+                Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey.shade300),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  padding: EdgeInsets.symmetric(horizontal: 12),
+                  child: Obx(
+                    () => DropdownButton<String>(
+                      value: selectedDataType.value,
+                      underline: SizedBox(),
+                      items:
+                          [
+                                'Pengguna',
+                                'Pembayaran',
+                                'Tuntutan',
+                                'Keluarga',
+                                'Kewangan',
+                              ]
+                              .map(
+                                (type) => DropdownMenuItem(
+                                  value: type,
+                                  child: Text(type),
+                                ),
+                              )
+                              .toList(),
+                      onChanged: (value) {
+                        if (value != null) {
+                          selectedDataType.value = value;
+                          setState(() {});
+                        }
+                      },
+                    ),
+                  ),
+                ),
+                SizedBox(width: 16),
+                // Refresh button
+                ElevatedButton(
+                  onPressed: fetchAllData,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
+                    child: Text("Muat Semula"),
+                  ),
+                ),
+              ],
             ),
-            SizedBox(width: 16),
-            // Refresh button
-            ElevatedButton(
-              onPressed: fetchAllData,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blue,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
-                ),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 12,
-                ),
-                child: Text("Muat Semula"),
-              ),
-            ),
+            // Month filter row (only shown for payment and claim)
+            Obx(() {
+              if (selectedDataType.value == 'Pembayaran' ||
+                  selectedDataType.value == 'Tuntutan') {
+                return Padding(
+                  padding: const EdgeInsets.only(top: 16.0),
+                  child: Row(
+                    children: [
+                      Icon(Icons.calendar_month, color: Colors.blue),
+                      SizedBox(width: 8),
+                      Text(
+                        "Tapis Mengikut Bulan:",
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      SizedBox(width: 16),
+                      // Month filter
+                      Container(
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.grey.shade300),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        padding: EdgeInsets.symmetric(horizontal: 12),
+                        child: Obx(
+                          () => DropdownButton<String>(
+                            value: selectedMonth.value,
+                            underline: SizedBox(),
+                            items:
+                                getAllMonths()
+                                    .map(
+                                      (month) => DropdownMenuItem(
+                                        value: month,
+                                        child: Text(month),
+                                      ),
+                                    )
+                                    .toList(),
+                            onChanged: (value) {
+                              if (value != null) {
+                                selectedMonth.value = value;
+                                setState(() {});
+                              }
+                            },
+                          ),
+                        ),
+                      ),
+                      SizedBox(width: 16),
+                      // Year filter
+                      Container(
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.grey.shade300),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        padding: EdgeInsets.symmetric(horizontal: 12),
+                        child: Obx(
+                          () => DropdownButton<int>(
+                            value: selectedYear.value,
+                            underline: SizedBox(),
+                            items: [
+                              for (
+                                int year = DateTime.now().year;
+                                year >= DateTime.now().year - 5;
+                                year--
+                              )
+                                DropdownMenuItem(
+                                  value: year,
+                                  child: Text(year.toString()),
+                                ),
+                            ],
+                            onChanged: (value) {
+                              if (value != null) {
+                                selectedYear.value = value;
+                                setState(() {});
+                              }
+                            },
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }
+              return SizedBox.shrink();
+            }),
           ],
         ),
       ),
@@ -494,50 +688,104 @@ class _LaporanPageState extends State<LaporanPage> {
                   );
                 }
 
-                // Create a nicely styled table
-                return SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: SingleChildScrollView(
-                    child: DataTable(
-                      headingRowColor: MaterialStateProperty.all(
-                        Colors.blue.shade100,
+                // Use LayoutBuilder to make table responsive to available space
+                return LayoutBuilder(
+                  builder: (context, constraints) {
+                    return Container(
+                      // Make it take the full available height
+                      constraints: BoxConstraints(
+                        minHeight: MediaQuery.of(context).size.height * 0.6,
+                        maxHeight: MediaQuery.of(context).size.height * 0.8,
                       ),
-                      dataRowColor: MaterialStateProperty.all(Colors.white),
-                      border: TableBorder.all(
-                        color: Colors.grey.shade300,
-                        width: 1,
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.grey.shade200),
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      columns:
-                          columns
-                              .map(
-                                (column) => DataColumn(
-                                  label: Text(
-                                    column,
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
-                              )
-                              .toList(),
-                      rows:
-                          data
-                              .map(
-                                (row) => DataRow(
-                                  cells:
-                                      columns
-                                          .map(
-                                            (column) => DataCell(
-                                              Text('${row[column] ?? "Tiada"}'),
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.vertical,
+                        physics: AlwaysScrollableScrollPhysics(),
+                        child: SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          physics: AlwaysScrollableScrollPhysics(),
+                          child: ConstrainedBox(
+                            constraints: BoxConstraints(
+                              minWidth:
+                                  constraints.maxWidth -
+                                  32, // Account for padding
+                            ),
+                            child: DataTable(
+                              headingRowColor: MaterialStateProperty.all(
+                                Colors.blue.shade100,
+                              ),
+                              dataRowColor: MaterialStateProperty.all(
+                                Colors.white,
+                              ),
+                              border: TableBorder.all(
+                                color: Colors.grey.shade300,
+                                width: 1,
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              headingRowHeight:
+                                  50, // Increase header row height
+                              dataRowMinHeight:
+                                  50, // Increase minimum row height
+                              dataRowMaxHeight:
+                                  70, // Increase maximum row height
+                              columnSpacing:
+                                  24, // Add more space between columns
+                              horizontalMargin: 16, // Add horizontal margin
+                              showBottomBorder:
+                                  true, // Ensure bottom border is visible
+                              columns:
+                                  columns
+                                      .map(
+                                        (column) => DataColumn(
+                                          label: Padding(
+                                            padding: const EdgeInsets.all(8.0),
+                                            child: Text(
+                                              column,
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 15, // Larger font
+                                              ),
                                             ),
-                                          )
-                                          .toList(),
-                                ),
-                              )
-                              .toList(),
-                    ),
-                  ),
+                                          ),
+                                        ),
+                                      )
+                                      .toList(),
+                              rows:
+                                  data
+                                      .map(
+                                        (row) => DataRow(
+                                          cells:
+                                              columns
+                                                  .map(
+                                                    (column) => DataCell(
+                                                      Padding(
+                                                        padding:
+                                                            const EdgeInsets.all(
+                                                              8.0,
+                                                            ),
+                                                        child: Text(
+                                                          '${row[column] ?? "Tiada"}',
+                                                          style: TextStyle(
+                                                            fontSize: 14,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  )
+                                                  .toList(),
+                                        ),
+                                      )
+                                      .toList(),
+                            ),
+                          ),
+                        ),
+                      ),
+                    );
+                  },
                 );
               }),
             ),
@@ -545,6 +793,153 @@ class _LaporanPageState extends State<LaporanPage> {
         ),
       ),
     );
+  }
+
+  // New financial summary card
+  Widget _buildFinancialSummaryCard() {
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(Icons.attach_money, color: Colors.blue),
+                SizedBox(width: 8),
+                Text(
+                  "Ringkasan Kewangan",
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+                Spacer(),
+                TextButton.icon(
+                  icon: Icon(Icons.add_circle_outline),
+                  label: Text('Masukkan dalam Eksport'),
+                  onPressed: () {
+                    // Add a new option to the dropdown
+                    if (!selectedDataType.value.contains('Kewangan')) {
+                      selectedDataType.value = 'Kewangan';
+                      setState(() {});
+                    }
+                  },
+                ),
+              ],
+            ),
+            SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: _buildFinancialInfoItem(
+                    title: 'Kutipan Yuran',
+                    value:
+                        'RM ${paymentController.totalPayments.value.toStringAsFixed(2)}',
+                    icon: Icons.money,
+                    color: Colors.green,
+                  ),
+                ),
+                Expanded(
+                  child: _buildFinancialInfoItem(
+                    title: 'Jumlah Tunggakan',
+                    value:
+                        'RM ${totalOutstandingFees.value.toStringAsFixed(2)}',
+                    icon: Icons.account_balance,
+                    color: Colors.orange,
+                  ),
+                ),
+                Expanded(
+                  child: _buildFinancialInfoItem(
+                    title: 'Tuntutan Ahli (Diluluskan)',
+                    value:
+                        'RM ${claimLineController.totalClaimLine.value.toStringAsFixed(2)}',
+                    icon: Icons.money_off,
+                    color: Colors.red,
+                  ),
+                ),
+                Expanded(
+                  child: _buildFinancialInfoItem(
+                    title: 'Baki Bersih',
+                    value:
+                        'RM ${(paymentController.totalPayments.value - claimLineController.totalClaimLine.value).toStringAsFixed(2)}',
+                    icon: Icons.account_balance_wallet,
+                    color: Colors.blue,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFinancialInfoItem({
+    required String title,
+    required String value,
+    required IconData icon,
+    required Color color,
+  }) {
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: 8),
+      padding: EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: color.withOpacity(0.3)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(icon, color: color, size: 24),
+              SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  title,
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 8),
+          Text(
+            value,
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+        ],
+      ),
+    );
+  }
+
+  List<Map<String, dynamic>> getFinancialData() {
+    return [
+      {
+        'Kategori': 'Kutipan Yuran',
+        'Nilai (RM)': paymentController.totalPayments.value.toStringAsFixed(2),
+        'Keterangan': 'Jumlah pembayaran yuran oleh ahli',
+      },
+      {
+        'Kategori': 'Jumlah Tunggakan',
+        'Nilai (RM)': totalOutstandingFees.value.toStringAsFixed(2),
+        'Keterangan': 'Jumlah tunggakan yuran ahli',
+      },
+      {
+        'Kategori': 'Tuntutan Ahli (Diluluskan)',
+        'Nilai (RM)': claimLineController.totalClaimLine.value.toStringAsFixed(
+          2,
+        ),
+        'Keterangan': 'Jumlah tuntutan khairat yang diluluskan',
+      },
+      {
+        'Kategori': 'Baki Bersih',
+        'Nilai (RM)': (paymentController.totalPayments.value -
+                claimLineController.totalClaimLine.value)
+            .toStringAsFixed(2),
+        'Keterangan': 'Baki bersih kewangan (kutipan - tuntutan diluluskan)',
+      },
+    ];
   }
 
   @override
@@ -557,14 +952,14 @@ class _LaporanPageState extends State<LaporanPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             AppHeader(title: "Laporan", notificationCount: 0),
-            const SizedBox(height: 16),
+            const SizedBox(height: 4), // Further reduced spacing
             SizedBox(
               width: double.infinity,
               child: Card(
                 color: MoonColors.light.goku,
                 elevation: 4,
                 child: Padding(
-                  padding: const EdgeInsets.all(16.0),
+                  padding: const EdgeInsets.all(8.0), // Further reduced padding
                   child: MoonBreadcrumb(
                     items: [
                       MoonBreadcrumbItem(
@@ -578,12 +973,17 @@ class _LaporanPageState extends State<LaporanPage> {
                 ),
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 4), // Further reduced spacing
             _buildSearchBar(),
-            const SizedBox(height: 16),
+            const SizedBox(height: 4), // Further reduced spacing
             _buildExportOptions(),
-            const SizedBox(height: 16),
-            Expanded(child: _buildReportDataCard()),
+            const SizedBox(height: 4), // Further reduced spacing
+            _buildFinancialSummaryCard(),
+            const SizedBox(height: 4), // Further reduced spacing
+            Expanded(
+              flex: 10, // Increased from 3 to 5
+              child: _buildReportDataCard(),
+            ),
           ],
         ),
       ),
