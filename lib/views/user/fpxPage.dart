@@ -149,16 +149,15 @@ class _PaymentPageState extends State<PaymentPage> {
           );
 
           // Instead of just popping, check if we need to handle deep link navigation
-          Future.delayed(const Duration(seconds: 2), () {
-            // If opened from deep link and not navigated properly
-            if (Navigator.of(context).canPop()) {
-              // Safe to pop back
-              Navigator.of(context).pop(true);
-            } else {
-              // App was likely launched from deep link, navigate to home
-              Get.offAllNamed(AppRoutes.home);
-            }
-          });
+
+          // If opened from deep link and not navigated properly
+          if (Navigator.of(context).canPop()) {
+            // Safe to pop back
+            Get.offAllNamed(AppRoutes.home);
+          } else {
+            // App was likely launched from deep link, navigate to home
+            Get.offAllNamed(AppRoutes.home);
+          }
         }
       } else if (status == 3) {
         // Failed payment
@@ -171,6 +170,7 @@ class _PaymentPageState extends State<PaymentPage> {
             ),
           );
         }
+        Get.offAllNamed(AppRoutes.home);
       }
     } catch (e) {
       print('Error checking payment status: $e');
