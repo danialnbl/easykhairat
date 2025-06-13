@@ -13,6 +13,7 @@ import 'package:moon_design/moon_design.dart';
 import 'package:syncfusion_flutter_xlsio/xlsio.dart' as xlsio;
 import 'package:pdf/widgets.dart' as pw;
 import 'package:pdf/pdf.dart';
+import 'package:flutter/services.dart' show rootBundle, ByteData;
 
 class LaporanPage extends StatefulWidget {
   const LaporanPage({super.key});
@@ -111,6 +112,7 @@ class _LaporanPageState extends State<LaporanPage> {
     return months[monthName] ?? 0;
   }
 
+  // Modify the getCurrentData() method in the payment case to include user names instead of IDs
   List<Map<String, dynamic>> getCurrentData() {
     // Filter data based on search if needed
     final searchTerm = searchController.text.toLowerCase();
@@ -132,7 +134,7 @@ class _LaporanPageState extends State<LaporanPage> {
                 'No. Kad Pengenalan': u.userIdentification,
                 'Emel': u.userEmail,
                 'Jenis': u.userType,
-                'Tarikh': u.userCreatedAt.toString().split(' ').first,
+                'Tarikh': formatDate(u.userCreatedAt.toString()),
               },
             )
             .toList();
@@ -159,16 +161,22 @@ class _LaporanPageState extends State<LaporanPage> {
 
               return matchesSearch && matchesMonth;
             })
-            .map(
-              (p) => {
+            .map((p) {
+              // Find the user name for this payment
+              final user = userController.users.firstWhereOrNull(
+                (u) => u.userId == p.userId,
+              );
+              final userName = user?.userName ?? 'Pengguna tidak dijumpai';
+
+              return {
                 'ID': p.paymentId ?? '',
-                'ID Pengguna': p.userId ?? '',
+                'Nama': userName, // Display user name instead of ID
                 'Nilai': p.paymentValue,
                 'Keterangan': p.paymentDescription,
                 'Jenis': p.paymentType ?? '',
                 'Tarikh': p.paymentCreatedAt.toString().split(' ').first,
-              },
-            )
+              };
+            })
             .toList();
       case 'Tuntutan':
         return tuntutanController.tuntutanList
@@ -191,15 +199,21 @@ class _LaporanPageState extends State<LaporanPage> {
 
               return matchesSearch && matchesMonth;
             })
-            .map(
-              (c) => {
+            .map((c) {
+              // Find the user name for this claim
+              final user = userController.users.firstWhereOrNull(
+                (u) => u.userId == c.userId,
+              );
+              final userName = user?.userName ?? 'Pengguna tidak dijumpai';
+
+              return {
                 'ID': c.claimId ?? '',
-                'ID Pengguna': c.userId ?? '',
+                'Nama': userName, // Display user name instead of ID
                 'Status': c.claimOverallStatus,
                 'Jenis': c.claimType ?? '',
                 'Tarikh': c.claimCreatedAt.toString().split(' ').first,
-              },
-            )
+              };
+            })
             .toList();
       case 'Keluarga':
         return familyController.familyMembers
@@ -209,16 +223,22 @@ class _LaporanPageState extends State<LaporanPage> {
                   f.familymemberName.toLowerCase().contains(searchTerm) ||
                   f.familymemberRelationship.toLowerCase().contains(searchTerm),
             )
-            .map(
-              (f) => {
+            .map((f) {
+              // Find the user name for this family member
+              final user = userController.users.firstWhereOrNull(
+                (u) => u.userId == f.userId,
+              );
+              final userName = user?.userName ?? 'Pengguna tidak dijumpai';
+
+              return {
                 'ID': f.familyId ?? '',
-                'ID Pengguna': f.userId,
-                'Nama': f.familymemberName,
+                'Nama Pengguna': userName, // Display user name
+                'Nama Ahli Keluarga': f.familymemberName,
                 'No. Kad Pengenalan': f.familymemberIdentification,
                 'Hubungan': f.familymemberRelationship,
                 'Tarikh': f.familyCreatedAt.toString().split(' ').first,
-              },
-            )
+              };
+            })
             .toList();
       case 'Kewangan':
         return getFinancialData()
@@ -331,18 +351,57 @@ class _LaporanPageState extends State<LaporanPage> {
     final workbook = xlsio.Workbook();
     final sheet = workbook.worksheets[0];
 
-    // Header
+    // Add logo
+    final ByteData logoData = await rootBundle.load(
+      'assets/images/easyKhairatLogo.png',
+    );
+    final List<int> logoBytes = logoData.buffer.asUint8List();
+    final int logoRowIndex = 1;
+    final int logoColIndex = 1;
+    final xlsio.Picture picture = sheet.pictures.addStream(
+      logoRowIndex,
+      logoColIndex,
+      logoBytes,
+    );
+    picture.width = 100;
+    picture.height = 50;
+
+    // Add title row (now at row 1, but with offset for the logo)
+    final titleRange = sheet.getRangeByIndex(1, 3, 1, columns.length + 2);
+    titleRange.setText('Laporan ${selectedDataType.value} - EasyKhairat');
+    titleRange.cellStyle.bold = true;
+    titleRange.cellStyle.fontSize = 14;
+    titleRange.cellStyle.hAlign = xlsio.HAlignType.center;
+    titleRange.merge();
+
+    // Add date subtitle row
+    final dateRange = sheet.getRangeByIndex(2, 3, 2, columns.length + 2);
+    final currentDate = formatDate(DateTime.now().toString());
+    dateRange.setText('Tarikh: $currentDate');
+    dateRange.cellStyle.fontSize = 12;
+    dateRange.cellStyle.hAlign = xlsio.HAlignType.center;
+    dateRange.merge();
+
+    // Header (now at row 4)
     for (int i = 0; i < columns.length; i++) {
-      sheet.getRangeByIndex(1, i + 1).setText(columns[i]);
+      sheet.getRangeByIndex(4, i + 1).setText(columns[i]);
+      sheet.getRangeByIndex(4, i + 1).cellStyle.bold = true;
+      sheet.getRangeByIndex(4, i + 1).cellStyle.backColor = '#D3E5F5';
     }
-    // Data
+
+    // Data (now starting at row 5)
     for (int row = 0; row < data.length; row++) {
       for (int col = 0; col < columns.length; col++) {
-        sheet
-            .getRangeByIndex(row + 2, col + 1)
-            .setText('${data[row][columns[col]]}');
+        // Format dates in the data
+        var cellValue = data[row][columns[col]];
+        if (columns[col].toLowerCase().contains('tarikh') &&
+            cellValue != null) {
+          cellValue = formatDate(cellValue.toString());
+        }
+        sheet.getRangeByIndex(row + 5, col + 1).setText('$cellValue');
       }
     }
+
     final bytes = workbook.saveAsStream();
     workbook.dispose();
 
@@ -366,15 +425,77 @@ class _LaporanPageState extends State<LaporanPage> {
     final columns = getCurrentColumns();
     final pdf = pw.Document();
 
+    // Load the logo image
+    final ByteData logoData = await rootBundle.load(
+      'assets/images/easyKhairatLogo.png',
+    );
+    final Uint8List logoBytes = logoData.buffer.asUint8List();
+    final logoImage = pw.MemoryImage(logoBytes);
+
     pdf.addPage(
       pw.Page(
         build:
-            (context) => pw.Table.fromTextArray(
-              headers: columns,
-              data:
-                  data
-                      .map((row) => columns.map((c) => '${row[c]}').toList())
-                      .toList(),
+            (context) => pw.Column(
+              crossAxisAlignment: pw.CrossAxisAlignment.start,
+              children: [
+                // Add logo and title in a row
+                pw.Row(
+                  mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                  children: [
+                    pw.Image(logoImage, width: 100, height: 50),
+                    pw.Expanded(
+                      child: pw.Column(
+                        crossAxisAlignment: pw.CrossAxisAlignment.center,
+                        children: [
+                          // Add title
+                          pw.Text(
+                            'Laporan ${selectedDataType.value} - EasyKhairat',
+                            style: pw.TextStyle(
+                              fontSize: 18,
+                              fontWeight: pw.FontWeight.bold,
+                            ),
+                          ),
+                          // Add date
+                          pw.Text(
+                            'Tarikh: ${formatDate(DateTime.now().toString())}',
+                            style: pw.TextStyle(fontSize: 12),
+                          ),
+                        ],
+                      ),
+                    ),
+                    pw.SizedBox(width: 100), // Balance the layout
+                  ],
+                ),
+                pw.SizedBox(height: 20),
+                // Add data table
+                pw.Table.fromTextArray(
+                  headers: columns,
+                  data:
+                      data
+                          .map(
+                            (row) =>
+                                columns.map((c) {
+                                  var cellValue = row[c];
+                                  // Format dates in the data
+                                  if (c.toLowerCase().contains('tarikh') &&
+                                      cellValue != null) {
+                                    cellValue = formatDate(
+                                      cellValue.toString(),
+                                    );
+                                  }
+                                  return '$cellValue';
+                                }).toList(),
+                          )
+                          .toList(),
+                  headerStyle: pw.TextStyle(fontWeight: pw.FontWeight.bold),
+                  headerDecoration: pw.BoxDecoration(color: PdfColors.grey300),
+                  cellHeight: 30,
+                  cellAlignments: {
+                    for (var i = 0; i < columns.length; i++)
+                      i: pw.Alignment.centerLeft,
+                  },
+                ),
+              ],
             ),
       ),
     );
@@ -940,6 +1061,16 @@ class _LaporanPageState extends State<LaporanPage> {
         'Keterangan': 'Baki bersih kewangan (kutipan - tuntutan diluluskan)',
       },
     ];
+  }
+
+  // Add this helper function to your _LaporanPageState class
+  String formatDate(String dateString) {
+    try {
+      final date = DateTime.parse(dateString);
+      return "${date.day.toString().padLeft(2, '0')}-${date.month.toString().padLeft(2, '0')}-${date.year}";
+    } catch (e) {
+      return dateString; // Return the original string if parsing fails
+    }
   }
 
   @override
