@@ -1094,7 +1094,7 @@ class _LaporanPageState extends State<LaporanPage> {
                   child: MoonBreadcrumb(
                     items: [
                       MoonBreadcrumbItem(
-                        label: const Text("Laman Utama"),
+                        label: const Text("Home"),
                         onTap: () => Get.toNamed('/adminMain'),
                       ),
                       MoonBreadcrumbItem(label: Text("Pengurusan")),
