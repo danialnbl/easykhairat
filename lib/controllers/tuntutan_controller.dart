@@ -70,6 +70,8 @@ class TuntutanController extends GetxController {
               .update({
                 'claim_overallStatus': updatedTuntutan.claimOverallStatus,
                 'claim_type': updatedTuntutan.claimType,
+                'claim_reason':
+                    updatedTuntutan.claimReason, // Added claim_reason
                 'claim_updated_at':
                     updatedTuntutan.claimUpdatedAt.toIso8601String(),
               })
@@ -119,17 +121,18 @@ class TuntutanController extends GetxController {
     );
   }
 
-  // Add this method to your TuntutanController class
-
+  // Updated to include claim_reason
   Future<ClaimModel?> createTuntutan({
     required String userId,
     required String claimType,
+    String? claimReason,
   }) async {
     try {
       final newClaim = ClaimModel(
         userId: userId,
         claimOverallStatus: 'Dalam Proses',
         claimType: claimType,
+        claimReason: claimReason,
         claimCreatedAt: DateTime.now(),
         claimUpdatedAt: DateTime.now(),
       );
@@ -156,6 +159,39 @@ class TuntutanController extends GetxController {
         backgroundColor: Colors.red.shade100,
       );
       return null;
+    }
+  }
+
+  // New method to update claim reason
+  Future<void> updateClaimReason(int claimId, String reason) async {
+    try {
+      final response =
+          await supabase
+              .from('claims')
+              .update({
+                'claim_reason': reason,
+                'claim_updated_at': DateTime.now().toIso8601String(),
+              })
+              .eq('claim_id', claimId.toString())
+              .select()
+              .single();
+
+      if (response != null) {
+        await fetchTuntutan(); // Refresh the list after updating
+        Get.snackbar(
+          'Berjaya',
+          'Sebab tuntutan telah dikemaskini',
+          snackPosition: SnackPosition.TOP,
+        );
+      }
+    } catch (e) {
+      print("Error updating claim reason: $e");
+      Get.snackbar(
+        'Ralat',
+        'Gagal mengemaskini sebab tuntutan',
+        snackPosition: SnackPosition.TOP,
+      );
+      rethrow;
     }
   }
 }

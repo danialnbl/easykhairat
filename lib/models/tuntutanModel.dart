@@ -8,7 +8,7 @@ class ClaimModel {
   final int? familyId;
   final String? userId;
   final String? claimType;
-  final String? claimReason;
+  String? claimReason;
   final User? user;
 
   ClaimModel({

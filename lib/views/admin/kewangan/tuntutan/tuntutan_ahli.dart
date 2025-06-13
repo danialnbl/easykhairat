@@ -120,8 +120,10 @@ class TuntutanAhliState extends State<TuntutanAhli> {
                               const SizedBox(height: 16),
                               DropdownButtonFormField(
                                 value:
-                                    tuntutan?.claimOverallStatus ??
-                                    "Dalam Proses",
+                                    overallstatus.text.isNotEmpty
+                                        ? overallstatus.text
+                                        : tuntutan?.claimOverallStatus ??
+                                            "Dalam Proses",
                                 items: [
                                   DropdownMenuItem(
                                     value: "Dalam Proses",
@@ -139,6 +141,10 @@ class TuntutanAhliState extends State<TuntutanAhli> {
                                 onChanged: (value) {
                                   setState(() {
                                     overallstatus.text = value.toString();
+                                    // If changing from "Gagal" to something else, clear the reason
+                                    if (value != "Gagal") {
+                                      tuntutan.claimReason = null;
+                                    }
                                   });
                                 },
                                 decoration: InputDecoration(
@@ -171,6 +177,31 @@ class TuntutanAhliState extends State<TuntutanAhli> {
                                 ),
                               ),
                               const SizedBox(height: 16),
+                              // Add reason field when status is "Gagal"
+                              if (overallstatus.text == "Gagal" ||
+                                  (overallstatus.text.isEmpty &&
+                                      tuntutan.claimOverallStatus == "Gagal"))
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    TextFormField(
+                                      initialValue: tuntutan.claimReason,
+                                      decoration: InputDecoration(
+                                        labelText: 'Sebab Ditolak',
+                                        border: OutlineInputBorder(),
+                                        hintText:
+                                            'Masukkan sebab tuntutan ditolak',
+                                      ),
+                                      maxLines: 3,
+                                      onChanged: (value) {
+                                        setState(() {
+                                          tuntutan.claimReason = value;
+                                        });
+                                      },
+                                    ),
+                                    const SizedBox(height: 16),
+                                  ],
+                                ),
                               // update button
                               ElevatedButton(
                                 onPressed: () {
@@ -185,8 +216,17 @@ class TuntutanAhliState extends State<TuntutanAhli> {
                                           claimtype.text.isEmpty
                                               ? tuntutan.claimType
                                               : claimtype.text,
+                                      // Pass the updated reason directly from the model
+                                      claimReason:
+                                          (overallstatus.text == "Gagal" ||
+                                                  tuntutan.claimOverallStatus ==
+                                                      "Gagal")
+                                              ? tuntutan.claimReason
+                                              : null,
                                       claimCreatedAt: tuntutan.claimCreatedAt,
                                       claimUpdatedAt: DateTime.now(),
+                                      userId: tuntutan.userId,
+                                      familyId: tuntutan.familyId,
                                     );
                                     claimController.updateTuntutan(
                                       updatedClaim,
@@ -286,6 +326,33 @@ class TuntutanAhliState extends State<TuntutanAhli> {
                                               ),
                                             ],
                                           ),
+                                          // Display rejection reason if status is "Gagal" and reason exists
+                                          if (tuntutan.claimOverallStatus ==
+                                                  "Gagal" &&
+                                              tuntutan.claimReason != null &&
+                                              tuntutan
+                                                  .claimReason!
+                                                  .isNotEmpty) ...[
+                                            SizedBox(height: 4),
+                                            Row(
+                                              children: [
+                                                Icon(
+                                                  Icons.info_outline,
+                                                  size: 16,
+                                                  color: Colors.red,
+                                                ),
+                                                SizedBox(width: 4),
+                                                Expanded(
+                                                  child: Text(
+                                                    'Sebab Ditolak: ${tuntutan.claimReason}',
+                                                    style: TextStyle(
+                                                      color: Colors.red,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ],
                                         ],
                                       ),
                                       trailing: Row(
