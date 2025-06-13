@@ -90,91 +90,10 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                 height: 50.0,
                 fit: BoxFit.fitWidth,
               ),
-              // Padding(
-              //   padding: const EdgeInsets.only(right: 16.0),
-              //   child: badges.Badge(
-              //     position: badges.BadgePosition.topEnd(top: -5, end: -5),
-              //     badgeContent: Text(
-              //       '3',
-              //       style: TextStyle(color: Colors.white, fontSize: 10),
-              //     ),
-              //     child: IconButton(
-              //       icon: Icon(Icons.notifications, color: Colors.grey[700]),
-              //       onPressed: () {
-              //         showMenu(
-              //           color: Colors.white,
-              //           context: context,
-              //           position: RelativeRect.fromLTRB(
-              //             MediaQuery.of(context).size.width - 150,
-              //             80,
-              //             16,
-              //             0,
-              //           ),
-              //           items: [
-              //             PopupMenuItem(
-              //               child: ListTile(
-              //                 leading: Padding(
-              //                   padding: const EdgeInsets.only(
-              //                     left: 8.0,
-              //                   ), // Move icon to the right
-              //                   child: Icon(
-              //                     Icons.check,
-              //                     color:
-              //                         MoonColors
-              //                             .light
-              //                             .bulma, // Change icon color
-              //                     size: 20,
-              //                   ),
-              //                 ),
-              //                 title: Padding(
-              //                   padding: const EdgeInsets.only(
-              //                     left: 8.0,
-              //                   ), // Move text to the right
-              //                   child: Text(
-              //                     'Mark all as read',
-              //                     style: TextStyle(
-              //                       color:
-              //                           MoonColors
-              //                               .light
-              //                               .bulma, // Change text color
-              //                       fontWeight: FontWeight.bold,
-              //                     ),
-              //                   ),
-              //                 ),
-              //                 tileColor:
-              //                     MoonColors
-              //                         .light
-              //                         .beerus, // Change ListTile background color
-              //                 shape: RoundedRectangleBorder(
-              //                   borderRadius: BorderRadius.circular(
-              //                     8,
-              //                   ), // Optional: Add rounded corners
-              //                 ),
-              //                 onTap: () {
-              //                   // Logic to mark all notifications as read
-              //                   Navigator.pop(context); // Close the menu
-              //                 },
-              //               ),
-              //             ),
-              //             PopupMenuItem(child: Text('Tuntutan Approved')),
-              //             PopupMenuItem(
-              //               child: Text('Sila Bayar Yuran Tertunggak'),
-              //             ),
-              //             PopupMenuItem(
-              //               child: Text('Ahli keluarga baharu ditambah'),
-              //             ),
-              //           ],
-              //         );
-              //       },
-              //     ),
-              //   ),
-              // ),
-              // IconButton(icon: Icon(Icons.notifications), onPressed: () {}),
             ],
           ),
         ),
         Expanded(
-          // Replace your existing SingleChildScrollView with RefreshIndicator
           child: RefreshIndicator(
             onRefresh: _refreshDashboardData,
             child: SingleChildScrollView(
@@ -310,7 +229,7 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                                           (a) =>
                                               a.announcementType
                                                   .toLowerCase() ==
-                                              'Kematian',
+                                              'kematian',
                                         )
                                         .toList();
 
@@ -347,7 +266,7 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                                             ),
                                             SizedBox(height: 8),
                                             Text(
-                                              'No death announcements',
+                                              'Tiada pengumuman kematian',
                                               style: TextStyle(
                                                 color: Colors.grey[700],
                                                 fontSize: 16,
@@ -650,7 +569,7 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                                       ),
                                       child: Center(
                                         child: Text(
-                                          'No general announcements',
+                                          'Tiada pengumuman am',
                                           style: TextStyle(
                                             color: Colors.grey[700],
                                             fontSize: 16,
@@ -739,7 +658,7 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                                                   ),
                                                   SizedBox(height: 8),
                                                   Text(
-                                                    'Posted on: ${_formatDate(announcement.announcementCreatedAt)}',
+                                                    'Tarikh: ${_formatDate(announcement.announcementCreatedAt)}',
                                                     style: TextStyle(
                                                       fontSize: 12,
                                                       color: Colors.grey[600],
@@ -991,8 +910,8 @@ class _HomePageWidgetState extends State<HomePageWidget> {
     } catch (error) {
       print('Error refreshing dashboard data: $error');
       Get.snackbar(
-        'Refresh Failed',
-        'Unable to refresh data. Please check your connection.',
+        'Gagal Menyegarkan',
+        'Tidak dapat menyegarkan data. Sila periksa sambungan anda.',
         backgroundColor: Colors.red,
         colorText: Colors.white,
       );
