@@ -230,4 +230,78 @@ class FeeController extends GetxController {
     final now = DateTime.now();
     return yuranGeneral.where((fee) => fee.feeDue.isBefore(now)).toList();
   }
+
+  // Add this new method
+  Future<double> calculateTotalOutstandingFeesForAllUsers() async {
+    try {
+      isLoading.value = true;
+      print("Starting calculation of total outstanding fees for all users");
+
+      // Get all users except admins
+      final usersResponse = await supabase
+          .from('users')
+          .select(
+            'user_id',
+          ) // Changed from 'user_id' to 'id' - this appears to be the correct column name
+          .eq('user_type', 'user'); // Filter to get only regular users
+
+      print("Users response: $usersResponse"); // Debug the response
+
+      if (usersResponse is List && usersResponse.isNotEmpty) {
+        final users = usersResponse as List<dynamic>;
+        print("Found ${users.length} users to process");
+
+        double totalOutstanding = 0.0;
+        int totalUnpaidFees = 0;
+
+        // For each user, fetch their outstanding fees
+        for (var user in users) {
+          final userId = user['user_id'];
+          if (userId != null) {
+            print("Processing user ID: $userId");
+
+            // Clear previous user's data
+            yuranTertunggak.clear();
+
+            // Use existing method to fetch outstanding fees for this user
+            await fetchYuranTertunggak(userId);
+            print(
+              "After fetching - Found ${yuranTertunggak.length} outstanding fees for user $userId",
+            );
+
+            // Sum up the outstanding fees for this user
+            double userTotal = 0.0;
+            for (var fee in yuranTertunggak) {
+              userTotal += fee.feeAmount;
+              print("Fee ID: ${fee.feeId}, Amount: RM ${fee.feeAmount}");
+            }
+
+            totalUnpaidFees += yuranTertunggak.length;
+            totalOutstanding += userTotal;
+            print(
+              "User $userId has ${yuranTertunggak.length} unpaid fees totaling RM ${userTotal.toStringAsFixed(2)}",
+            );
+          } else {
+            print("User ID is null in this user record: $user");
+          }
+        }
+
+        print(
+          "Calculation complete. Total: $totalUnpaidFees unpaid fees across all users",
+        );
+        print(
+          "Total outstanding amount: RM ${totalOutstanding.toStringAsFixed(2)}",
+        );
+        return totalOutstanding;
+      } else {
+        print("No users found or unexpected response format: $usersResponse");
+        return 0.0;
+      }
+    } catch (e) {
+      print("Error calculating total outstanding fees: $e");
+      return 0.0;
+    } finally {
+      isLoading.value = false;
+    }
+  }
 }

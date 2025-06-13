@@ -21,7 +21,7 @@ class _DetailAnnouncementState extends State<DetailAnnouncement> {
   final TextEditingController _descriptionController = TextEditingController();
   final AnnouncementController announcementController =
       Get.find<AnnouncementController>();
-  String _selectedType = 'General';
+  String _selectedType = 'Umum';
 
   final supabase = Supabase.instance.client;
   String? _imageUrl;
@@ -234,7 +234,7 @@ class _DetailAnnouncementState extends State<DetailAnnouncement> {
                                   border: OutlineInputBorder(),
                                 ),
                                 items:
-                                    ['General', 'Death']
+                                    ['Umum', 'Kematian']
                                         .map(
                                           (type) => DropdownMenuItem(
                                             value: type,

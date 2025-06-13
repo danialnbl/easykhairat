@@ -8,6 +8,7 @@ class ClaimModel {
   final int? familyId;
   final String? userId;
   final String? claimType;
+  final String? claimReason;
   final User? user;
 
   ClaimModel({
@@ -18,6 +19,7 @@ class ClaimModel {
     this.familyId,
     this.userId,
     this.claimType,
+    this.claimReason,
     this.user,
   });
 
@@ -30,6 +32,7 @@ class ClaimModel {
       familyId: json['family_id'], // Made nullable
       userId: json['user_id'], // Made nullable
       claimType: json['claim_type'], // Added to fromJson
+      claimReason: json['claim_reason'], // Added claim reason
       user: json['users'] != null ? User.fromJson(json['users']) : null,
     );
   }
@@ -43,11 +46,12 @@ class ClaimModel {
       if (familyId != null) 'family_id': familyId, // Include only if not null
       'user_id': userId, // Made nullable
       'claim_type': claimType, // Added to toJson
+      'claim_reason': claimReason, // Added claim reason to toJson
     };
   }
 
   @override
   String toString() {
-    return 'ClaimModel(claimId: $claimId, overallStatus: $claimOverallStatus, userId: $userId, familyId: $familyId, claimType: $claimType)'; // Updated toString
+    return 'ClaimModel(claimId: $claimId, overallStatus: $claimOverallStatus, userId: $userId, familyId: $familyId, claimType: $claimType, claimReason: $claimReason)'; // Updated toString
   }
 }

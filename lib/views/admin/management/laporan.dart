@@ -25,9 +25,9 @@ class _LaporanPageState extends State<LaporanPage> {
   final tuntutanController = Get.put(TuntutanController());
   final familyController = Get.put(FamilyController());
 
-  final RxString selectedDataType = 'Users'.obs;
-  final RxString primaryType = 'Users'.obs;
-  final RxString secondaryType = 'Payments'.obs;
+  final RxString selectedDataType = 'Pengguna'.obs;
+  final RxString primaryType = 'Pengguna'.obs;
+  final RxString secondaryType = 'Pembayaran'.obs;
 
   final TextEditingController searchController = TextEditingController();
   final RxBool isLoading = false.obs;
@@ -52,7 +52,7 @@ class _LaporanPageState extends State<LaporanPage> {
     final searchTerm = searchController.text.toLowerCase();
 
     switch (selectedDataType.value) {
-      case 'Users':
+      case 'Pengguna':
         return userController.users
             .where(
               (u) =>
@@ -64,15 +64,15 @@ class _LaporanPageState extends State<LaporanPage> {
             .map(
               (u) => {
                 'ID': u.userId ?? '',
-                'Name': u.userName,
-                'IC': u.userIdentification,
-                'Email': u.userEmail,
-                'Type': u.userType,
-                'Date': u.userCreatedAt.toString().split(' ').first,
+                'Nama': u.userName,
+                'No. Kad Pengenalan': u.userIdentification,
+                'Emel': u.userEmail,
+                'Jenis': u.userType,
+                'Tarikh': u.userCreatedAt.toString().split(' ').first,
               },
             )
             .toList();
-      case 'Payments':
+      case 'Pembayaran':
         return paymentController.payments
             .where(
               (p) =>
@@ -83,15 +83,15 @@ class _LaporanPageState extends State<LaporanPage> {
             .map(
               (p) => {
                 'ID': p.paymentId ?? '',
-                'User ID': p.userId ?? '',
-                'Value': p.paymentValue,
-                'Desc': p.paymentDescription,
-                'Type': p.paymentType ?? '',
-                'Date': p.paymentCreatedAt.toString().split(' ').first,
+                'ID Pengguna': p.userId ?? '',
+                'Nilai': p.paymentValue,
+                'Keterangan': p.paymentDescription,
+                'Jenis': p.paymentType ?? '',
+                'Tarikh': p.paymentCreatedAt.toString().split(' ').first,
               },
             )
             .toList();
-      case 'Claims':
+      case 'Tuntutan':
         return tuntutanController.tuntutanList
             .where(
               (c) =>
@@ -102,14 +102,14 @@ class _LaporanPageState extends State<LaporanPage> {
             .map(
               (c) => {
                 'ID': c.claimId ?? '',
-                'User ID': c.userId ?? '',
+                'ID Pengguna': c.userId ?? '',
                 'Status': c.claimOverallStatus,
-                'Type': c.claimType ?? '',
-                'Date': c.claimCreatedAt.toString().split(' ').first,
+                'Jenis': c.claimType ?? '',
+                'Tarikh': c.claimCreatedAt.toString().split(' ').first,
               },
             )
             .toList();
-      case 'Family':
+      case 'Keluarga':
         return familyController.familyMembers
             .where(
               (f) =>
@@ -120,11 +120,11 @@ class _LaporanPageState extends State<LaporanPage> {
             .map(
               (f) => {
                 'ID': f.familyId ?? '',
-                'User ID': f.userId,
-                'Name': f.familymemberName,
-                'IC': f.familymemberIdentification,
-                'Relation': f.familymemberRelationship,
-                'Date': f.familyCreatedAt.toString().split(' ').first,
+                'ID Pengguna': f.userId,
+                'Nama': f.familymemberName,
+                'No. Kad Pengenalan': f.familymemberIdentification,
+                'Hubungan': f.familymemberRelationship,
+                'Tarikh': f.familyCreatedAt.toString().split(' ').first,
               },
             )
             .toList();
@@ -148,27 +148,27 @@ class _LaporanPageState extends State<LaporanPage> {
     List<Map<String, dynamic>> secondaryList = [];
 
     switch (primary) {
-      case 'Users':
+      case 'Pengguna':
         primaryList =
             userController.users
                 .map(
                   (u) => {
-                    'User ID': u.userId ?? '',
-                    'Name': u.userName,
-                    'Email': u.userEmail,
-                    'Type': u.userType,
+                    'ID Pengguna': u.userId ?? '',
+                    'Nama': u.userName,
+                    'Emel': u.userEmail,
+                    'Jenis': u.userType,
                   },
                 )
                 .toList();
         break;
-      case 'Payments':
+      case 'Pembayaran':
         primaryList =
             paymentController.payments
                 .map(
                   (p) => {
-                    'User ID': p.userId ?? '',
-                    'Payment Value': p.paymentValue,
-                    'Payment Desc': p.paymentDescription,
+                    'ID Pengguna': p.userId ?? '',
+                    'Nilai Pembayaran': p.paymentValue,
+                    'Keterangan Pembayaran': p.paymentDescription,
                   },
                 )
                 .toList();
@@ -177,27 +177,27 @@ class _LaporanPageState extends State<LaporanPage> {
     }
 
     switch (secondary) {
-      case 'Users':
+      case 'Pengguna':
         secondaryList =
             userController.users
                 .map(
                   (u) => {
-                    'User ID': u.userId ?? '',
-                    'Name2': u.userName,
-                    'Email2': u.userEmail,
-                    'Type2': u.userType,
+                    'ID Pengguna': u.userId ?? '',
+                    'Nama2': u.userName,
+                    'Emel2': u.userEmail,
+                    'Jenis2': u.userType,
                   },
                 )
                 .toList();
         break;
-      case 'Payments':
+      case 'Pembayaran':
         secondaryList =
             paymentController.payments
                 .map(
                   (p) => {
-                    'User ID': p.userId ?? '',
-                    'Payment Value2': p.paymentValue,
-                    'Payment Desc2': p.paymentDescription,
+                    'ID Pengguna': p.userId ?? '',
+                    'Nilai Pembayaran2': p.paymentValue,
+                    'Keterangan Pembayaran2': p.paymentDescription,
                   },
                 )
                 .toList();
@@ -205,11 +205,11 @@ class _LaporanPageState extends State<LaporanPage> {
       // Add other cases...
     }
 
-    // Combine by 'User ID'
+    // Combine by 'ID Pengguna'
     List<Map<String, dynamic>> combined = [];
     for (var p in primaryList) {
       final match = secondaryList.firstWhereOrNull(
-        (s) => s['User ID'] == p['User ID'],
+        (s) => s['ID Pengguna'] == p['ID Pengguna'],
       );
       combined.add({...p, ...?match});
     }
@@ -251,7 +251,7 @@ class _LaporanPageState extends State<LaporanPage> {
     final url = html.Url.createObjectUrlFromBlob(blob);
     final anchor =
         html.AnchorElement(href: url)
-          ..setAttribute('download', '${selectedDataType.value}_report.xlsx')
+          ..setAttribute('download', 'Laporan_${selectedDataType.value}.xlsx')
           ..click();
     html.Url.revokeObjectUrl(url);
 
@@ -283,7 +283,7 @@ class _LaporanPageState extends State<LaporanPage> {
     final url = html.Url.createObjectUrlFromBlob(blob);
     final anchor =
         html.AnchorElement(href: url)
-          ..setAttribute('download', '${selectedDataType.value}_report.pdf')
+          ..setAttribute('download', 'Laporan_${selectedDataType.value}.pdf')
           ..click();
     html.Url.revokeObjectUrl(url);
 
@@ -302,7 +302,7 @@ class _LaporanPageState extends State<LaporanPage> {
             Icon(Icons.search, color: Colors.blue),
             SizedBox(width: 8),
             Text(
-              "Search & Filter Reports",
+              "Carian & Tapis Laporan",
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
             SizedBox(width: 20),
@@ -323,7 +323,7 @@ class _LaporanPageState extends State<LaporanPage> {
                       child: TextField(
                         controller: searchController,
                         decoration: InputDecoration(
-                          hintText: "Search in reports...",
+                          hintText: "Cari dalam laporan...",
                           border: InputBorder.none,
                         ),
                         onChanged: (value) {
@@ -348,7 +348,7 @@ class _LaporanPageState extends State<LaporanPage> {
                   value: selectedDataType.value,
                   underline: SizedBox(),
                   items:
-                      ['Users', 'Payments', 'Claims', 'Family']
+                      ['Pengguna', 'Pembayaran', 'Tuntutan', 'Keluarga']
                           .map(
                             (type) => DropdownMenuItem(
                               value: type,
@@ -381,7 +381,7 @@ class _LaporanPageState extends State<LaporanPage> {
                   horizontal: 16,
                   vertical: 12,
                 ),
-                child: Text("Refresh"),
+                child: Text("Muat Semula"),
               ),
             ),
           ],
@@ -402,7 +402,7 @@ class _LaporanPageState extends State<LaporanPage> {
             Icon(Icons.file_download, color: Colors.green),
             SizedBox(width: 8),
             Text(
-              "Export Options",
+              "Pilihan Eksport",
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
             SizedBox(width: 20),
@@ -412,7 +412,7 @@ class _LaporanPageState extends State<LaporanPage> {
                 children: [
                   ElevatedButton.icon(
                     icon: const Icon(Icons.picture_as_pdf, color: Colors.white),
-                    label: const Text('Export to PDF'),
+                    label: const Text('Eksport ke PDF'),
                     onPressed: exportToPDF,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.red,
@@ -425,7 +425,7 @@ class _LaporanPageState extends State<LaporanPage> {
                   const SizedBox(width: 16),
                   ElevatedButton.icon(
                     icon: const Icon(Icons.grid_on, color: Colors.white),
-                    label: const Text('Export to Excel'),
+                    label: const Text('Eksport ke Excel'),
                     onPressed: exportToExcel,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.green,
@@ -458,7 +458,7 @@ class _LaporanPageState extends State<LaporanPage> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  "${selectedDataType.value} Report Data",
+                  "Data Laporan ${selectedDataType.value}",
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 Obx(
@@ -469,7 +469,7 @@ class _LaporanPageState extends State<LaporanPage> {
                             child: CircularProgressIndicator(strokeWidth: 2),
                           )
                           : Text(
-                            "${getCurrentData().length} records found",
+                            "${getCurrentData().length} rekod dijumpai",
                             style: TextStyle(color: Colors.grey),
                           ),
                 ),
@@ -488,7 +488,7 @@ class _LaporanPageState extends State<LaporanPage> {
                 if (data.isEmpty) {
                   return Center(
                     child: Text(
-                      "No data found for ${selectedDataType.value}.",
+                      "Tiada data dijumpai untuk ${selectedDataType.value}.",
                       style: TextStyle(fontSize: 16, color: Colors.grey),
                     ),
                   );
@@ -529,7 +529,7 @@ class _LaporanPageState extends State<LaporanPage> {
                                       columns
                                           .map(
                                             (column) => DataCell(
-                                              Text('${row[column] ?? "N/A"}'),
+                                              Text('${row[column] ?? "Tiada"}'),
                                             ),
                                           )
                                           .toList(),
@@ -568,10 +568,10 @@ class _LaporanPageState extends State<LaporanPage> {
                   child: MoonBreadcrumb(
                     items: [
                       MoonBreadcrumbItem(
-                        label: const Text("Home"),
+                        label: const Text("Laman Utama"),
                         onTap: () => Get.toNamed('/adminMain'),
                       ),
-                      MoonBreadcrumbItem(label: Text("Management")),
+                      MoonBreadcrumbItem(label: Text("Pengurusan")),
                       const MoonBreadcrumbItem(label: Text("Laporan")),
                     ],
                   ),

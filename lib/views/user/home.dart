@@ -310,7 +310,7 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                                           (a) =>
                                               a.announcementType
                                                   .toLowerCase() ==
-                                              'death',
+                                              'Kematian',
                                         )
                                         .toList();
 
@@ -577,7 +577,7 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                                       .where(
                                         (a) =>
                                             a.announcementType.toLowerCase() ==
-                                            'death',
+                                            'kematian',
                                       )
                                       .toList();
 
@@ -622,7 +622,7 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                                           (a) =>
                                               a.announcementType
                                                   .toLowerCase() !=
-                                              'death',
+                                              'kematian',
                                         )
                                         .toList();
 
@@ -766,7 +766,7 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                                       .where(
                                         (a) =>
                                             a.announcementType.toLowerCase() !=
-                                            'death',
+                                            'kematian',
                                       )
                                       .toList();
 

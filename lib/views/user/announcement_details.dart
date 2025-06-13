@@ -30,7 +30,8 @@ class AnnouncementDetailsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bool isDeath = announcement.announcementType.toLowerCase() == 'death';
+    final bool isDeath =
+        announcement.announcementType.toLowerCase() == 'Kematian';
     final Color primaryColor =
         isDeath ? Colors.red.shade800 : MoonColors.light.bulma;
     final Color secondaryColor =

@@ -22,7 +22,7 @@ class _AddAnnouncementState extends State<AddAnnouncement> {
   final TextEditingController _descriptionController = TextEditingController();
   final AnnouncementController announcementController =
       Get.find<AnnouncementController>();
-  String _selectedType = 'General';
+  String _selectedType = 'Umum';
 
   final supabase = Supabase.instance.client;
   String? _imageUrl;
@@ -64,8 +64,8 @@ class _AddAnnouncementState extends State<AddAnnouncement> {
       // Add this check before uploading
       if (supabase.auth.currentUser == null) {
         Get.snackbar(
-          'Error',
-          'Please login first',
+          'Ralat',
+          'Sila log masuk terlebih dahulu',
           backgroundColor: Colors.red.withOpacity(0.1),
           colorText: Colors.red,
         );
@@ -94,16 +94,16 @@ class _AddAnnouncementState extends State<AddAnnouncement> {
         });
 
         Get.snackbar(
-          'Success',
-          'Image uploaded successfully',
+          'Berjaya',
+          'Gambar berjaya dimuat naik',
           backgroundColor: Colors.green.withOpacity(0.1),
           colorText: Colors.green,
         );
       } catch (storageError) {
         print('Storage error: $storageError');
         Get.snackbar(
-          'Error',
-          'Failed to upload image. Please ensure you are logged in.',
+          'Ralat',
+          'Gagal memuat naik gambar. Sila pastikan anda telah log masuk.',
           backgroundColor: Colors.red.withOpacity(0.1),
           colorText: Colors.red,
         );
@@ -111,8 +111,8 @@ class _AddAnnouncementState extends State<AddAnnouncement> {
     } catch (e) {
       print('File picking error: $e');
       Get.snackbar(
-        'Error',
-        'Failed to select image',
+        'Ralat',
+        'Gagal memilih gambar',
         backgroundColor: Colors.red.withOpacity(0.1),
         colorText: Colors.red,
       );
@@ -148,7 +148,7 @@ class _AddAnnouncementState extends State<AddAnnouncement> {
                     child: MoonBreadcrumb(
                       items: [
                         MoonBreadcrumbItem(
-                          label: Text("Home"),
+                          label: Text("Laman Utama"),
                           onTap: () => Get.toNamed('/adminMain'),
                         ),
                         MoonBreadcrumbItem(
@@ -219,7 +219,7 @@ class _AddAnnouncementState extends State<AddAnnouncement> {
                                   border: OutlineInputBorder(),
                                 ),
                                 items:
-                                    ['General', 'Death']
+                                    ['Umum', 'Kematian']
                                         .map(
                                           (type) => DropdownMenuItem(
                                             value: type,
@@ -314,8 +314,8 @@ class _AddAnnouncementState extends State<AddAnnouncement> {
                                               supabase.auth.currentUser;
                                           if (currentUser == null) {
                                             Get.snackbar(
-                                              'Error',
-                                              'Please login first',
+                                              'Ralat',
+                                              'Sila log masuk terlebih dahulu',
                                               backgroundColor: Colors.red
                                                   .withOpacity(0.1),
                                               colorText: Colors.red,
@@ -348,7 +348,7 @@ class _AddAnnouncementState extends State<AddAnnouncement> {
                                           _titleController.clear();
                                           _descriptionController.clear();
                                           setState(() {
-                                            _selectedType = 'General';
+                                            _selectedType = 'Umum';
                                             _imageUrl = null;
                                             _fileName = null;
                                             _imageBytes = null;
@@ -356,8 +356,8 @@ class _AddAnnouncementState extends State<AddAnnouncement> {
 
                                           // Show success message and navigate back
                                           Get.snackbar(
-                                            'Success',
-                                            'Announcement added successfully',
+                                            'Berjaya',
+                                            'Pengumuman berjaya ditambah',
                                             backgroundColor: Colors.green
                                                 .withOpacity(0.1),
                                             colorText: Colors.green,
@@ -368,8 +368,8 @@ class _AddAnnouncementState extends State<AddAnnouncement> {
                                             'Error saving announcement: $e',
                                           );
                                           Get.snackbar(
-                                            'Error',
-                                            'Failed to save announcement',
+                                            'Ralat',
+                                            'Gagal menyimpan pengumuman',
                                             backgroundColor: Colors.red
                                                 .withOpacity(0.1),
                                             colorText: Colors.red,
@@ -414,7 +414,7 @@ class _AddAnnouncementState extends State<AddAnnouncement> {
                             Text("• Ruangan bertanda * wajib diisi."),
                             const SizedBox(height: 8),
                             Text(
-                              "• Pengumuman 'Important' akan dipaparkan di bahagian atas.",
+                              "• Pengumuman 'Penting' akan dipaparkan di bahagian atas.",
                             ),
                             const SizedBox(height: 8),
                             Text(

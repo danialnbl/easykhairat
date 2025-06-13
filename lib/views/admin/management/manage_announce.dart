@@ -21,7 +21,7 @@ class _ManageAnnounceState extends State<ManageAnnounce> {
     AnnouncementController(),
   );
   final NavigationController navigationController = Get.find();
-  RxString selectedFilter = 'All Announcements'.obs;
+  RxString selectedFilter = 'Semua Pengumuman'.obs;
 
   @override
   void initState() {
@@ -45,7 +45,7 @@ class _ManageAnnounceState extends State<ManageAnnounce> {
               .contains(dateSearchController.text.toLowerCase());
 
       bool matchesType =
-          selectedFilter.value == 'All Announcements' ||
+          selectedFilter.value == 'Semua Pengumuman' ||
           announcement.announcementType == selectedFilter.value;
 
       return matchesTitle && matchesDate && matchesType;
@@ -55,14 +55,14 @@ class _ManageAnnounceState extends State<ManageAnnounce> {
   void deleteAnnouncement(AnnouncementModel announcement) {
     Get.dialog(
       AlertDialog(
-        title: const Text('Confirm Delete'),
+        title: const Text('Sahkan Padam'),
         content: Text(
-          'Are you sure you want to delete ${announcement.announcementTitle}?',
+          'Adakah anda pasti mahu memadamkan ${announcement.announcementTitle}?',
         ),
         actions: [
-          TextButton(child: const Text('Cancel'), onPressed: () => Get.back()),
+          TextButton(child: const Text('Batal'), onPressed: () => Get.back()),
           TextButton(
-            child: const Text('Delete'),
+            child: const Text('Padam'),
             onPressed: () {
               announcementController.deleteAnnouncement(
                 announcement.announcementId!,
@@ -87,7 +87,7 @@ class _ManageAnnounceState extends State<ManageAnnounce> {
             Icon(Icons.search, color: Colors.blue),
             SizedBox(width: 8),
             Text(
-              "Search & Filter Announcements",
+              "Cari & Tapis Pengumuman",
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
             SizedBox(width: 20),
@@ -108,7 +108,7 @@ class _ManageAnnounceState extends State<ManageAnnounce> {
                       child: TextField(
                         controller: titleSearchController,
                         decoration: InputDecoration(
-                          hintText: "Search by title...",
+                          hintText: "Cari mengikut tajuk...",
                           border: InputBorder.none,
                         ),
                         onChanged: (value) {
@@ -138,7 +138,7 @@ class _ManageAnnounceState extends State<ManageAnnounce> {
                       child: TextField(
                         controller: dateSearchController,
                         decoration: InputDecoration(
-                          hintText: "Search by date...",
+                          hintText: "Cari mengikut tarikh...",
                           border: InputBorder.none,
                         ),
                         onChanged: (value) {
@@ -163,7 +163,7 @@ class _ManageAnnounceState extends State<ManageAnnounce> {
                   value: selectedFilter.value,
                   underline: SizedBox(),
                   items:
-                      ['All Announcements', 'Important', 'General']
+                      ['Semua Pengumuman', 'Penting', 'Umum']
                           .map(
                             (type) => DropdownMenuItem(
                               value: type,
@@ -197,7 +197,7 @@ class _ManageAnnounceState extends State<ManageAnnounce> {
                   horizontal: 16,
                   vertical: 12,
                 ),
-                child: Text("Refresh"),
+                child: Text("Muat Semula"),
               ),
             ),
           ],
@@ -220,7 +220,7 @@ class _ManageAnnounceState extends State<ManageAnnounce> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  "Announcement List",
+                  "Senarai Pengumuman",
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 MoonButton(
@@ -233,7 +233,7 @@ class _ManageAnnounceState extends State<ManageAnnounce> {
                     navigationController.selectedIndex.value = 14;
                   },
                   label: const Text(
-                    'Add Announcement',
+                    'Tambah Pengumuman',
                     style: TextStyle(color: Colors.white),
                   ),
                   backgroundColor: MoonColors.light.roshi,
@@ -252,7 +252,7 @@ class _ManageAnnounceState extends State<ManageAnnounce> {
                 if (filteredAnnouncements.isEmpty) {
                   return Center(
                     child: Text(
-                      "No announcements found.",
+                      "Tiada pengumuman ditemui.",
                       style: TextStyle(fontSize: 16, color: Colors.grey),
                     ),
                   );
@@ -266,10 +266,10 @@ class _ManageAnnounceState extends State<ManageAnnounce> {
                     Color typeColor = Colors.grey;
                     IconData typeIcon = Icons.announcement;
 
-                    if (announcement.announcementType == 'Important') {
+                    if (announcement.announcementType == 'Penting') {
                       typeColor = Colors.red;
                       typeIcon = Icons.priority_high;
-                    } else if (announcement.announcementType == 'General') {
+                    } else if (announcement.announcementType == 'Umum') {
                       typeColor = Colors.blue;
                       typeIcon = Icons.info;
                     }
@@ -290,7 +290,7 @@ class _ManageAnnounceState extends State<ManageAnnounce> {
                             Icon(Icons.calendar_today, size: 14),
                             SizedBox(width: 4),
                             Text(
-                              "Created on: ${DateFormat('dd/MM/yyyy').format(announcement.announcementCreatedAt)}",
+                              "Dibuat pada: ${DateFormat('dd/MM/yyyy').format(announcement.announcementCreatedAt)}",
                             ),
                           ],
                         ),
@@ -330,12 +330,12 @@ class _ManageAnnounceState extends State<ManageAnnounce> {
                                   announcement,
                                 );
                               },
-                              tooltip: "View Announcement",
+                              tooltip: "Lihat Pengumuman",
                             ),
                             IconButton(
                               icon: Icon(Icons.delete, color: Colors.red),
                               onPressed: () => deleteAnnouncement(announcement),
-                              tooltip: "Delete Announcement",
+                              tooltip: "Padam Pengumuman",
                             ),
                           ],
                         ),
@@ -366,7 +366,7 @@ class _ManageAnnounceState extends State<ManageAnnounce> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            AppHeader(title: "Manage Announcements", notificationCount: 3),
+            AppHeader(title: "Urus Pengumuman", notificationCount: 3),
             const SizedBox(height: 16),
             SizedBox(
               width: double.infinity,
@@ -378,11 +378,11 @@ class _ManageAnnounceState extends State<ManageAnnounce> {
                   child: MoonBreadcrumb(
                     items: [
                       MoonBreadcrumbItem(
-                        label: Text("Home"),
+                        label: Text("Utama"),
                         onTap: () => Get.toNamed('/adminMain'),
                       ),
-                      MoonBreadcrumbItem(label: Text("Management")),
-                      MoonBreadcrumbItem(label: Text("Announcements")),
+                      MoonBreadcrumbItem(label: Text("Pengurusan")),
+                      MoonBreadcrumbItem(label: Text("Pengumuman")),
                     ],
                   ),
                 ),

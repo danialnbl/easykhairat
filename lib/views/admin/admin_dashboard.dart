@@ -10,6 +10,7 @@ import 'package:easykhairat/widgets/admin/total_claims_chart.dart';
 import 'package:easykhairat/controllers/user_controller.dart';
 import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:easykhairat/controllers/fee_controller.dart'; // Import FeeController
 
 class AdminDashboard extends StatefulWidget {
   const AdminDashboard({super.key});
@@ -25,6 +26,10 @@ class _AdminDashboardState extends State<AdminDashboard> {
   final ClaimLineController claimLineController = Get.put(
     ClaimLineController(),
   );
+  final FeeController feeController = Get.put(FeeController()); // Add this line
+
+  // Add an RxDouble to store total outstanding fees
+  final RxDouble totalOutstandingFees = 0.0.obs;
 
   @override
   void initState() {
@@ -38,8 +43,28 @@ class _AdminDashboardState extends State<AdminDashboard> {
       Supabase.instance.client.auth.currentUser?.id ?? "",
     );
     claimLineController.fetchTotalClaimLine();
+    calculateTotalOutstandingFees(); // Add this line
 
     print("Admin ID: ${Supabase.instance.client.auth.currentUser?.id}");
+  }
+
+  // Add this method to calculate total outstanding fees
+  void calculateTotalOutstandingFees() async {
+    try {
+      // Use the optimized method from FeeController
+      double total =
+          await feeController.calculateTotalOutstandingFeesForAllUsers();
+      totalOutstandingFees.value = total;
+      print("Total outstanding fees: RM ${total.toStringAsFixed(2)}");
+    } catch (e) {
+      print("Error calculating total outstanding fees: $e");
+      Get.snackbar(
+        'Error',
+        'Failed to calculate outstanding fees',
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+    }
   }
 
   @override
@@ -98,38 +123,33 @@ class _AdminDashboardState extends State<AdminDashboard> {
     return Column(
       children: [
         Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
               child: Obx(
                 () => _statCard(
                   'Jumlah Ahli Aktif',
                   userController.users.length.toString(), // dynamic count
-
                   Colors.green,
                 ),
               ),
             ),
-            const SizedBox(width: 8),
+
             Expanded(
               child: Obx(
                 () => _statCard(
-                  'Kutipan Yuran',
-                  'RM ${paymentController.totalPayments.value.toStringAsFixed(2)}',
-
-                  Colors.red,
+                  'Jumlah Admin',
+                  userController.adminUsers.length.toString(),
+                  Colors.green,
                 ),
               ),
             ),
 
-            const SizedBox(width: 8),
             Expanded(
               child: Obx(
                 () => _statCard(
-                  'Tuntutan Ahli Tahun Ini',
-                  'RM ${claimLineController.totalClaimLine.value.toStringAsFixed(2)}',
-
-                  Colors.red,
+                  'Jumlah AJK',
+                  userController.adminUsers.length.toString(),
+                  Colors.green,
                 ),
               ),
             ),
@@ -137,22 +157,41 @@ class _AdminDashboardState extends State<AdminDashboard> {
         ),
         const SizedBox(height: 8),
         Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
               child: Obx(
                 () => _statCard(
-                  'Jumlah Admin',
-                  userController.adminUsers.length.toString(),
-
-                  Colors.green,
+                  'Kutipan Yuran',
+                  'RM ${paymentController.totalPayments.value.toStringAsFixed(2)}',
+                  Colors.red,
                 ),
               ),
             ),
 
-            Expanded(child: _statCard('Jumlah AJK', '10', Colors.green)),
+            Expanded(
+              child: Obx(
+                () => _statCard(
+                  'Jumlah Tunggakan',
+                  'RM ${totalOutstandingFees.value.toStringAsFixed(2)}',
+                  Colors.orange,
+                ),
+              ),
+            ),
+
+            Expanded(
+              child: Obx(
+                () => _statCard(
+                  'Tuntutan Ahli Tahun Ini',
+                  'RM ${claimLineController.totalClaimLine.value.toStringAsFixed(2)}',
+                  Colors.red,
+                ),
+              ),
+            ),
           ],
         ),
         const SizedBox(height: 8),
+
         Row(
           children: [
             Expanded(flex: 1, child: RegisteredMembersChart()),
