@@ -76,6 +76,39 @@ class AuthService {
     }
   }
 
+  static Future<void> resetPassword(String email) async {
+    try {
+      await supabase.auth.resetPasswordForEmail(
+        email,
+        redirectTo: 'io.supabase.easykhairat://reset-callback/',
+      );
+
+      Get.snackbar(
+        "Berjaya",
+        "Arahan tetapan semula kata laluan telah dihantar ke alamat e-mel anda.",
+        snackPosition: SnackPosition.TOP,
+        backgroundColor: Colors.green,
+        colorText: Colors.white,
+        duration: const Duration(seconds: 5),
+      );
+    } catch (error) {
+      print('Password reset error details: $error'); // Debug log
+
+      String errorMessage = 'Ralat berlaku semasa memproses permintaan anda.';
+      if (error is AuthException) {
+        errorMessage = error.message;
+      }
+
+      Get.snackbar(
+        'Ralat',
+        errorMessage,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+        duration: const Duration(seconds: 3),
+      );
+    }
+  }
+
   static Future<void> signOut() async {
     await supabase.auth.signOut();
     SessionController()

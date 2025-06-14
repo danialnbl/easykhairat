@@ -1,4 +1,5 @@
 import 'package:easykhairat/controllers/auth_controller.dart';
+import 'package:easykhairat/views/auth/forgot_password.dart';
 import 'package:easykhairat/views/user/home.dart';
 import 'package:easykhairat/views/auth/signUp.dart';
 import 'package:flutter/material.dart';
@@ -184,7 +185,8 @@ class _SignInPageState extends State<SignInPage> {
                             Align(
                               alignment: Alignment.centerRight,
                               child: TextButton(
-                                onPressed: () {},
+                                onPressed:
+                                    () => Get.to(() => ForgotPasswordPage()),
                                 child: Text(
                                   'Forgot Password?',
                                   style: GoogleFonts.poppins(

@@ -1,5 +1,7 @@
 import 'package:easykhairat/views/admin/admin_main.dart';
 import 'package:easykhairat/views/auth/signIn.dart';
+import 'package:easykhairat/views/auth/reset_password.dart'; // Add this import
+import 'package:easykhairat/views/auth/update_password.dart'; // Add this import
 import 'package:easykhairat/views/user/home.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -21,6 +23,8 @@ class AppRoutes {
   static const String prosesYuran = '/proses-yuran';
   static const String adminSettings = '/admin-settings';
   static const String home = '/home';
+  static const String resetPassword = '/reset-password'; // Add this route
+  static const String updatePassword = '/update-password'; // Add this route
 
   static final List<GetPage> pages = [
     GetPage(
@@ -36,6 +40,14 @@ class AppRoutes {
     GetPage(name: prosesYuran, page: () => ProsesYuran()),
     GetPage(name: adminSettings, page: () => AdminSettings()),
     GetPage(name: home, page: () => HomePageWidget()),
+    GetPage(
+      name: resetPassword,
+      page: () => ResetPasswordPage(),
+    ), // Add this route
+    GetPage(
+      name: updatePassword,
+      page: () => UpdatePasswordPage(),
+    ), // Add this page
   ];
 }
 
