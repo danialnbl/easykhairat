@@ -182,22 +182,21 @@ class _SignInPageState extends State<SignInPage> {
                             ),
 
                             // Forgot password
-                            Align(
-                              alignment: Alignment.centerRight,
-                              child: TextButton(
-                                onPressed:
-                                    () => Get.to(() => ForgotPasswordPage()),
-                                child: Text(
-                                  'Forgot Password?',
-                                  style: GoogleFonts.poppins(
-                                    color: Theme.of(context).primaryColor,
-                                    fontWeight: FontWeight.w500,
-                                    fontSize: 14,
-                                  ),
-                                ),
-                              ),
-                            ),
-
+                            // Align(
+                            //   alignment: Alignment.centerRight,
+                            //   child: TextButton(
+                            //     onPressed:
+                            //         () => Get.to(() => ForgotPasswordPage()),
+                            //     child: Text(
+                            //       'Forgot Password?',
+                            //       style: GoogleFonts.poppins(
+                            //         color: Theme.of(context).primaryColor,
+                            //         fontWeight: FontWeight.w500,
+                            //         fontSize: 14,
+                            //       ),
+                            //     ),
+                            //   ),
+                            // ),
                             const SizedBox(height: 16),
 
                             // Sign in button
