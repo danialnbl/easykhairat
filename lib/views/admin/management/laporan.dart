@@ -814,10 +814,11 @@ class _LaporanPageState extends State<LaporanPage> {
                   builder: (context, constraints) {
                     return Container(
                       // Make it take the full available height
-                      constraints: BoxConstraints(
-                        minHeight: MediaQuery.of(context).size.height * 0.6,
-                        maxHeight: MediaQuery.of(context).size.height * 0.8,
-                      ),
+                      // constraints: BoxConstraints(
+                      //   minHeight: MediaQuery.of(context).size.height * 0.6,
+                      //   maxHeight: MediaQuery.of(context).size.height * 0.8,
+                      // ),
+                      height: constraints.maxHeight * 0.9,
                       width: double.infinity,
                       decoration: BoxDecoration(
                         border: Border.all(color: Colors.grey.shade200),
@@ -933,18 +934,6 @@ class _LaporanPageState extends State<LaporanPage> {
                 Text(
                   "Ringkasan Kewangan",
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                ),
-                Spacer(),
-                TextButton.icon(
-                  icon: Icon(Icons.add_circle_outline),
-                  label: Text('Masukkan dalam Eksport'),
-                  onPressed: () {
-                    // Add a new option to the dropdown
-                    if (!selectedDataType.value.contains('Kewangan')) {
-                      selectedDataType.value = 'Kewangan';
-                      setState(() {});
-                    }
-                  },
                 ),
               ],
             ),
