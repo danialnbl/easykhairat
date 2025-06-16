@@ -208,12 +208,12 @@ class UserController extends GetxController {
       isLoading.value = true;
 
       // Load the environment variables first (in case onInit() is not called at the correct time)
-      await dotenv.load(fileName: ".env");
+      // await dotenv.load(fileName: ".env");
       // print(dotenv.env); // To see all loaded environment variables
 
       // Fetch the service role key from .env
-      var key = dotenv.env['SUPABASE_SERVICE_ROLE_KEY'];
-      // var key = String.fromEnvironment('SUPABASE_SERVICE_ROLE_KEY');
+      // var key = dotenv.env['SUPABASE_SERVICE_ROLE_KEY'];
+      var key = String.fromEnvironment('SUPABASE_SERVICE_ROLE_KEY');
 
       if (key == null || key.isEmpty) {
         throw Exception('Service Role Key not found in .env file');
