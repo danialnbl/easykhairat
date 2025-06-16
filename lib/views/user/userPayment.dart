@@ -247,7 +247,7 @@ class _UserPaymentState extends State<UserPayment> {
                           horizontal: 16,
                           vertical: 14,
                         ),
-                        helperText: 'Tetapkan jumlah yang ingin dibayar',
+
                         helperStyle: TextStyle(
                           fontSize: 12,
                           color: Colors.grey[600],
@@ -288,7 +288,7 @@ class _UserPaymentState extends State<UserPayment> {
 
                   const SizedBox(height: 8),
                   Text(
-                    'Minimum bayaran adalah RM2.00',
+                    'Jumlah bayaran telah ditetapkan dan tidak boleh diubah.',
                     style: TextStyle(
                       fontSize: 12,
                       color: Colors.grey,
