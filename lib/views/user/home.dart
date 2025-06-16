@@ -1,3 +1,4 @@
+import 'dart:math'; // Add this import for the min function
 import 'package:badges/badges.dart' as badges;
 import 'package:easykhairat/controllers/navigation_controller.dart';
 import 'package:easykhairat/controllers/fee_controller.dart';
@@ -23,8 +24,20 @@ class HomePageWidget extends StatefulWidget {
 
 class _HomePageWidgetState extends State<HomePageWidget> {
   final NavigationController navController = Get.put(NavigationController());
-  int selectedDot = 0;
-  int advertisementDot = 0;
+  // Use RxInt instead of int for reactive updates
+  final RxInt selectedDot = 0.obs;
+  final RxInt advertisementDot = 0.obs;
+
+  @override
+  void initState() {
+    super.initState();
+    // Reset indices when announcements data changes
+    final announcementController = Get.put(AnnouncementController());
+    ever(announcementController.announcements, (_) {
+      selectedDot.value = 0;
+      advertisementDot.value = 0;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -291,10 +304,21 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                                           MediaQuery.of(context).size.width -
                                           32,
                                       physics: const PageScrollPhysics(),
-                                      onIndexChanged:
-                                          (int index) => setState(
-                                            () => selectedDot = index,
-                                          ),
+                                      onIndexChanged: (int index) {
+                                        final deathAnnouncements =
+                                            controller.announcements
+                                                .where(
+                                                  (a) =>
+                                                      a.announcementType
+                                                          .toLowerCase() ==
+                                                      'kematian',
+                                                )
+                                                .toList();
+                                        if (index >= 0 &&
+                                            index < deathAnnouncements.length) {
+                                          selectedDot.value = index;
+                                        }
+                                      },
                                       itemBuilder: (
                                         BuildContext context,
                                         int itemIndex,
@@ -486,28 +510,6 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                                 );
                               },
                             ),
-                            const SizedBox(height: 16),
-                            Obx(() {
-                              final controller = Get.put(
-                                AnnouncementController(),
-                              );
-                              final deathAnnouncements =
-                                  controller.announcements
-                                      .where(
-                                        (a) =>
-                                            a.announcementType.toLowerCase() ==
-                                            'kematian',
-                                      )
-                                      .toList();
-
-                              return MoonDotIndicator(
-                                selectedDot: selectedDot,
-                                dotCount:
-                                    deathAnnouncements.isEmpty
-                                        ? 1
-                                        : deathAnnouncements.length,
-                              );
-                            }),
                           ],
                         ),
                         const SizedBox(height: 16),
@@ -581,20 +583,20 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                                 }
 
                                 return SizedBox(
-                                  height: 180,
+                                  height:
+                                      220, // Increased height for image content
                                   child: OverflowBox(
                                     maxWidth: MediaQuery.of(context).size.width,
                                     child: MoonCarousel(
-                                      gap: 32,
+                                      gap: 16,
                                       itemCount: generalAnnouncements.length,
                                       itemExtent:
                                           MediaQuery.of(context).size.width -
                                           32,
                                       physics: const PageScrollPhysics(),
-                                      onIndexChanged:
-                                          (int index) => setState(
-                                            () => advertisementDot = index,
-                                          ),
+                                      onIndexChanged: (int index) {
+                                        advertisementDot.value = index;
+                                      },
                                       itemBuilder: (
                                         BuildContext context,
                                         int itemIndex,
@@ -619,53 +621,166 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                                                     ),
                                               ),
                                             ),
-                                            child: Padding(
-                                              padding: const EdgeInsets.all(
-                                                16.0,
-                                              ),
-                                              child: Column(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: [
-                                                  Text(
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                // Image section with conditional display
+                                                if (announcement
+                                                            .announcementImage !=
+                                                        null &&
                                                     announcement
-                                                        .announcementTitle,
-                                                    style: TextStyle(
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                      fontSize: 18,
-                                                      color:
-                                                          MoonColors
-                                                              .light
-                                                              .bulma,
-                                                    ),
-                                                    overflow:
-                                                        TextOverflow.ellipsis,
-                                                    maxLines: 1,
-                                                  ),
-                                                  SizedBox(height: 8),
-                                                  Expanded(
-                                                    child: Text(
+                                                        .announcementImage!
+                                                        .isNotEmpty)
+                                                  ClipRRect(
+                                                    borderRadius:
+                                                        BorderRadius.only(
+                                                          topLeft:
+                                                              Radius.circular(
+                                                                12,
+                                                              ),
+                                                          topRight:
+                                                              Radius.circular(
+                                                                12,
+                                                              ),
+                                                        ),
+                                                    child: Image.network(
                                                       announcement
-                                                          .announcementDescription,
-                                                      style: TextStyle(
-                                                        fontSize: 14,
+                                                          .announcementImage!,
+                                                      height: 100,
+                                                      width: double.infinity,
+                                                      fit: BoxFit.cover,
+                                                      errorBuilder:
+                                                          (
+                                                            context,
+                                                            error,
+                                                            stackTrace,
+                                                          ) => Container(
+                                                            height: 100,
+                                                            color:
+                                                                Colors
+                                                                    .grey[200],
+                                                            child: Icon(
+                                                              Icons
+                                                                  .image_not_supported,
+                                                              size: 40,
+                                                              color:
+                                                                  Colors
+                                                                      .grey[400],
+                                                            ),
+                                                          ),
+                                                      loadingBuilder: (
+                                                        context,
+                                                        child,
+                                                        loadingProgress,
+                                                      ) {
+                                                        if (loadingProgress ==
+                                                            null)
+                                                          return child;
+                                                        return Container(
+                                                          height: 100,
+                                                          color:
+                                                              Colors.grey[200],
+                                                          child: Center(
+                                                            child:
+                                                                CircularProgressIndicator(),
+                                                          ),
+                                                        );
+                                                      },
+                                                    ),
+                                                  ),
+                                                Padding(
+                                                  padding: const EdgeInsets.all(
+                                                    16.0,
+                                                  ),
+                                                  child: Column(
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .start,
+                                                    children: [
+                                                      Row(
+                                                        children: [
+                                                          Container(
+                                                            padding:
+                                                                EdgeInsets.symmetric(
+                                                                  horizontal: 8,
+                                                                  vertical: 4,
+                                                                ),
+                                                            decoration: BoxDecoration(
+                                                              color: MoonColors
+                                                                  .light
+                                                                  .bulma
+                                                                  .withOpacity(
+                                                                    0.2,
+                                                                  ),
+                                                              borderRadius:
+                                                                  BorderRadius.circular(
+                                                                    4,
+                                                                  ),
+                                                            ),
+                                                            child: Text(
+                                                              'Pengumuman',
+                                                              style: TextStyle(
+                                                                color:
+                                                                    MoonColors
+                                                                        .light
+                                                                        .bulma,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .bold,
+                                                                fontSize: 12,
+                                                              ),
+                                                            ),
+                                                          ),
+                                                          SizedBox(width: 8),
+                                                          Text(
+                                                            _formatDate(
+                                                              announcement
+                                                                  .announcementCreatedAt,
+                                                            ),
+                                                            style: TextStyle(
+                                                              fontSize: 12,
+                                                              color:
+                                                                  Colors
+                                                                      .grey[600],
+                                                            ),
+                                                          ),
+                                                        ],
                                                       ),
-                                                      overflow:
-                                                          TextOverflow.ellipsis,
-                                                      maxLines: 4,
-                                                    ),
+                                                      SizedBox(height: 8),
+                                                      Text(
+                                                        announcement
+                                                            .announcementTitle,
+                                                        style: TextStyle(
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                          fontSize: 18,
+                                                        ),
+                                                        overflow:
+                                                            TextOverflow
+                                                                .ellipsis,
+                                                        maxLines: 1,
+                                                      ),
+                                                      SizedBox(height: 4),
+                                                      Text(
+                                                        announcement
+                                                            .announcementDescription,
+                                                        style: TextStyle(
+                                                          fontSize: 14,
+                                                        ),
+                                                        overflow:
+                                                            TextOverflow
+                                                                .ellipsis,
+                                                        maxLines:
+                                                            announcement.announcementImage !=
+                                                                    null
+                                                                ? 2
+                                                                : 3,
+                                                      ),
+                                                    ],
                                                   ),
-                                                  SizedBox(height: 8),
-                                                  Text(
-                                                    'Tarikh: ${_formatDate(announcement.announcementCreatedAt)}',
-                                                    style: TextStyle(
-                                                      fontSize: 12,
-                                                      color: Colors.grey[600],
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
+                                                ),
+                                              ],
                                             ),
                                           ),
                                         );
@@ -676,37 +791,40 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                               },
                             ),
                             const SizedBox(height: 16),
-                            Obx(() {
-                              final controller = Get.put(
-                                AnnouncementController(),
-                              );
-                              final generalAnnouncements =
-                                  controller.announcements
-                                      .where(
-                                        (a) =>
-                                            a.announcementType.toLowerCase() !=
-                                            'kematian',
-                                      )
-                                      .toList();
+                            // Obx(() {
+                            //   final controller = Get.put(
+                            //     AnnouncementController(),
+                            //   );
+                            //   final generalAnnouncements =
+                            //       controller.announcements
+                            //           .where(
+                            //             (a) =>
+                            //                 a.announcementType.toLowerCase() !=
+                            //                 'kematian',
+                            //           )
+                            //           .toList();
 
-                              // Make sure advertisementDot is in valid range
-                              if (advertisementDot >=
-                                      generalAnnouncements.length &&
-                                  generalAnnouncements.isNotEmpty) {
-                                advertisementDot = 0;
-                              }
+                            //   // Make sure advertisementDot is in valid range
+                            //   if (advertisementDot.value >=
+                            //           generalAnnouncements.length &&
+                            //       generalAnnouncements.isNotEmpty) {
+                            //     advertisementDot.value = 0;
+                            //   }
 
-                              return MoonDotIndicator(
-                                selectedDot:
-                                    generalAnnouncements.isEmpty
-                                        ? 0
-                                        : advertisementDot,
-                                dotCount:
-                                    generalAnnouncements.isEmpty
-                                        ? 1
-                                        : generalAnnouncements.length,
-                              );
-                            }),
+                            //   return MoonDotIndicator(
+                            //     selectedDot:
+                            //         generalAnnouncements.isEmpty
+                            //             ? 0
+                            //             : min(
+                            //               advertisementDot.value,
+                            //               generalAnnouncements.length - 1,
+                            //             ),
+                            //     dotCount:
+                            //         generalAnnouncements.isEmpty
+                            //             ? 1
+                            //             : generalAnnouncements.length,
+                            //   );
+                            // }),
                           ],
                         ),
                       ],
