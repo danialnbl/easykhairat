@@ -59,7 +59,7 @@ class _ManageFeeState extends State<ManageFee> {
     return years.toList()..sort();
   }
 
-  // Enhanced search widget similar to proses_yuran
+  // Enhanced search widget with refresh button
   Widget _buildSearchBar() {
     return Card(
       elevation: 2,
@@ -134,6 +134,48 @@ class _ManageFeeState extends State<ManageFee> {
               );
             }),
             SizedBox(width: 16),
+            // Refresh button
+            ElevatedButton.icon(
+              onPressed: () async {
+                try {
+                  // Refresh fee data
+                  await feeController.fetchFees();
+
+                  // Close loading dialog
+                  Get.back();
+
+                  // Show success message
+                  Get.snackbar(
+                    'Berjaya',
+                    'Senarai yuran telah dikemaskini',
+                    backgroundColor: Colors.green,
+                    colorText: Colors.white,
+                    duration: const Duration(seconds: 2),
+                  );
+                } catch (e) {
+                  // Close loading dialog
+                  Get.back();
+
+                  // Show error message
+                  Get.snackbar(
+                    'Ralat',
+                    'Gagal memuat semula data: $e',
+                    backgroundColor: Colors.red,
+                    colorText: Colors.white,
+                    duration: const Duration(seconds: 3),
+                  );
+                }
+              },
+              label: Text("Muat Semula"),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blue,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+              ),
+            ),
+            SizedBox(width: 16),
             // Add new fee button
             ElevatedButton.icon(
               onPressed: () {
@@ -141,7 +183,7 @@ class _ManageFeeState extends State<ManageFee> {
                   10,
                 ); // Navigate to add fee screen
               },
-              icon: Icon(Icons.add_circle_outline),
+              icon: Icon(Icons.add_circle_outline, color: Colors.white),
               label: Text("Tetapkan Yuran"),
               style: ElevatedButton.styleFrom(
                 backgroundColor: MoonColors.light.roshi,
@@ -272,6 +314,68 @@ class _ManageFeeState extends State<ManageFee> {
               }),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  // Enhanced refresh button that updates fee data
+  Widget _buildRefreshButton() {
+    return Obx(
+      () => ElevatedButton.icon(
+        onPressed:
+            feeController.isLoading.value
+                ? null
+                : () async {
+                  // Show loading indicator
+                  Get.dialog(
+                    const Center(child: CircularProgressIndicator()),
+                    barrierDismissible: false,
+                  );
+
+                  try {
+                    // Refresh fee data
+                    await feeController.fetchFees();
+
+                    // Close loading dialog
+                    Get.back();
+
+                    // Show success message
+                    Get.snackbar(
+                      'Berjaya',
+                      'Senarai yuran telah dikemaskini',
+                      backgroundColor: Colors.green,
+                      colorText: Colors.white,
+                      duration: const Duration(seconds: 2),
+                    );
+                  } catch (e) {
+                    // Close loading dialog
+                    Get.back();
+
+                    // Show error message
+                    Get.snackbar(
+                      'Ralat',
+                      'Gagal memuat semula data: $e',
+                      backgroundColor: Colors.red,
+                      colorText: Colors.white,
+                      duration: const Duration(seconds: 3),
+                    );
+                  }
+                },
+        icon:
+            feeController.isLoading.value
+                ? const SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+                : const Icon(Icons.refresh),
+        label: Text(
+          feeController.isLoading.value ? 'Memuat semula...' : 'Muat Semula',
+        ),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.blue,
+          foregroundColor: Colors.white,
         ),
       ),
     );

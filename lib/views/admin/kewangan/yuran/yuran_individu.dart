@@ -33,6 +33,7 @@ class YuranIndividuState extends State<YuranIndividu> {
   // Form state
   String paymentMethod = "Tunai";
   String? selectedInvoice;
+  String? selectedInvoiceName;
   int currentStep = 0;
   final RxBool isSubmitting = false.obs;
   DateTime? selectedDate;
@@ -51,9 +52,10 @@ class YuranIndividuState extends State<YuranIndividu> {
   }
 
   // Auto-fill amount when fee is selected
-  void _onFeeSelected(String? feeId) {
+  void _onFeeSelected(String? feeId, String? feeName) {
     setState(() {
       selectedInvoice = feeId;
+      selectedInvoiceName = feeName;
       if (feeId != null) {
         final selectedFee = feeController.yuranTertunggak.firstWhere(
           (fee) => fee.feeId.toString() == feeId,
@@ -179,90 +181,118 @@ class YuranIndividuState extends State<YuranIndividu> {
                 );
               }
 
-              return Column(
-                children:
-                    feeController.yuranTertunggak.map((fee) {
-                      bool isSelected = selectedInvoice == fee.feeId.toString();
-                      return Container(
-                        margin: const EdgeInsets.only(bottom: 12),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color:
-                                isSelected ? Colors.blue : Colors.grey.shade300,
-                            width: isSelected ? 2 : 1,
-                          ),
-                          color:
-                              isSelected ? Colors.blue.shade50 : Colors.white,
-                        ),
-                        child: ListTile(
-                          contentPadding: const EdgeInsets.all(16),
-                          leading: Radio<String>(
-                            value: fee.feeId.toString(),
-                            groupValue: selectedInvoice,
-                            onChanged: _onFeeSelected,
-                          ),
-                          title: Text(
-                            fee.feeDescription,
-                            style: TextStyle(
-                              fontWeight: FontWeight.w500,
-                              color:
-                                  isSelected
-                                      ? Colors.blue.shade700
-                                      : Colors.black87,
-                            ),
-                          ),
-                          subtitle: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const SizedBox(height: 4),
-                              Text(
-                                "Tarikh Terbuat: ${formatDate(fee.feeCreatedAt)}",
-                              ),
-                              Text("Tarikh Akhir: ${formatDate(fee.feeDue)}"),
-                              if (fee.feeDue.isBefore(DateTime.now()))
-                                Container(
-                                  margin: const EdgeInsets.only(top: 4),
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 8,
-                                    vertical: 2,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: Colors.red.shade100,
-                                    borderRadius: BorderRadius.circular(4),
-                                  ),
-                                  child: Text(
-                                    "LEWAT TEMPOH",
-                                    style: TextStyle(
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.red.shade700,
-                                    ),
-                                  ),
-                                ),
-                            ],
-                          ),
-                          trailing: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
+              // Wrap fee list in a Container with constraints and make it scrollable
+              return Container(
+                height: 360, // Set a fixed height for the scrollable area
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.grey.shade300),
+                ),
+                child: SingleChildScrollView(
+                  child: Column(
+                    children:
+                        feeController.yuranTertunggak.map((fee) {
+                          bool isSelected =
+                              selectedInvoice == fee.feeId.toString();
+                          return Container(
+                            margin: const EdgeInsets.symmetric(
                               vertical: 6,
+                              horizontal: 8,
                             ),
                             decoration: BoxDecoration(
-                              color: Colors.orange.shade100,
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: Text(
-                              "RM ${fee.feeAmount.toStringAsFixed(2)}",
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: Colors.orange.shade700,
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color:
+                                    isSelected
+                                        ? Colors.blue
+                                        : Colors.grey.shade300,
+                                width: isSelected ? 2 : 1,
                               ),
+                              color:
+                                  isSelected
+                                      ? Colors.blue.shade50
+                                      : Colors.white,
                             ),
-                          ),
-                          onTap: () => _onFeeSelected(fee.feeId.toString()),
-                        ),
-                      );
-                    }).toList(),
+                            child: ListTile(
+                              contentPadding: const EdgeInsets.all(16),
+                              leading: Radio<String>(
+                                value: fee.feeId.toString(),
+                                groupValue: selectedInvoice,
+                                onChanged:
+                                    (value) => _onFeeSelected(
+                                      value,
+                                      fee.feeDescription,
+                                    ),
+                              ),
+                              title: Text(
+                                fee.feeDescription,
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w500,
+                                  color:
+                                      isSelected
+                                          ? Colors.blue.shade700
+                                          : Colors.black87,
+                                ),
+                              ),
+                              subtitle: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    "Tarikh Terbuat: ${formatDate(fee.feeCreatedAt)}",
+                                  ),
+                                  Text(
+                                    "Tarikh Akhir: ${formatDate(fee.feeDue)}",
+                                  ),
+                                  if (fee.feeDue.isBefore(DateTime.now()))
+                                    Container(
+                                      margin: const EdgeInsets.only(top: 4),
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 8,
+                                        vertical: 2,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: Colors.red.shade100,
+                                        borderRadius: BorderRadius.circular(4),
+                                      ),
+                                      child: Text(
+                                        "LEWAT TEMPOH",
+                                        style: TextStyle(
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.red.shade700,
+                                        ),
+                                      ),
+                                    ),
+                                ],
+                              ),
+                              trailing: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 6,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Colors.orange.shade100,
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                child: Text(
+                                  "RM ${fee.feeAmount.toStringAsFixed(2)}",
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.orange.shade700,
+                                  ),
+                                ),
+                              ),
+                              onTap:
+                                  () => _onFeeSelected(
+                                    fee.feeId.toString(),
+                                    fee.feeDescription,
+                                  ),
+                            ),
+                          );
+                        }).toList(),
+                  ),
+                ),
               );
             }),
             const SizedBox(height: 24),
@@ -431,15 +461,15 @@ class YuranIndividuState extends State<YuranIndividu> {
                 ),
                 items: const [
                   DropdownMenuItem(value: "Tunai", child: Text("💵 Tunai")),
-                  DropdownMenuItem(
-                    value: "Bank Transfer",
-                    child: Text("🏦 Pindahan Bank"),
-                  ),
-                  DropdownMenuItem(value: "Cek", child: Text("📋 Cek")),
-                  DropdownMenuItem(
-                    value: "Lain-lain",
-                    child: Text("📄 Lain-lain"),
-                  ),
+                  // DropdownMenuItem(
+                  //   value: "Bank Transfer",
+                  //   child: Text("🏦 Pindahan Bank"),
+                  // ),
+                  // DropdownMenuItem(value: "Cek", child: Text("📋 Cek")),
+                  // DropdownMenuItem(
+                  //   value: "Lain-lain",
+                  //   child: Text("📄 Lain-lain"),
+                  // ),
                 ],
                 onChanged: (value) {
                   setState(() {
@@ -450,34 +480,34 @@ class YuranIndividuState extends State<YuranIndividu> {
               const SizedBox(height: 16),
 
               // Receipt number
-              TextFormField(
-                controller: receiptController,
-                decoration: InputDecoration(
-                  labelText: "Nombor Resit (Pilihan)",
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  filled: true,
-                  fillColor: Colors.grey.shade50,
-                  prefixIcon: const Icon(Icons.receipt),
-                ),
-              ),
-              const SizedBox(height: 16),
+              // TextFormField(
+              //   controller: receiptController,
+              //   decoration: InputDecoration(
+              //     labelText: "Nombor Resit (Pilihan)",
+              //     border: OutlineInputBorder(
+              //       borderRadius: BorderRadius.circular(12),
+              //     ),
+              //     filled: true,
+              //     fillColor: Colors.grey.shade50,
+              //     prefixIcon: const Icon(Icons.receipt),
+              //   ),
+              // ),
+              // const SizedBox(height: 16),
 
               // Notes
-              TextFormField(
-                controller: noteController,
-                maxLines: 3,
-                decoration: InputDecoration(
-                  labelText: "Nota Tambahan (Pilihan)",
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  filled: true,
-                  fillColor: Colors.grey.shade50,
-                  prefixIcon: const Icon(Icons.note),
-                ),
-              ),
+              // TextFormField(
+              //   controller: noteController,
+              //   maxLines: 3,
+              //   decoration: InputDecoration(
+              //     labelText: "Nota Tambahan (Pilihan)",
+              //     border: OutlineInputBorder(
+              //       borderRadius: BorderRadius.circular(12),
+              //     ),
+              //     filled: true,
+              //     fillColor: Colors.grey.shade50,
+              //     prefixIcon: const Icon(Icons.note),
+              //   ),
+              // ),
               const SizedBox(height: 24),
 
               // Navigation buttons
@@ -713,8 +743,7 @@ class YuranIndividuState extends State<YuranIndividu> {
     try {
       final payment = PaymentModel(
         paymentValue: double.parse(amountController.text),
-        paymentDescription:
-            noteController.text.isEmpty ? "Bayaran Yuran" : noteController.text,
+        paymentDescription: selectedInvoiceName ?? "Bayaran Yuran",
         paymentCreatedAt: DateTime.now(),
         paymentUpdatedAt: DateTime.now(),
         feeId: int.parse(selectedInvoice ?? '0'),
@@ -738,6 +767,11 @@ class YuranIndividuState extends State<YuranIndividu> {
 
       // Refresh data
       await feeController.fetchYuranTertunggak(
+        navController.getUser()?.userId.toString() ?? "",
+      );
+
+      // Refresh payment history
+      await paymentController.fetchPaymentsByUserId(
         navController.getUser()?.userId.toString() ?? "",
       );
 
@@ -1058,7 +1092,7 @@ class YuranIndividuState extends State<YuranIndividu> {
                                           style: const TextStyle(fontSize: 14),
                                         ),
                                         subtitle: Text(
-                                          formatDate(fee.feeCreatedAt),
+                                          "Due: ${formatDate(fee.feeDue)}",
                                           style: const TextStyle(fontSize: 12),
                                         ),
                                         trailing: Column(
