@@ -21,6 +21,7 @@ class _SignInPageState extends State<SignInPage> {
   final FocusNode _passwordFocusNode = FocusNode();
   bool _passwordVisibility = false;
   bool _isLoading = false;
+  bool _isResendingEmail = false;
 
   @override
   void dispose() {
@@ -35,8 +36,8 @@ class _SignInPageState extends State<SignInPage> {
     if (_emailController.text.trim().isEmpty ||
         _passwordController.text.trim().isEmpty) {
       Get.snackbar(
-        'Error',
-        'Please fill in all fields',
+        'Ralat',
+        'Sila isi semua ruangan',
         snackPosition: SnackPosition.TOP,
         backgroundColor: Colors.red.withOpacity(0.8),
         colorText: Colors.white,
@@ -51,7 +52,7 @@ class _SignInPageState extends State<SignInPage> {
       await AuthService.signIn(_emailController.text, _passwordController.text);
     } catch (e) {
       Get.snackbar(
-        'Login Failed',
+        'Log Masuk Gagal',
         e.toString(),
         snackPosition: SnackPosition.TOP,
         backgroundColor: Colors.red.withOpacity(0.8),
@@ -60,6 +61,40 @@ class _SignInPageState extends State<SignInPage> {
       );
     } finally {
       if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _handleResendVerification() async {
+    final email = _emailController.text.trim();
+
+    // More thorough email validation
+    if (email.isEmpty || !email.contains('@') || !email.contains('.')) {
+      Get.snackbar(
+        'Ralat',
+        'Sila masukkan alamat e-mel yang sah',
+        snackPosition: SnackPosition.TOP,
+        backgroundColor: Colors.red.withOpacity(0.8),
+        colorText: Colors.white,
+        margin: const EdgeInsets.all(10),
+      );
+      return;
+    }
+
+    setState(() => _isResendingEmail = true);
+
+    try {
+      await AuthService.resendVerificationEmail(email);
+    } catch (e) {
+      Get.snackbar(
+        'Ralat',
+        e.toString(),
+        snackPosition: SnackPosition.TOP,
+        backgroundColor: Colors.red.withOpacity(0.8),
+        colorText: Colors.white,
+        margin: const EdgeInsets.all(10),
+      );
+    } finally {
+      if (mounted) setState(() => _isResendingEmail = false);
     }
   }
 
@@ -165,8 +200,8 @@ class _SignInPageState extends State<SignInPage> {
                             _buildTextField(
                               controller: _emailController,
                               focusNode: _emailFocusNode,
-                              label: 'Email Address',
-                              hint: 'Enter your email here...',
+                              label: 'Alamat E-mel',
+                              hint: 'Masukkan e-mel anda di sini...',
                               icon: Icons.email_outlined,
                             ),
                             const SizedBox(height: 16.0),
@@ -175,8 +210,8 @@ class _SignInPageState extends State<SignInPage> {
                             _buildTextField(
                               controller: _passwordController,
                               focusNode: _passwordFocusNode,
-                              label: 'Password',
-                              hint: 'Enter your password here...',
+                              label: 'Kata Laluan',
+                              hint: 'Masukkan kata laluan anda di sini...',
                               isPassword: true,
                               icon: Icons.lock_outline,
                             ),
@@ -188,7 +223,7 @@ class _SignInPageState extends State<SignInPage> {
                             //     onPressed:
                             //         () => Get.to(() => ForgotPasswordPage()),
                             //     child: Text(
-                            //       'Forgot Password?',
+                            //       'Lupa Kata Laluan?',
                             //       style: GoogleFonts.poppins(
                             //         color: Theme.of(context).primaryColor,
                             //         fontWeight: FontWeight.w500,
@@ -225,7 +260,7 @@ class _SignInPageState extends State<SignInPage> {
                                           ),
                                         )
                                         : Text(
-                                          'Sign In',
+                                          'Log Masuk',
                                           style: GoogleFonts.poppins(
                                             fontSize: 16,
                                             fontWeight: FontWeight.w500,
@@ -234,7 +269,31 @@ class _SignInPageState extends State<SignInPage> {
                               ),
                             ),
 
-                            const SizedBox(height: 24),
+                            const SizedBox(height: 16),
+
+                            // Resend verification email button
+                            _isResendingEmail
+                                ? const Center(
+                                  child: SizedBox(
+                                    width: 24,
+                                    height: 24,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                    ),
+                                  ),
+                                )
+                                : TextButton(
+                                  onPressed: _handleResendVerification,
+                                  child: Text(
+                                    'Hantar semula e-mel pengesahan',
+                                    style: GoogleFonts.poppins(
+                                      color: Theme.of(context).primaryColor,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ),
+
+                            const SizedBox(height: 8),
 
                             // Don't have an account text
                             FittedBox(
@@ -243,7 +302,7 @@ class _SignInPageState extends State<SignInPage> {
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Text(
-                                    "Don't have an account?",
+                                    "Belum mempunyai akaun?",
                                     style: GoogleFonts.poppins(
                                       color: Colors.grey[700],
                                       fontSize: isWeb ? 14 : 13,
@@ -252,7 +311,7 @@ class _SignInPageState extends State<SignInPage> {
                                   TextButton(
                                     onPressed: () => Get.to(SignUpWidget()),
                                     child: Text(
-                                      'Sign Up',
+                                      'Daftar',
                                       style: GoogleFonts.poppins(
                                         fontWeight: FontWeight.bold,
                                         color: Theme.of(context).primaryColor,
@@ -281,7 +340,7 @@ class _SignInPageState extends State<SignInPage> {
                             //       ),
                             //     ),
                             //     child: Text(
-                            //       'Continue as Guest',
+                            //       'Teruskan sebagai Tetamu',
                             //       style: GoogleFonts.poppins(
                             //         color: Colors.grey[600],
                             //         fontWeight: FontWeight.w500,

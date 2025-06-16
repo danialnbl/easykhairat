@@ -219,7 +219,7 @@ class _CreateTuntutanPageState extends State<CreateTuntutanPage> {
       if (createdClaim != null) {
         _createdClaim = createdClaim;
         setState(() {
-          _currentStep = 3; // Move to claim line items
+          _currentStep = 2; // Move to claim line items
         });
 
         Get.snackbar(

@@ -52,7 +52,7 @@ class AuthService {
     } catch (error) {
       print('Sign-in error details: $error'); // Debug log
 
-      String errorMessage = 'Something went wrong.';
+      String errorMessage = 'Terdapat masalah berlaku.';
       if (error is AuthException) {
         switch (error.message) {
           case 'Invalid login credentials':
@@ -113,5 +113,31 @@ class AuthService {
     await supabase.auth.signOut();
     SessionController()
         .checkSession(); // This will handle redirection to sign-in page
+  }
+
+  /// Resends verification email to the provided email address
+  static Future<void> resendVerificationEmail(String email) async {
+    // Basic email validation before sending request
+    if (email.isEmpty || !email.contains('@') || !email.contains('.')) {
+      throw "Sila masukkan alamat e-mel yang sah";
+    }
+
+    try {
+      final response = await supabase.auth.resend(
+        type: OtpType.signup,
+        email: email, // Ensure email is trimmed
+      );
+
+      Get.snackbar(
+        'E-mel Dihantar',
+        'E-mel pengesahan telah dihantar ke $email',
+        snackPosition: SnackPosition.TOP,
+        backgroundColor: Colors.green.withOpacity(0.8),
+        colorText: Colors.white,
+        margin: const EdgeInsets.all(10),
+      );
+    } catch (e) {
+      throw e.toString();
+    }
   }
 }

@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'dart:ui'; // Add this import for BackdropFilter
+import 'dart:ui';
 
 class SignUpWidget extends StatefulWidget {
   const SignUpWidget({super.key});
@@ -68,8 +68,8 @@ class _SignUpWidgetState extends State<SignUpWidget> {
       Get.to(() => SignInPage());
 
       Get.snackbar(
-        'Success',
-        'Account created successfully',
+        'Berjaya',
+        'Akaun berjaya didaftarkan',
         snackPosition: SnackPosition.TOP,
         backgroundColor: Colors.green.withOpacity(0.8),
         colorText: Colors.white,
@@ -77,7 +77,7 @@ class _SignUpWidgetState extends State<SignUpWidget> {
       );
     } catch (e) {
       Get.snackbar(
-        'Signup Failed',
+        'Pendaftaran Gagal',
         e.toString(),
         snackPosition: SnackPosition.TOP,
         backgroundColor: Colors.red.withOpacity(0.8),
@@ -173,7 +173,7 @@ class _SignUpWidgetState extends State<SignUpWidget> {
                             ),
                             const SizedBox(height: 16),
                             Text(
-                              'Create Account',
+                              'Daftar Akaun',
                               style: GoogleFonts.poppins(
                                 fontSize: isWeb ? 24 : 20,
                                 fontWeight: FontWeight.bold,
@@ -217,7 +217,7 @@ class _SignUpWidgetState extends State<SignUpWidget> {
                                           ),
                                         )
                                         : Text(
-                                          'Sign Up',
+                                          'Daftar',
                                           style: GoogleFonts.poppins(
                                             fontSize: isWeb ? 16 : 14,
                                             fontWeight: FontWeight.w500,
@@ -235,7 +235,7 @@ class _SignUpWidgetState extends State<SignUpWidget> {
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Text(
-                                    'Already have an account?',
+                                    'Sudah mempunyai akaun?',
                                     style: GoogleFonts.poppins(
                                       color: Colors.grey[700],
                                       fontSize: isWeb ? 14 : 13,
@@ -244,7 +244,7 @@ class _SignUpWidgetState extends State<SignUpWidget> {
                                   TextButton(
                                     onPressed: () => Get.to(SignInPage()),
                                     child: Text(
-                                      'Sign In',
+                                      'Log Masuk',
                                       style: GoogleFonts.poppins(
                                         fontWeight: FontWeight.bold,
                                         color: Theme.of(context).primaryColor,
@@ -281,7 +281,7 @@ class _SignUpWidgetState extends State<SignUpWidget> {
               children: [
                 Expanded(
                   child: _buildValidatedField(
-                    'Full Name',
+                    'Nama Penuh',
                     _nameController,
                     TextInputType.name,
                   ),
@@ -289,7 +289,7 @@ class _SignUpWidgetState extends State<SignUpWidget> {
                 const SizedBox(width: 16),
                 Expanded(
                   child: _buildValidatedField(
-                    'IC Number',
+                    'Nombor Kad Pengenalan',
                     _icController,
                     TextInputType.text,
                   ),
@@ -302,7 +302,7 @@ class _SignUpWidgetState extends State<SignUpWidget> {
               children: [
                 Expanded(
                   child: _buildValidatedField(
-                    'Phone Number',
+                    'Nombor Telefon',
                     _phoneController,
                     TextInputType.phone,
                   ),
@@ -310,7 +310,7 @@ class _SignUpWidgetState extends State<SignUpWidget> {
                 const SizedBox(width: 16),
                 Expanded(
                   child: _buildValidatedField(
-                    'Email Address',
+                    'Alamat E-mel',
                     _emailController,
                     TextInputType.emailAddress,
                   ),
@@ -319,7 +319,7 @@ class _SignUpWidgetState extends State<SignUpWidget> {
             ),
             const SizedBox(height: 16),
             _buildValidatedField(
-              'Home Address',
+              'Alamat Rumah',
               _addressController,
               TextInputType.streetAddress,
             ),
@@ -329,7 +329,7 @@ class _SignUpWidgetState extends State<SignUpWidget> {
               children: [
                 Expanded(
                   child: _buildPasswordField(
-                    'Password',
+                    'Kata Laluan',
                     _passwordController,
                     _passwordVisibility,
                     () => setState(
@@ -340,7 +340,7 @@ class _SignUpWidgetState extends State<SignUpWidget> {
                 const SizedBox(width: 16),
                 Expanded(
                   child: _buildPasswordField(
-                    'Confirm Password',
+                    'Sahkan Kata Laluan',
                     _confirmPasswordController,
                     _confirmPasswordVisibility,
                     () => setState(
@@ -361,37 +361,41 @@ class _SignUpWidgetState extends State<SignUpWidget> {
   Widget _buildMobileFormLayout() {
     return Column(
       children: [
-        _buildValidatedField('Full Name', _nameController, TextInputType.name),
-        const SizedBox(height: 16),
-        _buildValidatedField('IC Number', _icController, TextInputType.text),
+        _buildValidatedField('Nama Penuh', _nameController, TextInputType.name),
         const SizedBox(height: 16),
         _buildValidatedField(
-          'Phone Number',
+          'Nombor Kad Pengenalan',
+          _icController,
+          TextInputType.text,
+        ),
+        const SizedBox(height: 16),
+        _buildValidatedField(
+          'Nombor Telefon',
           _phoneController,
           TextInputType.phone,
         ),
         const SizedBox(height: 16),
         _buildValidatedField(
-          'Home Address',
+          'Alamat Rumah',
           _addressController,
           TextInputType.streetAddress,
         ),
         const SizedBox(height: 16),
         _buildValidatedField(
-          'Email Address',
+          'Alamat E-mel',
           _emailController,
           TextInputType.emailAddress,
         ),
         const SizedBox(height: 16),
         _buildPasswordField(
-          'Password',
+          'Kata Laluan',
           _passwordController,
           _passwordVisibility,
           () => setState(() => _passwordVisibility = !_passwordVisibility),
         ),
         const SizedBox(height: 16),
         _buildPasswordField(
-          'Confirm Password',
+          'Sahkan Kata Laluan',
           _confirmPasswordController,
           _confirmPasswordVisibility,
           () => setState(
@@ -434,13 +438,13 @@ class _SignUpWidgetState extends State<SignUpWidget> {
       ),
       validator: (value) {
         if (value == null || value.trim().isEmpty) {
-          return '$label is required';
+          return '$label diperlukan';
         }
-        if (label == 'Email Address' && !GetUtils.isEmail(value)) {
-          return 'Please enter a valid email address';
+        if (label == 'Alamat E-mel' && !GetUtils.isEmail(value)) {
+          return 'Sila masukkan alamat e-mel yang sah';
         }
-        if (label == 'Phone Number' && !GetUtils.isPhoneNumber(value)) {
-          return 'Please enter a valid phone number';
+        if (label == 'Nombor Telefon' && !GetUtils.isPhoneNumber(value)) {
+          return 'Sila masukkan nombor telefon yang sah';
         }
         return null;
       },
@@ -487,13 +491,14 @@ class _SignUpWidgetState extends State<SignUpWidget> {
       ),
       validator: (value) {
         if (value == null || value.trim().isEmpty) {
-          return '$label is required';
+          return '$label diperlukan';
         }
         if (value.length < 6) {
-          return 'Password should be at least 6 characters';
+          return 'Kata laluan mestilah sekurang-kurangnya 6 aksara';
         }
-        if (label == 'Confirm Password' && value != _passwordController.text) {
-          return 'Passwords do not match';
+        if (label == 'Sahkan Kata Laluan' &&
+            value != _passwordController.text) {
+          return 'Kata laluan tidak sepadan';
         }
         return null;
       },
