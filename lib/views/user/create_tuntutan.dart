@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:easykhairat/controllers/claimline_controller.dart';
 import 'package:easykhairat/controllers/tuntutan_controller.dart';
@@ -7,8 +8,10 @@ import 'package:easykhairat/models/tuntutanModel.dart';
 import 'package:easykhairat/views/user/user_tuntutan.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:moon_design/moon_design.dart';
+import 'package:path/path.dart' as path;
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 final primaryColor = Color(0xFF2BAAAD);
@@ -38,94 +41,36 @@ class _CreateTuntutanPageState extends State<CreateTuntutanPage> {
   // Form controllers
   final _formKey = GlobalKey<FormState>();
   final _claimLineFormKey = GlobalKey<FormState>();
+  final _certificateFormKey = GlobalKey<FormState>();
   final TextEditingController _claimTypeController = TextEditingController();
   final TextEditingController _reasonController = TextEditingController();
   final TextEditingController _amountController = TextEditingController();
 
   bool isLoading = false;
-  bool isCreatingNew = false;
 
   // Added temporary claim lines
   List<ClaimLineModel> _tempClaimLines = [];
 
-  // Store claims in a state variable to avoid repeated fetching
-  List<ClaimModel> _userClaims = [];
-  bool _hasLoadedInitially = false;
+  // Image upload variables
+  File? _certificateImage;
+  String? _certificateUrl;
+  bool _isUploading = false;
+
+  // Modify _CreateTuntutanPageState to store form values temporarily without creating a claim
+  // Add these variables to store form data before creating the claim
+  String _selectedClaimType = 'Ahli Sendiri';
+  String? _uploadedCertificateUrl;
 
   @override
   void initState() {
     super.initState();
     _claimTypeController.text = 'Ahli Sendiri'; // Default value
-    _fetchUserTuntutan(); // Load user's claims on init
   }
 
   // Format date for display
   String formatDate(DateTime? date) {
     if (date == null) return 'N/A';
     return DateFormat('dd/MM/yyyy').format(date);
-  }
-
-  // Fetch user's tuntutan list with improved error handling and caching
-  Future<List<ClaimModel>> _fetchUserTuntutan() async {
-    // If we already have data and this isn't a forced refresh, return cached data
-    if (_userClaims.isNotEmpty && _hasLoadedInitially) {
-      return _userClaims;
-    }
-
-    try {
-      setState(() {
-        isLoading = true;
-      });
-
-      final userId = supabase.auth.currentUser?.id;
-      if (userId == null) {
-        setState(() {
-          isLoading = false;
-        });
-        return [];
-      }
-
-      // Add a timeout to prevent hanging forever
-      final response = await supabase
-          .from('claims')
-          .select('*')
-          .eq('user_id', userId)
-          .order('claim_created_at', ascending: false)
-          .timeout(
-            Duration(seconds: 10),
-            onTimeout: () {
-              throw TimeoutException('Database request timed out');
-            },
-          );
-
-      // Cache the results
-      _userClaims =
-          (response as List).map((data) => ClaimModel.fromJson(data)).toList();
-
-      _hasLoadedInitially = true;
-
-      setState(() {
-        isLoading = false;
-      });
-
-      return _userClaims;
-    } catch (e) {
-      print('Error fetching user tuntutan: $e');
-      setState(() {
-        isLoading = false;
-      });
-
-      // Show error to user
-      Get.snackbar(
-        'Error',
-        'Failed to load claims: ${e.toString()}',
-        backgroundColor: Colors.red.shade100,
-        duration: Duration(seconds: 3),
-      );
-
-      // Return cached data if available, otherwise empty list
-      return _userClaims.isNotEmpty ? _userClaims : [];
-    }
   }
 
   // Step 1: Create a new base claim
@@ -153,16 +98,14 @@ class _CreateTuntutanPageState extends State<CreateTuntutanPage> {
         // Store created claim reference for later use
         _createdClaim = createdClaim;
 
-        // Add to our cached list
         setState(() {
-          _userClaims = [createdClaim, ..._userClaims];
           _currentStep = 1; // Move to next step
           isLoading = false;
         });
 
         Get.snackbar(
           'Berjaya',
-          'Tuntutan asas telah dicipta. Sila tambahkan butiran perbelanjaan.',
+          'Tuntutan asas telah dicipta. Sila lengkapkan maklumat seterusnya.',
           backgroundColor: Colors.green.shade100,
         );
       }
@@ -182,9 +125,140 @@ class _CreateTuntutanPageState extends State<CreateTuntutanPage> {
     }
   }
 
-  // Step 2: Add claim line items
+  // Step 1: Collect basic info (no database operation)
+  void _validateBasicInfoAndContinue() {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() {
+      _selectedClaimType = _claimTypeController.text;
+      _currentStep = 1; // Move to certificate upload step
+    });
+  }
+
+  // Step 2: Upload death certificate
+  Future<void> _pickImage() async {
+    final ImagePicker _picker = ImagePicker();
+    final XFile? pickedFile = await _picker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 80,
+      maxWidth: 1000,
+    );
+
+    if (pickedFile != null) {
+      setState(() {
+        _certificateImage = File(pickedFile.path);
+      });
+    }
+  }
+
+  Future<void> _uploadCertificateAndContinue() async {
+    if (!_certificateFormKey.currentState!.validate()) return;
+
+    if (_certificateImage == null) {
+      Get.snackbar('Perhatian', 'Sila muatnaik sijil kematian');
+      return;
+    }
+
+    setState(() {
+      _isUploading = true;
+    });
+
+    try {
+      // Upload image and get URL
+      final String fileName =
+          'temp_${DateTime.now().millisecondsSinceEpoch}${path.extension(_certificateImage!.path)}';
+      await supabase.storage
+          .from('certificates')
+          .upload(
+            'certificates/$fileName',
+            _certificateImage!,
+            fileOptions: const FileOptions(cacheControl: '3600', upsert: false),
+          );
+
+      final String imageUrl = supabase.storage
+          .from('certificates')
+          .getPublicUrl('certificates/$fileName');
+
+      setState(() {
+        _uploadedCertificateUrl = imageUrl;
+        _currentStep = 2; // Move to create claim step
+      });
+
+      // Now create the claim with the uploaded certificate
+      await _createClaimWithCertificate();
+    } catch (e) {
+      print('Error uploading certificate: $e');
+      Get.snackbar('Error', 'Gagal memuat naik sijil: ${e.toString()}');
+    } finally {
+      setState(() {
+        _isUploading = false;
+      });
+    }
+  }
+
+  // Step 3: Create the claim with all data collected so far
+  Future<void> _createClaimWithCertificate() async {
+    setState(() {
+      isLoading = true;
+    });
+
+    try {
+      final userId = supabase.auth.currentUser?.id;
+      if (userId == null) {
+        Get.snackbar('Error', 'Please log in to make a claim');
+        return;
+      }
+
+      // Create claim with certificate URL already included
+      final createdClaim = await tuntutanController.createTuntutan(
+        userId: userId,
+        claimType: _selectedClaimType,
+        certificateUrl: _uploadedCertificateUrl,
+      );
+
+      if (createdClaim != null) {
+        _createdClaim = createdClaim;
+        setState(() {
+          _currentStep = 3; // Move to claim line items
+        });
+
+        Get.snackbar(
+          'Berjaya',
+          'Tuntutan telah dicipta. Sila tambah butiran perbelanjaan.',
+          backgroundColor: Colors.green.shade100,
+        );
+      }
+    } catch (e) {
+      print('Error creating claim: $e');
+      Get.snackbar('Error', 'Failed to create claim: ${e.toString()}');
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
+  // Step 3: Add claim line items
   Future<void> _addClaimLine() async {
-    if (!_claimLineFormKey.currentState!.validate()) return;
+    if (!_claimLineFormKey.currentState!.validate()) {
+      // Add visual feedback when validation fails
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              Icon(Icons.error_outline, color: Colors.white),
+              SizedBox(width: 8),
+              Text('Sila perbaiki kesalahan dalam borang'),
+            ],
+          ),
+          backgroundColor: Colors.red[400],
+          behavior: SnackBarBehavior.floating,
+          margin: EdgeInsets.all(16),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        ),
+      );
+      return;
+    }
 
     // Validate amount input
     double? amount;
@@ -253,21 +327,42 @@ class _CreateTuntutanPageState extends State<CreateTuntutanPage> {
     }
   }
 
-  // Step 3: Complete the claiming process
+  // Step 4: Complete the claiming process
   void _completeClaimProcess() {
     if (_tempClaimLines.isEmpty) {
-      Get.snackbar(
-        'Amaran',
-        'Anda belum menambah sebarang butiran perbelanjaan. Adakah anda pasti mahu teruskan?',
-        backgroundColor: Colors.amber.shade100,
-        duration: Duration(seconds: 5),
-        mainButton: TextButton(
-          onPressed: () {
-            Get.back(); // Close snackbar
-            _navigateToFinishedClaim();
-          },
-          child: Text('Ya, Teruskan', style: TextStyle(color: Colors.black87)),
-        ),
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Tiada Butiran Perbelanjaan'),
+            content: Text(
+              'Anda belum menambah sebarang butiran perbelanjaan. '
+              'Adakah anda pasti mahu menyerahkan tuntutan tanpa butiran?',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop(); // Close dialog
+                },
+                child: Text('BATAL', style: TextStyle(color: Colors.grey[700])),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).pop(); // Close dialog
+                  _navigateToFinishedClaim();
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: primaryColor,
+                  foregroundColor: Colors.white,
+                ),
+                child: Text('TERUSKAN'),
+              ),
+            ],
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          );
+        },
       );
     } else {
       _navigateToFinishedClaim();
@@ -280,15 +375,8 @@ class _CreateTuntutanPageState extends State<CreateTuntutanPage> {
       Get.to(() => UserTuntutanPage(claimId: _createdClaim!.claimId!))?.then((
         _,
       ) {
-        // Refresh list when returning from details
-        setState(() {
-          isCreatingNew = false;
-          _currentStep = 0;
-          _userClaims = []; // Clear cache to ensure fresh data
-          _fetchUserTuntutan();
-          _createdClaim = null;
-          _tempClaimLines = [];
-        });
+        // Go back to list page after viewing details
+        Get.back();
       });
     }
   }
@@ -299,7 +387,7 @@ class _CreateTuntutanPageState extends State<CreateTuntutanPage> {
       backgroundColor: backgroundColor,
       appBar: AppBar(
         title: Text(
-          isCreatingNew ? 'Buat Tuntutan Baru' : 'Senarai Tuntutan',
+          'Buat Tuntutan Baru',
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
         backgroundColor: primaryColor,
@@ -309,196 +397,216 @@ class _CreateTuntutanPageState extends State<CreateTuntutanPage> {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(bottom: Radius.circular(16)),
         ),
-      ),
-      body:
-          isCreatingNew
-              ? _buildStepperView()
-              : RefreshIndicator(
-                onRefresh: () async {
-                  await _fetchUserTuntutan();
-                  setState(() {});
-                },
-                child: SingleChildScrollView(
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Header info card
-                        Card(
-                          color: MoonColors.light.bulma.withOpacity(0.1),
-                          elevation: 0,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.all(16.0),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  children: [
-                                    Icon(
-                                      MoonIcons.generic_info_16_light,
-                                      color: MoonColors.light.bulma,
-                                    ),
-                                    SizedBox(width: 8),
-                                    Text(
-                                      'Tuntutan Khairat Kematian',
-                                      style: TextStyle(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                SizedBox(height: 8),
-                                Text(
-                                  'Tuntutan ini adalah untuk ahli yang berdaftar di bawah khairat kematian. '
-                                  'Sila lengkapkan maklumat yang diperlukan dan lampirkan dokumen yang berkaitan.',
-                                  style: TextStyle(fontSize: 14),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        SizedBox(height: 16),
-
-                        // List of user's tuntutan
-                        _buildTuntutanList(),
-                      ],
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () {
+            // If we've already created a claim and we're trying to go back
+            if (_createdClaim != null && _currentStep > 0) {
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return AlertDialog(
+                    title: Text('Batalkan Tuntutan?'),
+                    content: Text(
+                      'Anda telah memulakan proses permohonan tuntutan. '
+                      'Adakah anda pasti mahu keluar? Tuntutan yang telah dibuat akan disimpan.',
                     ),
-                  ),
-                ),
-              ),
-      floatingActionButton:
-          isCreatingNew
-              ? null
-              : FloatingActionButton.extended(
-                onPressed: () {
-                  setState(() {
-                    isCreatingNew = true;
-                  });
+                    actions: [
+                      TextButton(
+                        onPressed: () {
+                          Navigator.of(context).pop(); // Close dialog
+                        },
+                        child: Text('TERUSKAN TUNTUTAN'),
+                      ),
+                      ElevatedButton(
+                        onPressed: () {
+                          Navigator.of(context).pop(); // Close dialog
+                          Get.back(); // Go back to list
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.red[400],
+                          foregroundColor: Colors.white,
+                        ),
+                        child: Text('KELUAR'),
+                      ),
+                    ],
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  );
                 },
-                label: Text(
-                  'Buat Tuntutan',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-                icon: Icon(Icons.add),
-                backgroundColor: primaryColor,
-                elevation: 4,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
-              ),
+              );
+            } else {
+              Get.back(); // Just go back without warning
+            }
+          },
+        ),
+      ),
+      body: _buildStepperView(),
     );
   }
 
   Widget _buildStepperView() {
-    return Theme(
-      data: Theme.of(context).copyWith(
-        colorScheme: Theme.of(context).colorScheme.copyWith(
-          primary: primaryColor,
-          secondary: secondaryColor,
-        ),
-        elevatedButtonTheme: ElevatedButtonThemeData(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: primaryColor,
-            foregroundColor: Colors.white,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-            padding: EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+    return Column(
+      children: [
+        // Linear progress indicator to show overall progress
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Progres',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  Text(
+                    '${(_currentStep + 1)}/4',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ],
+              ),
+              SizedBox(height: 8),
+              LinearProgressIndicator(
+                value: (_currentStep + 1) / 4,
+                color: primaryColor,
+                backgroundColor: lightAccentColor,
+                minHeight: 8,
+                borderRadius: BorderRadius.circular(4),
+              ),
+            ],
           ),
         ),
-        outlinedButtonTheme: OutlinedButtonThemeData(
-          style: OutlinedButton.styleFrom(
-            foregroundColor: primaryColor,
-            side: BorderSide(color: primaryColor),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
+
+        // Existing Stepper code
+        Expanded(
+          child: Theme(
+            data: Theme.of(context).copyWith(
+              colorScheme: Theme.of(context).colorScheme.copyWith(
+                primary: primaryColor,
+                secondary: secondaryColor,
+              ),
+              elevatedButtonTheme: ElevatedButtonThemeData(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: primaryColor,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  padding: EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+                ),
+              ),
+              outlinedButtonTheme: OutlinedButtonThemeData(
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: primaryColor,
+                  side: BorderSide(color: primaryColor),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  padding: EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+                ),
+              ),
             ),
-            padding: EdgeInsets.symmetric(vertical: 12, horizontal: 24),
-          ),
-        ),
-      ),
-      child: Stepper(
-        currentStep: _currentStep,
-        controlsBuilder: (context, details) {
-          // Custom controls based on the current step
-          return Padding(
-            padding: const EdgeInsets.only(top: 16.0),
-            child: Row(
-              children: [
-                if (_currentStep > 0)
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: details.onStepCancel,
-                      child: Text('Kembali'),
-                    ),
+            child: Stepper(
+              currentStep: _currentStep,
+              controlsBuilder: (context, details) {
+                // Custom controls based on the current step
+                return Padding(
+                  padding: const EdgeInsets.only(top: 16.0),
+                  child: Row(
+                    children: [
+                      if (_currentStep > 0)
+                        Expanded(
+                          child: OutlinedButton(
+                            onPressed: details.onStepCancel,
+                            child: Text('Kembali'),
+                          ),
+                        ),
+                      if (_currentStep > 0) SizedBox(width: 12),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed:
+                              isLoading || _isUploading
+                                  ? null
+                                  : details.onStepContinue,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: MoonColors.light.bulma,
+                            foregroundColor: Colors.white,
+                          ),
+                          child:
+                              isLoading || _isUploading
+                                  ? SizedBox(
+                                    height: 20,
+                                    width: 20,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 3,
+                                      color: Colors.white,
+                                    ),
+                                  )
+                                  : Text(_getButtonTextForStep(_currentStep)),
+                        ),
+                      ),
+                    ],
                   ),
-                if (_currentStep > 0) SizedBox(width: 12),
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: details.onStepContinue,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: MoonColors.light.bulma,
-                      foregroundColor: Colors.white,
-                    ),
-                    child: Text(_getButtonTextForStep(_currentStep)),
-                  ),
+                );
+              },
+              onStepContinue: () {
+                if (_currentStep == 0) {
+                  _validateBasicInfoAndContinue();
+                } else if (_currentStep == 1) {
+                  _uploadCertificateAndContinue();
+                } else if (_currentStep == 2) {
+                  setState(() {
+                    _currentStep = 3;
+                  });
+                } else if (_currentStep == 3) {
+                  _completeClaimProcess();
+                }
+              },
+              onStepCancel: () {
+                if (_currentStep > 0) {
+                  setState(() {
+                    _currentStep--;
+                  });
+                }
+              },
+              type: StepperType.vertical,
+              steps: [
+                Step(
+                  title: Text('Maklumat Asas'),
+                  content: _buildBasicClaimForm(),
+                  isActive: _currentStep >= 0,
+                  state:
+                      _currentStep > 0 ? StepState.complete : StepState.indexed,
+                ),
+                Step(
+                  title: Text('Muatnaik Sijil Kematian'),
+                  content: _buildCertificateUploadForm(),
+                  isActive: _currentStep >= 1,
+                  state:
+                      _currentStep > 1 ? StepState.complete : StepState.indexed,
+                ),
+                Step(
+                  title: Text('Butiran Perbelanjaan'),
+                  content: _buildClaimLineForm(),
+                  isActive: _currentStep >= 2,
+                  state:
+                      _currentStep > 2 ? StepState.complete : StepState.indexed,
+                ),
+                Step(
+                  title: Text('Semak & Hantar'),
+                  content: _buildClaimReview(),
+                  isActive: _currentStep >= 3,
+                  state:
+                      _currentStep > 3 ? StepState.complete : StepState.indexed,
                 ),
               ],
             ),
-          );
-        },
-        onStepContinue: () {
-          if (_currentStep == 0) {
-            _createBaseClaimAndContinue();
-          } else if (_currentStep == 1) {
-            _currentStep = 2;
-            setState(() {});
-          } else if (_currentStep == 2) {
-            _completeClaimProcess();
-          }
-        },
-        onStepCancel: () {
-          if (_currentStep > 0) {
-            setState(() {
-              _currentStep--;
-            });
-          } else {
-            // If at first step, cancel the whole process
-            setState(() {
-              isCreatingNew = false;
-              _createdClaim = null;
-              _tempClaimLines = [];
-            });
-          }
-        },
-        type: StepperType.vertical,
-        steps: [
-          Step(
-            title: Text('Maklumat Asas'),
-            content: _buildBasicClaimForm(),
-            isActive: _currentStep >= 0,
-            state: _currentStep > 0 ? StepState.complete : StepState.indexed,
           ),
-          Step(
-            title: Text('Butiran Perbelanjaan'),
-            content: _buildClaimLineForm(),
-            isActive: _currentStep >= 1,
-            state: _currentStep > 1 ? StepState.complete : StepState.indexed,
-          ),
-          Step(
-            title: Text('Semak & Hantar'),
-            content: _buildClaimReview(),
-            isActive: _currentStep >= 2,
-            state: _currentStep > 2 ? StepState.complete : StepState.indexed,
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
@@ -507,8 +615,10 @@ class _CreateTuntutanPageState extends State<CreateTuntutanPage> {
       case 0:
         return 'Teruskan';
       case 1:
-        return 'Semak & Hantar';
+        return 'Muat Naik & Teruskan';
       case 2:
+        return 'Teruskan ke Semakan';
+      case 3:
         return 'Selesai';
       default:
         return 'Teruskan';
@@ -579,7 +689,7 @@ class _CreateTuntutanPageState extends State<CreateTuntutanPage> {
             ),
           SizedBox(height: 16),
           Text(
-            'Nota: Setelah mencipta tuntutan asas, anda akan diminta untuk menambahkan butiran perbelanjaan.',
+            'Nota: Setelah mencipta tuntutan asas, anda akan diminta untuk memuat naik sijil kematian.',
             style: TextStyle(
               fontStyle: FontStyle.italic,
               fontSize: 12,
@@ -591,15 +701,122 @@ class _CreateTuntutanPageState extends State<CreateTuntutanPage> {
     );
   }
 
-  Widget _buildClaimLineForm() {
-    if (_createdClaim == null) {
-      return Center(
-        child: Text('Sila lengkapkan langkah pertama terlebih dahulu'),
-      );
-    }
+  // NEW: Certificate upload form widget
+  Widget _buildCertificateUploadForm() {
+    return Form(
+      key: _certificateFormKey,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Sijil Kematian',
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+          ),
+          SizedBox(height: 12),
 
+          // Image selection area
+          GestureDetector(
+            onTap: _pickImage,
+            child: Container(
+              height: 200,
+              width: double.infinity,
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: primaryColor.withOpacity(0.5),
+                  width: 1,
+                ),
+                borderRadius: BorderRadius.circular(12),
+                color: lightAccentColor.withOpacity(0.3),
+              ),
+              child:
+                  _certificateImage != null
+                      ? Stack(
+                        alignment: Alignment.topRight,
+                        children: [
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(12),
+                            child: Image.file(
+                              _certificateImage!,
+                              fit: BoxFit.cover,
+                              width: double.infinity,
+                              height: double.infinity,
+                            ),
+                          ),
+                          IconButton(
+                            icon: Container(
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.7),
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(Icons.close, color: Colors.red),
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                _certificateImage = null;
+                              });
+                            },
+                          ),
+                        ],
+                      )
+                      : Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.add_photo_alternate_outlined,
+                            size: 48,
+                            color: primaryColor,
+                          ),
+                          SizedBox(height: 12),
+                          Text(
+                            'Tekan untuk memuat naik sijil kematian',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: primaryColor,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          Text(
+                            'Format diterima: JPG, PNG',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey[600],
+                            ),
+                          ),
+                        ],
+                      ),
+            ),
+          ),
+
+          SizedBox(height: 16),
+
+          if (_isUploading)
+            Center(
+              child: Column(
+                children: [
+                  CircularProgressIndicator(color: primaryColor),
+                  SizedBox(height: 16),
+                  Text('Memuat naik sijil kematian...'),
+                ],
+              ),
+            ),
+
+          SizedBox(height: 16),
+
+          Text(
+            'Nota: Sijil kematian yang dimuat naik mestilah jelas dan dokumen rasmi.',
+            style: TextStyle(
+              fontStyle: FontStyle.italic,
+              color: Colors.grey[600],
+              fontSize: 12,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildClaimLineForm() {
     return SingleChildScrollView(
-      // Wrap in SingleChildScrollView
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -621,16 +838,16 @@ class _CreateTuntutanPageState extends State<CreateTuntutanPage> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Tuntutan ID: #${_createdClaim!.claimId}',
+                          'Tuntutan ID: #${_createdClaim?.claimId ?? ''}',
                           style: TextStyle(fontWeight: FontWeight.bold),
                         ),
                         Text(
-                          'Jenis: ${_createdClaim!.claimType}',
-                          overflow:
-                              TextOverflow
-                                  .ellipsis, // Add ellipsis for long text
+                          'Jenis: ${_createdClaim?.claimType ?? _selectedClaimType}',
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        Text('Status: ${_createdClaim!.claimOverallStatus}'),
+                        Text(
+                          'Status: ${_createdClaim?.claimOverallStatus ?? 'Baru'}',
+                        ),
                       ],
                     ),
                   ),
@@ -813,21 +1030,12 @@ class _CreateTuntutanPageState extends State<CreateTuntutanPage> {
   }
 
   Widget _buildClaimReview() {
-    if (_createdClaim == null) {
-      return Center(
-        child: Text(
-          'Sila lengkapkan langkah-langkah sebelumnya terlebih dahulu',
-        ),
-      );
-    }
-
     final double totalAmount = _tempClaimLines.fold(
       0.0,
       (sum, item) => sum + item.claimLineTotalPrice,
     );
 
     return SingleChildScrollView(
-      // Wrap in SingleChildScrollView to prevent vertical overflow
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -851,19 +1059,43 @@ class _CreateTuntutanPageState extends State<CreateTuntutanPage> {
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                   ),
                   Divider(),
-                  _buildInfoRow('ID Tuntutan', '#${_createdClaim!.claimId}'),
+                  _buildInfoRow(
+                    'ID Tuntutan',
+                    '#${_createdClaim?.claimId ?? ''}',
+                  ),
                   _buildInfoRow(
                     'Jenis Tuntutan',
-                    _createdClaim!.claimType ?? 'N/A',
+                    _createdClaim?.claimType ?? _selectedClaimType,
                   ),
-                  _buildInfoRow('Status', _createdClaim!.claimOverallStatus),
+                  _buildInfoRow(
+                    'Status',
+                    _createdClaim?.claimOverallStatus ?? 'Baru',
+                  ),
                   _buildInfoRow(
                     'Tarikh Dibuat',
-                    formatDate(_createdClaim!.claimCreatedAt),
+                    formatDate(_createdClaim?.claimCreatedAt ?? DateTime.now()),
                   ),
-                  SizedBox(height: 16),
+
+                  // Add certificate information
+                  if (_createdClaim?.claimReason != null &&
+                      _createdClaim!.claimReason!.isNotEmpty) ...[
+                    SizedBox(height: 16),
+                    Text(
+                      'Maklumat Si Mati',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                    Divider(),
+                    _buildInfoRow('Nama Si Mati', _createdClaim!.claimReason!),
+
+                    if (_certificateImage != null || _certificateUrl != null)
+                      _buildInfoRow('Sijil Kematian', 'Dimuat naik'),
+                  ],
 
                   // Claim line summary
+                  SizedBox(height: 16),
                   Text(
                     'Butiran Perbelanjaan (${_tempClaimLines.length})',
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
@@ -892,7 +1124,6 @@ class _CreateTuntutanPageState extends State<CreateTuntutanPage> {
                                 CrossAxisAlignment
                                     .start, // Align to top in case of text wrapping
                             children: [
-                              // Fixed: Added flexible to allow text wrapping
                               Flexible(
                                 flex: 3,
                                 child: Text(
@@ -900,7 +1131,7 @@ class _CreateTuntutanPageState extends State<CreateTuntutanPage> {
                                   style: TextStyle(fontSize: 14),
                                 ),
                               ),
-                              SizedBox(width: 8), // Add spacing between columns
+                              SizedBox(width: 8),
                               Text(
                                 'RM ${item.claimLineTotalPrice.toStringAsFixed(2)}',
                                 textAlign: TextAlign.end,
@@ -972,314 +1203,6 @@ class _CreateTuntutanPageState extends State<CreateTuntutanPage> {
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  // Build the list of user's tuntutan
-  Widget _buildTuntutanList() {
-    // Use a StatefulBuilder to avoid flickering when refreshing
-    return StatefulBuilder(
-      builder: (context, setState) {
-        return FutureBuilder<List<ClaimModel>>(
-          future: _fetchUserTuntutan(), // Use our updated fetch method
-          builder: (context, snapshot) {
-            // Show loading indicator only on initial load
-            if (!_hasLoadedInitially &&
-                (snapshot.connectionState == ConnectionState.waiting ||
-                    isLoading)) {
-              return Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(32.0),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      CircularProgressIndicator(),
-                      SizedBox(height: 16),
-                      Text('Loading tuntutan...'),
-                    ],
-                  ),
-                ),
-              );
-            }
-
-            // If error, show error with cached data if available
-            if (snapshot.hasError && _userClaims.isEmpty) {
-              return Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.error_outline, size: 48, color: Colors.red),
-                    SizedBox(height: 16),
-                    Text('Error: Failed to load claims'),
-                    SizedBox(height: 8),
-                    ElevatedButton(
-                      onPressed: () {
-                        setState(() {
-                          _hasLoadedInitially = false;
-                          _fetchUserTuntutan();
-                        });
-                      },
-                      child: Text('Try Again'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: MoonColors.light.bulma,
-                        foregroundColor: Colors.white,
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            }
-
-            // Empty state
-            List<ClaimModel> claims = snapshot.data ?? _userClaims;
-            if (claims.isEmpty) {
-              return _buildEmptyState();
-            }
-
-            // We have data, display the list
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.only(left: 4.0, bottom: 8.0),
-                      child: Text(
-                        'Senarai Tuntutan Anda',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                    // Add refresh button
-                    if (_hasLoadedInitially)
-                      isLoading
-                          ? SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                          : IconButton(
-                            icon: Icon(
-                              Icons.refresh,
-                              color: MoonColors.light.bulma,
-                            ),
-                            onPressed: () {
-                              setState(() {
-                                _userClaims = []; // Clear cache
-                                _fetchUserTuntutan(); // Refetch
-                              });
-                            },
-                          ),
-                  ],
-                ),
-                ListView.builder(
-                  shrinkWrap: true,
-                  physics: NeverScrollableScrollPhysics(),
-                  itemCount: claims.length,
-                  itemBuilder: (context, index) {
-                    final claim = claims[index];
-                    return Card(
-                      margin: EdgeInsets.only(bottom: 12),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      elevation: 2,
-                      child: InkWell(
-                        onTap: () {
-                          // Navigate to details page with this claim
-                          Get.to(
-                            () => UserTuntutanPage(claimId: claim.claimId!),
-                          )?.then((_) {
-                            // Refresh list when returning from details page
-                            setState(() {
-                              _userClaims = []; // Clear cache
-                              _fetchUserTuntutan(); // Refetch
-                            });
-                          });
-                        },
-                        borderRadius: BorderRadius.circular(12),
-                        child: Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    'Tuntutan #${claim.claimId}',
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 16,
-                                    ),
-                                  ),
-                                  _buildStatusChip(claim.claimOverallStatus),
-                                ],
-                              ),
-                              SizedBox(height: 8),
-                              Row(
-                                children: [
-                                  Icon(
-                                    Icons.calendar_today,
-                                    size: 16,
-                                    color: Colors.grey,
-                                  ),
-                                  SizedBox(width: 4),
-                                  Text(
-                                    formatDate(claim.claimCreatedAt),
-                                    style: TextStyle(
-                                      color: Colors.grey[700],
-                                      fontSize: 14,
-                                    ),
-                                  ),
-                                  SizedBox(width: 16),
-                                  Icon(
-                                    Icons.category,
-                                    size: 16,
-                                    color: Colors.grey,
-                                  ),
-                                  SizedBox(width: 4),
-                                  Text(
-                                    claim.claimType ?? 'Tidak dinyatakan',
-                                    style: TextStyle(
-                                      color: Colors.grey[700],
-                                      fontSize: 14,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              SizedBox(height: 12),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                children: [
-                                  TextButton.icon(
-                                    onPressed: () {
-                                      Get.to(
-                                        () => UserTuntutanPage(
-                                          claimId: claim.claimId!,
-                                        ),
-                                      )?.then((_) {
-                                        // Refresh list when returning from details page
-                                        setState(() {
-                                          _userClaims = []; // Clear cache
-                                          _fetchUserTuntutan(); // Refetch
-                                        });
-                                      });
-                                    },
-                                    icon: Icon(Icons.visibility, size: 16),
-                                    label: Text('Lihat Details'),
-                                    style: TextButton.styleFrom(
-                                      foregroundColor: MoonColors.light.bulma,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ],
-            );
-          },
-        );
-      },
-    );
-  }
-
-  // Helper widget to display status chips with appropriate colors
-  Widget _buildStatusChip(String status) {
-    Color chipColor;
-    Color textColor = Colors.white;
-
-    switch (status.toLowerCase()) {
-      case 'lulus':
-        chipColor = Colors.green[600]!;
-        break;
-      case 'gagal':
-        chipColor = Colors.red[600]!;
-        break;
-      case 'dalam proses':
-      default:
-        chipColor = Colors.orange[600]!;
-        break;
-    }
-
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        color: chipColor,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: chipColor.withOpacity(0.4),
-            blurRadius: 4,
-            offset: Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Text(
-        status,
-        style: TextStyle(
-          color: textColor,
-          fontWeight: FontWeight.bold,
-          fontSize: 12,
-        ),
-      ),
-    );
-  }
-
-  // Empty state widget when no claims exist
-  Widget _buildEmptyState() {
-    return Card(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      elevation: 2,
-      child: Padding(
-        padding: const EdgeInsets.all(32.0),
-        child: Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.receipt_long_outlined, size: 64, color: Colors.grey),
-              SizedBox(height: 16),
-              Text(
-                'Tiada Tuntutan',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.grey[700],
-                ),
-              ),
-              SizedBox(height: 8),
-              Text(
-                'Anda belum membuat sebarang tuntutan khairat kematian.',
-                textAlign: TextAlign.center,
-                style: TextStyle(color: Colors.grey[600]),
-              ),
-              SizedBox(height: 24),
-              ElevatedButton.icon(
-                onPressed: () {
-                  setState(() {
-                    isCreatingNew = true;
-                  });
-                },
-                icon: Icon(Icons.add),
-                label: Text('Buat Tuntutan Baru'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: MoonColors.light.bulma,
-                  foregroundColor: Colors.white,
-                ),
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }

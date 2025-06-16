@@ -71,6 +71,12 @@ class _LaporanPageState extends State<LaporanPage> {
     await paymentController.fetchPayments();
     await tuntutanController.fetchTuntutan();
     await familyController.fetchFamilyMembers();
+
+    // Add these lines to refresh financial summary data
+    calculateTotalOutstandingFees();
+    paymentController.fetchTotalPayments();
+    claimLineController.fetchTotalApprovedClaimLine();
+
     isLoading.value = false;
   }
 

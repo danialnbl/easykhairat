@@ -292,9 +292,9 @@ class ProsesTuntutanState extends State<ProsesTuntutan> {
                                 ],
                               ),
                             ),
-                            SizedBox(width: 16),
+                            SizedBox(width: 8),
                             IconButton(
-                              icon: Icon(Icons.visibility, color: Colors.green),
+                              icon: Icon(Icons.visibility, color: Colors.blue),
                               onPressed: () {
                                 if (claim.user != null) {
                                   claimLineController.getClaimLinesByClaimId(
@@ -306,6 +306,14 @@ class ProsesTuntutanState extends State<ProsesTuntutan> {
                                 }
                               },
                               tooltip: "Lihat Tuntutan",
+                            ),
+                            IconButton(
+                              icon: Icon(
+                                Icons.delete_outline,
+                                color: Colors.red,
+                              ),
+                              onPressed: () => _showDeleteConfirmation(claim),
+                              tooltip: "Padam Tuntutan",
                             ),
                           ],
                         ),
@@ -327,6 +335,35 @@ class ProsesTuntutanState extends State<ProsesTuntutan> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  void _showDeleteConfirmation(ClaimModel claim) {
+    Get.dialog(
+      AlertDialog(
+        title: Text('Padam Tuntutan'),
+        content: Text(
+          'Adakah anda pasti untuk memadam tuntutan ini?\n\n'
+          'ID: ${claim.claimId}\n'
+          'Pemohon: ${claim.user?.userName ?? "N/A"}\n'
+          'Status: ${claim.claimOverallStatus}',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(),
+            child: Text('Batal'),
+            style: TextButton.styleFrom(foregroundColor: Colors.grey),
+          ),
+          TextButton(
+            onPressed: () {
+              Get.back();
+              tuntutanController.deleteTuntutan(claim.claimId!);
+            },
+            child: Text('Padam'),
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+          ),
+        ],
       ),
     );
   }

@@ -101,16 +101,34 @@ class TuntutanController extends GetxController {
   // Delete a claim from Supabase
   Future<void> deleteTuntutan(int claimId) async {
     try {
+      isLoading(true);
+
+      // Delete from Supabase
       final response = await supabase
           .from('claims')
           .delete()
           .eq('claim_id', claimId);
 
-      if (response != null) {
-        fetchTuntutan(); // Refresh the list after deleting
-      }
+      // Remove the deleted claim from the list
+      tuntutanList.removeWhere((claim) => claim.claimId == claimId);
+
+      Get.snackbar(
+        'Berjaya',
+        'Tuntutan telah dipadamkan',
+        backgroundColor: Colors.green,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,
+      );
     } catch (e) {
-      print("Error deleting tuntutan: $e");
+      Get.snackbar(
+        'Ralat',
+        'Gagal memadam tuntutan: ${e.toString()}',
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    } finally {
+      isLoading(false);
     }
   }
 
@@ -125,22 +143,21 @@ class TuntutanController extends GetxController {
   Future<ClaimModel?> createTuntutan({
     required String userId,
     required String claimType,
-    String? claimReason,
+    String? certificateUrl, // Add this parameter
   }) async {
     try {
-      final newClaim = ClaimModel(
-        userId: userId,
-        claimOverallStatus: 'Dalam Proses',
-        claimType: claimType,
-        claimReason: claimReason,
-        claimCreatedAt: DateTime.now(),
-        claimUpdatedAt: DateTime.now(),
-      );
-
       final response =
           await supabase
               .from('claims')
-              .insert(newClaim.toJson())
+              .insert({
+                'user_id': userId,
+                'claim_type': claimType,
+                'claim_overallStatus': 'Dalam Proses',
+                'claim_certificate_url':
+                    certificateUrl, // Include certificate URL
+                'claim_created_at': DateTime.now().toIso8601String(),
+                'claim_updated_at': DateTime.now().toIso8601String(),
+              })
               .select()
               .single();
 
@@ -192,6 +209,29 @@ class TuntutanController extends GetxController {
         snackPosition: SnackPosition.TOP,
       );
       rethrow;
+    }
+  }
+
+  Future<bool> updateClaimCertificate(
+    int claimId,
+    String certificateUrl,
+  ) async {
+    try {
+      final response =
+          await supabase
+              .from('claims')
+              .update({
+                'claim_certificate_url': certificateUrl,
+                'claim_updated_at': DateTime.now().toIso8601String(),
+              })
+              .eq('claim_id', claimId)
+              .select()
+              .single();
+
+      return true;
+    } catch (e) {
+      print('Error updating claim certificate: $e');
+      return false;
     }
   }
 }

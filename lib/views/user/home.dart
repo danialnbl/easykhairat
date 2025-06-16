@@ -5,6 +5,7 @@ import 'package:easykhairat/controllers/announcement_controller.dart';
 import 'package:easykhairat/models/announcementModel.dart';
 import 'package:easykhairat/views/user/announcement_details.dart';
 import 'package:easykhairat/views/user/create_tuntutan.dart';
+import 'package:easykhairat/views/user/list_tuntutan.dart';
 import 'package:easykhairat/views/user/receipts.dart';
 import 'package:easykhairat/views/user/settings.dart';
 import 'package:easykhairat/views/user/userPayment.dart';
@@ -196,8 +197,7 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                                     icon: Icons.receipt_long_outlined,
                                     label: "Tuntutan",
                                     onTap:
-                                        () =>
-                                            Get.to(() => CreateTuntutanPage()),
+                                        () => Get.to(() => ListTuntutanPage()),
                                   ),
                                 ],
                               ),

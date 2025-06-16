@@ -9,6 +9,7 @@ class ClaimModel {
   final String? userId;
   final String? claimType;
   String? claimReason;
+  String? claimCertificateUrl;
   final User? user;
 
   ClaimModel({
@@ -20,6 +21,7 @@ class ClaimModel {
     this.userId,
     this.claimType,
     this.claimReason,
+    this.claimCertificateUrl,
     this.user,
   });
 
@@ -33,6 +35,8 @@ class ClaimModel {
       userId: json['user_id'], // Made nullable
       claimType: json['claim_type'], // Added to fromJson
       claimReason: json['claim_reason'], // Added claim reason
+      claimCertificateUrl:
+          json['claim_certificate_url'], // Added certificate URL
       user: json['users'] != null ? User.fromJson(json['users']) : null,
     );
   }
@@ -47,11 +51,13 @@ class ClaimModel {
       'user_id': userId, // Made nullable
       'claim_type': claimType, // Added to toJson
       'claim_reason': claimReason, // Added claim reason to toJson
+      'claim_certificate_url':
+          claimCertificateUrl, // Added certificate URL to toJson
     };
   }
 
   @override
   String toString() {
-    return 'ClaimModel(claimId: $claimId, overallStatus: $claimOverallStatus, userId: $userId, familyId: $familyId, claimType: $claimType, claimReason: $claimReason)'; // Updated toString
+    return 'ClaimModel(claimId: $claimId, overallStatus: $claimOverallStatus, userId: $userId, familyId: $familyId, claimType: $claimType, claimReason: $claimReason, claimCertificateUrl: $claimCertificateUrl)'; // Updated toString
   }
 }

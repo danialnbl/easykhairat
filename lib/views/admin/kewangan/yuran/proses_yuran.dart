@@ -184,19 +184,60 @@ class ProsesYuranState extends State<ProsesYuran> {
     });
   }
 
-  // Add refresh button to manually refresh all statuses
+  // Enhanced refresh button that updates both payment statuses and user list
   Widget _buildRefreshButton() {
     return Obx(
       () => ElevatedButton.icon(
         onPressed:
-            feeController.isLoading.value
+            feeController.isLoading.value || userController.isLoading.value
                 ? null
-                : () {
-                  userPaymentStatus.clear();
-                  _setupRealTimePaymentMonitoring();
+                : () async {
+                  // Show loading indicator
+                  Get.dialog(
+                    const Center(child: CircularProgressIndicator()),
+                    barrierDismissible: false,
+                  );
+
+                  try {
+                    // Clear existing data
+                    userPaymentStatus.clear();
+
+                    // Reload users list first
+                    await userController.fetchNormal();
+
+                    // Then refresh fee data
+                    await feeController.fetchFees();
+
+                    // Setup monitoring for all users (including new ones)
+                    _setupRealTimePaymentMonitoring();
+
+                    // Close loading dialog
+                    Get.back();
+
+                    // Show success message
+                    Get.snackbar(
+                      'Berjaya',
+                      'Senarai ahli dan status yuran telah dikemaskini',
+                      backgroundColor: Colors.green,
+                      colorText: Colors.white,
+                      duration: const Duration(seconds: 2),
+                    );
+                  } catch (e) {
+                    // Close loading dialog
+                    Get.back();
+
+                    // Show error message
+                    Get.snackbar(
+                      'Ralat',
+                      'Gagal memuat semula data: $e',
+                      backgroundColor: Colors.red,
+                      colorText: Colors.white,
+                      duration: const Duration(seconds: 3),
+                    );
+                  }
                 },
         icon:
-            feeController.isLoading.value
+            feeController.isLoading.value || userController.isLoading.value
                 ? const SizedBox(
                   width: 16,
                   height: 16,
@@ -204,7 +245,9 @@ class ProsesYuranState extends State<ProsesYuran> {
                 )
                 : const Icon(Icons.refresh),
         label: Text(
-          feeController.isLoading.value ? 'Refreshing...' : 'Refresh Status',
+          feeController.isLoading.value || userController.isLoading.value
+              ? 'Memuat semula...'
+              : 'Muat Semula',
         ),
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.blue,
@@ -475,7 +518,6 @@ class ProsesYuranState extends State<ProsesYuran> {
                               ),
                               onPressed: () async {
                                 try {
-                                  
                                   // Set user first
                                   navController.setUser(user);
 
@@ -520,8 +562,6 @@ class ProsesYuranState extends State<ProsesYuran> {
                         ),
                         onTap: () async {
                           try {
-                            
-
                             // Set user first
                             navController.setUser(user);
 

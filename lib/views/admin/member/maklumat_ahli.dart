@@ -369,28 +369,36 @@ class MaklumatAhliState extends State<MaklumatAhli> {
                                         ],
                                       ),
                                       const SizedBox(width: 16),
-                                      Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            member.userId != null
-                                                ? member.userId!.substring(0, 8)
-                                                : "Unknown ID",
-                                          ),
-                                          const SizedBox(height: 8),
-                                          Text(member.userName),
-                                          const SizedBox(height: 8),
-                                          Text(member.userIdentification),
-                                          const SizedBox(height: 8),
-                                          Text(member.userAddress),
-                                          const SizedBox(height: 8),
-                                          Text(member.userPhoneNo),
-                                          const SizedBox(height: 8),
-                                          Text(member.userEmail),
-                                          const SizedBox(height: 8),
-                                          Text(member.userType),
-                                        ],
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              member.userId != null
+                                                  ? member.userId!.substring(
+                                                    0,
+                                                    8,
+                                                  )
+                                                  : "Unknown ID",
+                                            ),
+                                            const SizedBox(height: 8),
+                                            Text(member.userName),
+                                            const SizedBox(height: 8),
+                                            Text(member.userIdentification),
+                                            const SizedBox(height: 8),
+                                            Text(
+                                              member.userAddress,
+                                              softWrap: true,
+                                            ),
+                                            const SizedBox(height: 8),
+                                            Text(member.userPhoneNo),
+                                            const SizedBox(height: 8),
+                                            Text(member.userEmail),
+                                            const SizedBox(height: 8),
+                                            Text(member.userType),
+                                          ],
+                                        ),
                                       ),
                                     ],
                                   ),

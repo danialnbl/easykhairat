@@ -122,8 +122,11 @@ class TuntutanAhliState extends State<TuntutanAhli> {
                                 value:
                                     overallstatus.text.isNotEmpty
                                         ? overallstatus.text
-                                        : tuntutan?.claimOverallStatus ??
-                                            "Dalam Proses",
+                                        : (tuntutan?.claimOverallStatus ==
+                                                "Dibatalkan"
+                                            ? "Gagal"
+                                            : tuntutan?.claimOverallStatus ??
+                                                "Dalam Proses"),
                                 items: [
                                   DropdownMenuItem(
                                     value: "Dalam Proses",
@@ -202,6 +205,162 @@ class TuntutanAhliState extends State<TuntutanAhli> {
                                     const SizedBox(height: 16),
                                   ],
                                 ),
+
+                              // Display certificate image if available
+                              if (tuntutan.claimCertificateUrl != null &&
+                                  tuntutan.claimCertificateUrl!.isNotEmpty)
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      "Sijil Kematian",
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Container(
+                                      width: double.infinity,
+                                      height: 200,
+                                      decoration: BoxDecoration(
+                                        border: Border.all(color: Colors.grey),
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      child: InkWell(
+                                        onTap: () {
+                                          // Open image in full screen when tapped
+                                          showDialog(
+                                            context: context,
+                                            builder:
+                                                (context) => Dialog(
+                                                  child: Container(
+                                                    width: double.maxFinite,
+                                                    height: double.maxFinite,
+                                                    child: InteractiveViewer(
+                                                      panEnabled: true,
+                                                      boundaryMargin:
+                                                          EdgeInsets.all(20),
+                                                      minScale: 0.5,
+                                                      maxScale: 4,
+                                                      child: Image.network(
+                                                        tuntutan
+                                                            .claimCertificateUrl!,
+                                                        fit: BoxFit.contain,
+                                                        loadingBuilder: (
+                                                          context,
+                                                          child,
+                                                          loadingProgress,
+                                                        ) {
+                                                          if (loadingProgress ==
+                                                              null)
+                                                            return child;
+                                                          return Center(
+                                                            child: CircularProgressIndicator(
+                                                              value:
+                                                                  loadingProgress
+                                                                              .expectedTotalBytes !=
+                                                                          null
+                                                                      ? loadingProgress
+                                                                              .cumulativeBytesLoaded /
+                                                                          loadingProgress
+                                                                              .expectedTotalBytes!
+                                                                      : null,
+                                                            ),
+                                                          );
+                                                        },
+                                                        errorBuilder: (
+                                                          context,
+                                                          error,
+                                                          stackTrace,
+                                                        ) {
+                                                          return Center(
+                                                            child: Column(
+                                                              mainAxisSize:
+                                                                  MainAxisSize
+                                                                      .min,
+                                                              children: [
+                                                                Icon(
+                                                                  Icons.error,
+                                                                  color:
+                                                                      Colors
+                                                                          .red,
+                                                                  size: 48,
+                                                                ),
+                                                                SizedBox(
+                                                                  height: 8,
+                                                                ),
+                                                                Text(
+                                                                  "Gagal memuat turun imej",
+                                                                ),
+                                                              ],
+                                                            ),
+                                                          );
+                                                        },
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                          );
+                                        },
+                                        child: ClipRRect(
+                                          borderRadius: BorderRadius.circular(
+                                            8,
+                                          ),
+                                          child: Image.network(
+                                            tuntutan.claimCertificateUrl!,
+                                            fit: BoxFit.cover,
+                                            loadingBuilder: (
+                                              context,
+                                              child,
+                                              loadingProgress,
+                                            ) {
+                                              if (loadingProgress == null)
+                                                return child;
+                                              return Center(
+                                                child: CircularProgressIndicator(
+                                                  value:
+                                                      loadingProgress
+                                                                  .expectedTotalBytes !=
+                                                              null
+                                                          ? loadingProgress
+                                                                  .cumulativeBytesLoaded /
+                                                              loadingProgress
+                                                                  .expectedTotalBytes!
+                                                          : null,
+                                                ),
+                                              );
+                                            },
+                                            errorBuilder: (
+                                              context,
+                                              error,
+                                              stackTrace,
+                                            ) {
+                                              return Center(
+                                                child: Column(
+                                                  mainAxisSize:
+                                                      MainAxisSize.min,
+                                                  children: [
+                                                    Icon(
+                                                      Icons.broken_image,
+                                                      color: Colors.grey,
+                                                      size: 48,
+                                                    ),
+                                                    SizedBox(height: 8),
+                                                    Text(
+                                                      "Gagal memuat turun sijil",
+                                                    ),
+                                                  ],
+                                                ),
+                                              );
+                                            },
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 16),
+                                  ],
+                                ),
+
                               // update button
                               ElevatedButton(
                                 onPressed: () {
