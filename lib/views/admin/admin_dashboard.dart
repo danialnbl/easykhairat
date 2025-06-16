@@ -247,7 +247,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
             Expanded(
               child: Obx(
                 () => _statCard(
-                  'Tuntutan Ahli Tahun Ini (Diluluskan)',
+                  'Jumlah Tuntutan Ahli (Diluluskan)',
                   'RM ${claimLineController.totalClaimLine.value.toStringAsFixed(2)}',
                   Colors.red,
                 ),

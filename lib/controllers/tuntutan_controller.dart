@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:easykhairat/models/tuntutanModel.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:easykhairat/controllers/claimline_controller.dart'; // Add this import
 
 class TuntutanController extends GetxController {
   // Reactive list to store claims
@@ -11,8 +12,15 @@ class TuntutanController extends GetxController {
   // Loading state
   var isLoading = false.obs;
 
+  // Map to store claim line totals for each claim
+  var claimTotals = <int, double>{}.obs;
+
   // Supabase client instance
   final supabase = Supabase.instance.client;
+  // Reference to ClaimLineController
+  final ClaimLineController claimLineController = Get.put(
+    ClaimLineController(),
+  );
 
   // Method to set tuntutan
   void setTuntutan(ClaimModel newselectedTuntutan) {
@@ -42,11 +50,47 @@ class TuntutanController extends GetxController {
       tuntutanList.assignAll(
         (response as List).map((data) => ClaimModel.fromJson(data)).toList(),
       );
+
+      // After fetching claims, fetch totals for each claim
+      await fetchClaimTotals();
     } catch (e) {
       print("Error fetching tuntutan: $e");
     } finally {
       isLoading.value = false;
     }
+  }
+
+  // New method to fetch totals for each claim
+  Future<void> fetchClaimTotals() async {
+    try {
+      // Clear existing totals
+      claimTotals.clear();
+
+      for (var claim in tuntutanList) {
+        if (claim.claimId != null) {
+          // Get claim lines for this claim
+          final claimLines = await claimLineController.getClaimLinesByClaimId(
+            claim.claimId!,
+          );
+
+          // Calculate total
+          double total = 0;
+          for (var line in claimLines) {
+            total += line.claimLineTotalPrice;
+          }
+
+          // Store total for this claim
+          claimTotals[claim.claimId!] = total;
+        }
+      }
+    } catch (e) {
+      print("Error fetching claim totals: $e");
+    }
+  }
+
+  // Get claim total for a specific claim
+  double getClaimTotal(int claimId) {
+    return claimTotals[claimId] ?? 0.0;
   }
 
   // Add a new claim to Supabase

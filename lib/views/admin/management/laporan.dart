@@ -50,8 +50,17 @@ class _LaporanPageState extends State<LaporanPage> {
     fetchAllData();
     calculateTotalOutstandingFees();
     paymentController.fetchTotalPayments();
-    // Replace fetchTotalClaimLine with fetchTotalApprovedClaimLine
-    claimLineController.fetchTotalApprovedClaimLine();
+
+    // Initialize ClaimLineController with error handling
+    try {
+      if (!Get.isRegistered<ClaimLineController>()) {
+        Get.lazyPut(() => ClaimLineController());
+      }
+      claimLineController.fetchTotalApprovedClaimLine();
+    } catch (e) {
+      print("Failed to initialize ClaimLineController: $e");
+      // Handle the error gracefully - maybe set a default value
+    }
   }
 
   // Add this method to calculate total outstanding fees
@@ -213,11 +222,20 @@ class _LaporanPageState extends State<LaporanPage> {
               );
               final userName = user?.userName ?? 'Pengguna tidak dijumpai';
 
+              // Get the total value for this claim
+              final claimTotal =
+                  c.claimId != null
+                      ? tuntutanController.getClaimTotal(c.claimId!)
+                      : 0.0;
+
               return {
                 'ID': c.claimId ?? '',
                 'Nama': userName, // Display user name instead of ID
                 'Status': c.claimOverallStatus,
                 'Jenis': c.claimType ?? '',
+                'Nilai (RM)': claimTotal.toStringAsFixed(
+                  2,
+                ), // Include the claim total
                 'Tarikh': c.claimCreatedAt.toString().split(' ').first,
               };
             })
