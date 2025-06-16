@@ -28,20 +28,20 @@ class _TotalClaimsChartState extends State<TotalClaimsChart> {
     await claimLineController.fetchClaimLines();
   }
 
-  Map<int, double> getMonthlyClaimAmounts() {
-    Map<int, double> monthlyAmounts = {};
+  Map<int, double> getYearlyClaimAmounts() {
+    Map<int, double> yearlyAmounts = {};
 
     for (var claimLine in claimLineController.claimLineList) {
-      // Get month from the created_at date
+      // Get year from the created_at date
       DateTime createdAt = claimLine.claimLineCreatedAt ?? DateTime.now();
-      int month = createdAt.month;
+      int year = createdAt.year;
 
       // Use the total price from the claim line
       double amount = claimLine.claimLineTotalPrice?.toDouble() ?? 0;
-      monthlyAmounts[month] = (monthlyAmounts[month] ?? 0) + amount;
+      yearlyAmounts[year] = (yearlyAmounts[year] ?? 0) + amount;
     }
 
-    return monthlyAmounts;
+    return yearlyAmounts;
   }
 
   @override
@@ -56,7 +56,7 @@ class _TotalClaimsChartState extends State<TotalClaimsChart> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
-              'Jumlah Tuntutan (RM) Mengikut Bulan',
+              'Jumlah Tuntutan (RM) Mengikut Tahun',
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
@@ -81,26 +81,9 @@ class _TotalClaimsChartState extends State<TotalClaimsChart> {
   Widget bottomTitleWidgets(double value, TitleMeta meta) {
     const style = TextStyle(fontWeight: FontWeight.bold, fontSize: 14);
     Widget text;
-    switch (value.toInt()) {
-      case 1:
-        text = const Text('Jan', style: style);
-        break;
-      case 3:
-        text = const Text('Mar', style: style);
-        break;
-      case 6:
-        text = const Text('Jun', style: style);
-        break;
-      case 9:
-        text = const Text('Sep', style: style);
-        break;
-      case 12:
-        text = const Text('Dis', style: style);
-        break;
-      default:
-        text = const Text('', style: style);
-        break;
-    }
+
+    int valueAsInt = value.toInt();
+    text = Text(valueAsInt.toString(), style: style);
 
     return SideTitleWidget(meta: meta, child: text, space: 8);
   }
@@ -112,18 +95,32 @@ class _TotalClaimsChartState extends State<TotalClaimsChart> {
   }
 
   LineChartData mainData() {
-    final monthlyData = getMonthlyClaimAmounts();
+    final yearlyData = getYearlyClaimAmounts();
+
+    // Get current year
+    int currentYear = DateTime.now().year;
+
+    // Create a fixed range of years: current year and 3 years before
+    List<int> years = [
+      currentYear - 3,
+      currentYear - 2,
+      currentYear - 1,
+      currentYear,
+    ];
 
     double maxAmount =
-        monthlyData.isEmpty
-            ? 1000
-            : (monthlyData.values.reduce((a, b) => a > b ? a : b) * 1.2);
+        yearlyData.isEmpty
+            ? 500
+            : (yearlyData.values.reduce((a, b) => a > b ? a : b) * 1.2).clamp(
+              500,
+              double.infinity,
+            );
 
     return LineChartData(
       gridData: FlGridData(
         show: true,
         drawVerticalLine: true,
-        horizontalInterval: maxAmount > 5000 ? 1000 : 500,
+        horizontalInterval: maxAmount > 1000 ? 200 : 100,
         verticalInterval: 1,
       ),
       titlesData: FlTitlesData(
@@ -144,7 +141,7 @@ class _TotalClaimsChartState extends State<TotalClaimsChart> {
           sideTitles: SideTitles(
             showTitles: true,
             reservedSize: 54,
-            interval: maxAmount > 5000 ? 1000 : 500,
+            interval: maxAmount > 1000 ? 200 : 100,
             getTitlesWidget: leftTitleWidgets,
           ),
         ),
@@ -153,15 +150,15 @@ class _TotalClaimsChartState extends State<TotalClaimsChart> {
         show: true,
         border: Border.all(color: Colors.grey),
       ),
-      minX: 1,
-      maxX: 12,
+      minX: currentYear - 3, // Starting year (current year - 3)
+      maxX: currentYear.toDouble(), // Ending year (current year)
       minY: 0,
       maxY: maxAmount,
       lineBarsData: [
         LineChartBarData(
           spots: [
-            for (int month = 1; month <= 12; month++)
-              FlSpot(month.toDouble(), monthlyData[month] ?? 0),
+            for (int year in years)
+              FlSpot(year.toDouble(), yearlyData[year] ?? 0),
           ],
           isCurved: true,
           gradient: LinearGradient(colors: gradientColors),
@@ -183,11 +180,23 @@ class _TotalClaimsChartState extends State<TotalClaimsChart> {
   }
 
   LineChartData avgData() {
-    final monthlyData = getMonthlyClaimAmounts();
+    final yearlyData = getYearlyClaimAmounts();
+
+    // Get current year
+    int currentYear = DateTime.now().year;
+
+    // Create a fixed range of years: current year and 3 years before
+    List<int> years = [
+      currentYear - 3,
+      currentYear - 2,
+      currentYear - 1,
+      currentYear,
+    ];
+
     double average =
-        monthlyData.isEmpty
+        yearlyData.isEmpty
             ? 0
-            : monthlyData.values.reduce((a, b) => a + b) / monthlyData.length;
+            : yearlyData.values.reduce((a, b) => a + b) / yearlyData.length;
 
     return LineChartData(
       gridData: FlGridData(
@@ -223,13 +232,13 @@ class _TotalClaimsChartState extends State<TotalClaimsChart> {
         show: true,
         border: Border.all(color: Colors.grey),
       ),
-      minX: 1,
-      maxX: 12,
+      minX: currentYear - 3, // Starting year (current year - 3)
+      maxX: currentYear.toDouble(), // Ending year (current year)
       minY: 0,
       maxY: average * 2,
       lineBarsData: [
         LineChartBarData(
-          spots: List.generate(12, (i) => FlSpot(i + 1, average)),
+          spots: years.map((year) => FlSpot(year.toDouble(), average)).toList(),
           isCurved: true,
           gradient: LinearGradient(
             colors:
