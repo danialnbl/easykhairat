@@ -28,17 +28,29 @@ class _ListTuntutanPageState extends State<ListTuntutanPage> {
   bool isLoading = false;
   List<ClaimModel> _userClaims = [];
   bool _hasLoadedInitially = false;
+  // Add a future to control the FutureBuilder properly
+  late Future<List<ClaimModel>> _claimsFuture;
 
   @override
   void initState() {
     super.initState();
-    _fetchUserTuntutan(); // Load user's claims on init
+    // Initialize the future
+    _claimsFuture = _fetchUserTuntutan();
   }
 
   // Format date for display
   String formatDate(DateTime? date) {
     if (date == null) return 'N/A';
     return DateFormat('dd/MM/yyyy').format(date);
+  }
+
+  // Refresh data method - clearer separation of concerns
+  void _refreshData() {
+    setState(() {
+      _userClaims = []; // Clear cache
+      _hasLoadedInitially = false;
+      _claimsFuture = _fetchUserTuntutan(isRefresh: true);
+    });
   }
 
   // Fetch user's tuntutan list with improved error handling and caching
@@ -152,10 +164,7 @@ class _ListTuntutanPageState extends State<ListTuntutanPage> {
             label: 'CUBA LAGI',
             textColor: Colors.white,
             onPressed: () {
-              setState(() {
-                _hasLoadedInitially = false;
-                _fetchUserTuntutan();
-              });
+              _refreshData();
             },
           ),
         ),
@@ -185,13 +194,7 @@ class _ListTuntutanPageState extends State<ListTuntutanPage> {
       ),
       body: RefreshIndicator(
         onRefresh: () async {
-          setState(() {
-            _userClaims = []; // Clear cache
-            _hasLoadedInitially = false;
-          });
-
-          // Pass the isRefresh flag to ensure the loading state is shown
-          await _fetchUserTuntutan(isRefresh: true);
+          _refreshData();
 
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -262,11 +265,7 @@ class _ListTuntutanPageState extends State<ListTuntutanPage> {
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
           Get.to(() => CreateTuntutanPage())?.then((_) {
-            setState(() {
-              _userClaims = []; // Clear cache
-              _hasLoadedInitially = false; // Force refresh
-              _fetchUserTuntutan(); // Refetch
-            });
+            _refreshData();
           });
         },
         label: Text(
@@ -283,13 +282,37 @@ class _ListTuntutanPageState extends State<ListTuntutanPage> {
 
   // Build the list of user's tuntutan
   Widget _buildTuntutanList() {
-    return StatefulBuilder(
-      builder: (context, setState) {
-        return FutureBuilder<List<ClaimModel>>(
-          future: _fetchUserTuntutan(),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(left: 4.0, bottom: 8.0),
+              child: Text(
+                'Senarai Tuntutan Anda',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+            ),
+            // Add refresh button
+            if (_hasLoadedInitially)
+              isLoading
+                  ? SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                  : IconButton(
+                    icon: Icon(Icons.refresh, color: MoonColors.light.bulma),
+                    onPressed: _refreshData,
+                  ),
+          ],
+        ),
+        FutureBuilder<List<ClaimModel>>(
+          future: _claimsFuture,
           builder: (context, snapshot) {
             // Always show loading state when waiting or when there's an error
-            // This effectively replaces the error message with a loading indicator
             if (snapshot.connectionState == ConnectionState.waiting ||
                 isLoading ||
                 (snapshot.hasError && _userClaims.isEmpty)) {
@@ -328,217 +351,165 @@ class _ListTuntutanPageState extends State<ListTuntutanPage> {
             }
 
             // We have data, display the list
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.only(left: 4.0, bottom: 8.0),
-                      child: Text(
-                        'Senarai Tuntutan Anda',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                    // Add refresh button
-                    if (_hasLoadedInitially)
-                      isLoading
-                          ? SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                          : IconButton(
-                            icon: Icon(
-                              Icons.refresh,
-                              color: MoonColors.light.bulma,
-                            ),
-                            onPressed: () {
-                              setState(() {
-                                _userClaims = []; // Clear cache
-                                _fetchUserTuntutan(); // Refetch
-                              });
-                            },
-                          ),
-                  ],
-                ),
-                ListView.builder(
-                  shrinkWrap: true,
-                  physics: NeverScrollableScrollPhysics(),
-                  itemCount: claims.length,
-                  itemBuilder: (context, index) {
-                    final claim = claims[index];
-                    return Card(
-                      margin: EdgeInsets.only(bottom: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      elevation: 3,
-                      shadowColor: Colors.grey.withOpacity(0.3),
-                      child: InkWell(
-                        onTap: () {
-                          Get.to(
-                            () => UserTuntutanPage(claimId: claim.claimId!),
-                          )?.then((_) {
-                            setState(() {
-                              _userClaims = [];
-                              _fetchUserTuntutan();
-                            });
-                          });
-                        },
-                        borderRadius: BorderRadius.circular(16),
-                        child: Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+            return ListView.builder(
+              shrinkWrap: true,
+              physics: NeverScrollableScrollPhysics(),
+              itemCount: claims.length,
+              itemBuilder: (context, index) {
+                final claim = claims[index];
+                return Card(
+                  margin: EdgeInsets.only(bottom: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  elevation: 3,
+                  shadowColor: Colors.grey.withOpacity(0.3),
+                  child: InkWell(
+                    onTap: () {
+                      Get.to(
+                        () => UserTuntutanPage(claimId: claim.claimId!),
+                      )?.then((_) {
+                        _refreshData();
+                      });
+                    },
+                    borderRadius: BorderRadius.circular(16),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Row(
-                                    children: [
-                                      Container(
-                                        padding: EdgeInsets.all(10),
-                                        decoration: BoxDecoration(
-                                          color: lightAccentColor,
-                                          borderRadius: BorderRadius.circular(
-                                            12,
-                                          ),
-                                        ),
-                                        child: Icon(
-                                          Icons.description_outlined,
+                                  Container(
+                                    padding: EdgeInsets.all(10),
+                                    decoration: BoxDecoration(
+                                      color: lightAccentColor,
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    child: Icon(
+                                      Icons.description_outlined,
+                                      color: primaryColor,
+                                      size: 20,
+                                    ),
+                                  ),
+                                  SizedBox(width: 12),
+                                  Text(
+                                    'Tuntutan #${claim.claimId}',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              _buildStatusChip(claim.claimOverallStatus),
+                            ],
+                          ),
+                          SizedBox(height: 12),
+                          Divider(height: 1),
+                          SizedBox(height: 12),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Tarikh Dibuat',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: Colors.grey[600],
+                                      ),
+                                    ),
+                                    SizedBox(height: 4),
+                                    Row(
+                                      children: [
+                                        Icon(
+                                          Icons.calendar_today,
+                                          size: 14,
                                           color: primaryColor,
-                                          size: 20,
                                         ),
-                                      ),
-                                      SizedBox(width: 12),
-                                      Text(
-                                        'Tuntutan #${claim.claimId}',
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 16,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  _buildStatusChip(claim.claimOverallStatus),
-                                ],
-                              ),
-                              SizedBox(height: 12),
-                              Divider(height: 1),
-                              SizedBox(height: 12),
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
+                                        SizedBox(width: 4),
                                         Text(
-                                          'Tarikh Dibuat',
+                                          formatDate(claim.claimCreatedAt),
                                           style: TextStyle(
-                                            fontSize: 12,
-                                            color: Colors.grey[600],
+                                            fontWeight: FontWeight.w500,
                                           ),
-                                        ),
-                                        SizedBox(height: 4),
-                                        Row(
-                                          children: [
-                                            Icon(
-                                              Icons.calendar_today,
-                                              size: 14,
-                                              color: primaryColor,
-                                            ),
-                                            SizedBox(width: 4),
-                                            Text(
-                                              formatDate(claim.claimCreatedAt),
-                                              style: TextStyle(
-                                                fontWeight: FontWeight.w500,
-                                              ),
-                                            ),
-                                          ],
                                         ),
                                       ],
                                     ),
-                                  ),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
+                                  ],
+                                ),
+                              ),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Jenis Tuntutan',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: Colors.grey[600],
+                                      ),
+                                    ),
+                                    SizedBox(height: 4),
+                                    Row(
                                       children: [
-                                        Text(
-                                          'Jenis Tuntutan',
-                                          style: TextStyle(
-                                            fontSize: 12,
-                                            color: Colors.grey[600],
-                                          ),
+                                        Icon(
+                                          Icons.category,
+                                          size: 14,
+                                          color: primaryColor,
                                         ),
-                                        SizedBox(height: 4),
-                                        Row(
-                                          children: [
-                                            Icon(
-                                              Icons.category,
-                                              size: 14,
-                                              color: primaryColor,
-                                            ),
-                                            SizedBox(width: 4),
-                                            Text(
-                                              claim.claimType ??
-                                                  'Tidak dinyatakan',
-                                              style: TextStyle(
-                                                fontWeight: FontWeight.w500,
-                                              ),
-                                            ),
-                                          ],
+                                        SizedBox(width: 4),
+                                        Text(
+                                          claim.claimType ?? 'Tidak dinyatakan',
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.w500,
+                                          ),
                                         ),
                                       ],
                                     ),
-                                  ),
-                                ],
-                              ),
-                              SizedBox(height: 12),
-                              Divider(height: 1),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                children: [
-                                  TextButton.icon(
-                                    onPressed: () {
-                                      Get.to(
-                                        () => UserTuntutanPage(
-                                          claimId: claim.claimId!,
-                                        ),
-                                      )?.then((_) {
-                                        setState(() {
-                                          _userClaims = [];
-                                          _fetchUserTuntutan();
-                                        });
-                                      });
-                                    },
-                                    icon: Icon(Icons.visibility, size: 16),
-                                    label: Text('Lihat Details'),
-                                    style: TextButton.styleFrom(
-                                      foregroundColor: primaryColor,
-                                    ),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
                             ],
                           ),
-                        ),
+                          SizedBox(height: 12),
+                          Divider(height: 1),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              TextButton.icon(
+                                onPressed: () {
+                                  Get.to(
+                                    () => UserTuntutanPage(
+                                      claimId: claim.claimId!,
+                                    ),
+                                  )?.then((_) {
+                                    _refreshData();
+                                  });
+                                },
+                                icon: Icon(Icons.visibility, size: 16),
+                                label: Text('Lihat Details'),
+                                style: TextButton.styleFrom(
+                                  foregroundColor: primaryColor,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
-                    );
-                  },
-                ),
-              ],
+                    ),
+                  ),
+                );
+              },
             );
           },
-        );
-      },
+        ),
+      ],
     );
   }
 
