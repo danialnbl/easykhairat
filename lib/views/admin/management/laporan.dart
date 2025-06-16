@@ -179,6 +179,7 @@ class _LaporanPageState extends State<LaporanPage> {
                 'Nama': userName, // Display user name instead of ID
                 'Nilai': p.paymentValue,
                 'Keterangan': p.paymentDescription,
+                'Rujukan Pembayaran': p.referenceId ?? '',
                 'Jenis': p.paymentType ?? '',
                 'Tarikh': p.paymentCreatedAt.toString().split(' ').first,
               };
