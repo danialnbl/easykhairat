@@ -119,7 +119,7 @@ class _AdminMainState extends State<AdminMain> {
                           context: context,
                           builder: (BuildContext context) {
                             return AlertDialog(
-                              title: Text("Log Out"),
+                              title: Text("Log Keluar"),
                               content: Text(
                                 "Adakah anda pasti mahu log keluar?",
                               ),
