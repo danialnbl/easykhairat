@@ -76,6 +76,7 @@ class _LaporanPageState extends State<LaporanPage> {
     calculateTotalOutstandingFees();
     paymentController.fetchTotalPayments();
     claimLineController.fetchTotalApprovedClaimLine();
+    
 
     isLoading.value = false;
   }

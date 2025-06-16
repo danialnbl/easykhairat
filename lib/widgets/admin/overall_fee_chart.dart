@@ -8,19 +8,19 @@ class OverallFeeChart extends StatelessWidget {
 
   final PaymentController paymentController = Get.find<PaymentController>();
 
-  List<MapEntry<int, double>> getMonthlyTotals() {
-    // Create a map to store monthly totals
-    Map<int, double> monthlyTotals = {};
+  List<MapEntry<int, double>> getYearlyTotals() {
+    // Create a map to store yearly totals
+    Map<int, double> yearlyTotals = {};
 
-    // Group payments by month and sum their values
+    // Group payments by year and sum their values
     for (var payment in paymentController.payments) {
-      int month = payment.paymentCreatedAt.month;
-      monthlyTotals[month] = (monthlyTotals[month] ?? 0) + payment.paymentValue;
+      int year = payment.paymentCreatedAt.year;
+      yearlyTotals[year] = (yearlyTotals[year] ?? 0) + payment.paymentValue;
     }
 
-    // Convert to list and sort by month
+    // Convert to list and sort by year
     var sortedEntries =
-        monthlyTotals.entries.toList()..sort((a, b) => a.key.compareTo(b.key));
+        yearlyTotals.entries.toList()..sort((a, b) => a.key.compareTo(b.key));
 
     return sortedEntries;
   }
@@ -37,7 +37,7 @@ class OverallFeeChart extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
-              'Kutipan Yuran Keseluruhan',
+              'Kutipan Yuran Tahunan',
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
@@ -48,7 +48,7 @@ class OverallFeeChart extends StatelessWidget {
             SizedBox(
               height: 200,
               child: Obx(() {
-                final monthlyData = getMonthlyTotals();
+                final yearlyData = getYearlyTotals();
                 return BarChart(
                   BarChartData(
                     titlesData: FlTitlesData(
@@ -76,24 +76,10 @@ class OverallFeeChart extends StatelessWidget {
                         sideTitles: SideTitles(
                           showTitles: true,
                           getTitlesWidget: (value, _) {
-                            final months = [
-                              'Jan',
-                              'Feb',
-                              'Mar',
-                              'Apr',
-                              'May',
-                              'Jun',
-                              'Jul',
-                              'Aug',
-                              'Sep',
-                              'Oct',
-                              'Nov',
-                              'Dec',
-                            ];
                             final index = value.toInt();
-                            if (index >= 0 && index < monthlyData.length) {
+                            if (index >= 0 && index < yearlyData.length) {
                               return Text(
-                                months[monthlyData[index].key - 1],
+                                yearlyData[index].key.toString(),
                                 style: const TextStyle(
                                   fontSize: 12,
                                   color: Colors.black,
@@ -107,10 +93,10 @@ class OverallFeeChart extends StatelessWidget {
                     ),
                     borderData: FlBorderData(show: false),
                     barGroups: List.generate(
-                      monthlyData.length,
+                      yearlyData.length,
                       (index) => _barChartGroup(
                         index,
-                        monthlyData[index].value,
+                        yearlyData[index].value,
                         Colors.blue,
                       ),
                     ),

@@ -182,7 +182,7 @@ class MemberListState extends State<MemberList> {
                   horizontal: 16,
                   vertical: 12,
                 ),
-                child: Text("Refresh"),
+                child: Text("Muat Semula"),
               ),
             ),
           ],

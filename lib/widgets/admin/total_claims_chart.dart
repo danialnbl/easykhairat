@@ -2,6 +2,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:easykhairat/controllers/tuntutan_controller.dart';
+import 'package:easykhairat/controllers/claimline_controller.dart';
 
 class TotalClaimsChart extends StatefulWidget {
   const TotalClaimsChart({super.key});
@@ -12,18 +13,35 @@ class TotalClaimsChart extends StatefulWidget {
 
 class _TotalClaimsChartState extends State<TotalClaimsChart> {
   final TuntutanController tuntutanController = Get.find<TuntutanController>();
+  final ClaimLineController claimLineController =
+      Get.find<ClaimLineController>();
   List<Color> gradientColors = [Colors.redAccent, Colors.deepOrange];
   bool showAvg = false;
 
-  Map<int, int> getMonthlyClaimCounts() {
-    Map<int, int> monthlyTotals = {};
+  @override
+  void initState() {
+    super.initState();
+    fetchData();
+  }
 
-    for (var claim in tuntutanController.tuntutanList) {
-      int month = claim.claimCreatedAt.month;
-      monthlyTotals[month] = (monthlyTotals[month] ?? 0) + 1;
+  Future<void> fetchData() async {
+    await claimLineController.fetchClaimLines();
+  }
+
+  Map<int, double> getMonthlyClaimAmounts() {
+    Map<int, double> monthlyAmounts = {};
+
+    for (var claimLine in claimLineController.claimLineList) {
+      // Get month from the created_at date
+      DateTime createdAt = claimLine.claimLineCreatedAt ?? DateTime.now();
+      int month = createdAt.month;
+
+      // Use the total price from the claim line
+      double amount = claimLine.claimLineTotalPrice?.toDouble() ?? 0;
+      monthlyAmounts[month] = (monthlyAmounts[month] ?? 0) + amount;
     }
 
-    return monthlyTotals;
+    return monthlyAmounts;
   }
 
   @override
@@ -38,7 +56,7 @@ class _TotalClaimsChartState extends State<TotalClaimsChart> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
-              'Tuntutan Ahli Keseluruhan Mengikut Bulan',
+              'Jumlah Tuntutan (RM) Mengikut Bulan',
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
@@ -49,7 +67,9 @@ class _TotalClaimsChartState extends State<TotalClaimsChart> {
             SizedBox(
               height: 200,
               child: Obx(() {
-                return LineChart(showAvg ? avgData() : mainData());
+                return claimLineController.isLoading.value
+                    ? const Center(child: CircularProgressIndicator())
+                    : LineChart(showAvg ? avgData() : mainData());
               }),
             ),
           ],
@@ -85,14 +105,25 @@ class _TotalClaimsChartState extends State<TotalClaimsChart> {
     return SideTitleWidget(meta: meta, child: text, space: 8);
   }
 
+  Widget leftTitleWidgets(double value, TitleMeta meta) {
+    const style = TextStyle(fontWeight: FontWeight.bold, fontSize: 12);
+
+    return Text('RM ${value.toInt()}', style: style, textAlign: TextAlign.left);
+  }
+
   LineChartData mainData() {
-    final monthlyData = getMonthlyClaimCounts();
+    final monthlyData = getMonthlyClaimAmounts();
+
+    double maxAmount =
+        monthlyData.isEmpty
+            ? 1000
+            : (monthlyData.values.reduce((a, b) => a > b ? a : b) * 1.2);
 
     return LineChartData(
       gridData: FlGridData(
         show: true,
         drawVerticalLine: true,
-        horizontalInterval: 1,
+        horizontalInterval: maxAmount > 5000 ? 1000 : 500,
         verticalInterval: 1,
       ),
       titlesData: FlTitlesData(
@@ -112,8 +143,9 @@ class _TotalClaimsChartState extends State<TotalClaimsChart> {
         leftTitles: AxisTitles(
           sideTitles: SideTitles(
             showTitles: true,
-            reservedSize: 32,
-            interval: 1,
+            reservedSize: 54,
+            interval: maxAmount > 5000 ? 1000 : 500,
+            getTitlesWidget: leftTitleWidgets,
           ),
         ),
       ),
@@ -124,16 +156,12 @@ class _TotalClaimsChartState extends State<TotalClaimsChart> {
       minX: 1,
       maxX: 12,
       minY: 0,
-      maxY:
-          monthlyData.isEmpty
-              ? 10
-              : (monthlyData.values.reduce((a, b) => a > b ? a : b) + 2)
-                  .toDouble(),
+      maxY: maxAmount,
       lineBarsData: [
         LineChartBarData(
           spots: [
             for (int month = 1; month <= 12; month++)
-              FlSpot(month.toDouble(), monthlyData[month]?.toDouble() ?? 0),
+              FlSpot(month.toDouble(), monthlyData[month] ?? 0),
           ],
           isCurved: true,
           gradient: LinearGradient(colors: gradientColors),
@@ -155,13 +183,50 @@ class _TotalClaimsChartState extends State<TotalClaimsChart> {
   }
 
   LineChartData avgData() {
-    final monthlyData = getMonthlyClaimCounts();
+    final monthlyData = getMonthlyClaimAmounts();
     double average =
         monthlyData.isEmpty
             ? 0
             : monthlyData.values.reduce((a, b) => a + b) / monthlyData.length;
 
     return LineChartData(
+      gridData: FlGridData(
+        show: true,
+        drawHorizontalLine: true,
+        verticalInterval: 1,
+        horizontalInterval: 500,
+      ),
+      titlesData: FlTitlesData(
+        show: true,
+        rightTitles: const AxisTitles(
+          sideTitles: SideTitles(showTitles: false),
+        ),
+        topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+        bottomTitles: AxisTitles(
+          sideTitles: SideTitles(
+            showTitles: true,
+            reservedSize: 32,
+            interval: 1,
+            getTitlesWidget: bottomTitleWidgets,
+          ),
+        ),
+        leftTitles: AxisTitles(
+          sideTitles: SideTitles(
+            showTitles: true,
+            reservedSize: 54,
+            interval: 500,
+            getTitlesWidget: leftTitleWidgets,
+          ),
+        ),
+      ),
+      borderData: FlBorderData(
+        show: true,
+        border: Border.all(color: Colors.grey),
+      ),
+      minX: 1,
+      maxX: 12,
+      minY: 0,
+      maxY: average * 2,
       lineBarsData: [
         LineChartBarData(
           spots: List.generate(12, (i) => FlSpot(i + 1, average)),

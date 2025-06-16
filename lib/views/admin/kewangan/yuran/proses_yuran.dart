@@ -407,7 +407,7 @@ class ProsesYuranState extends State<ProsesYuran> {
                   horizontal: 16,
                   vertical: 12,
                 ),
-                child: Text("Refresh"),
+                child: Text("Muat Semula"),
               ),
             ),
           ],

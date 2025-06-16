@@ -30,10 +30,16 @@ class _AdminDashboardState extends State<AdminDashboard> {
 
   // Add an RxDouble to store total outstanding fees
   final RxDouble totalOutstandingFees = 0.0.obs;
+  final RxBool isRefreshing = false.obs;
 
   @override
   void initState() {
     super.initState();
+    loadAllData();
+  }
+
+  // Add this method to load all data
+  void loadAllData() {
     if (userController.users.isEmpty && !userController.isLoading.value) {
       userController.fetchUsers();
       userController.fetchAdmin();
@@ -43,9 +49,48 @@ class _AdminDashboardState extends State<AdminDashboard> {
       Supabase.instance.client.auth.currentUser?.id ?? "",
     );
     claimLineController.fetchTotalClaimLine();
-    calculateTotalOutstandingFees(); // Add this line
+    claimLineController.fetchTotalApprovedClaimLine();
+    calculateTotalOutstandingFees();
 
     print("Admin ID: ${Supabase.instance.client.auth.currentUser?.id}");
+  }
+
+  // Add a method to refresh all data
+  Future<void> refreshAllData() async {
+    try {
+      isRefreshing.value = true;
+
+      // Clear existing data (if controllers have such methods) or reinitialize them
+      userController.users.clear();
+      userController.adminUsers.clear();
+
+      // Load all data again
+      await userController.fetchUsers();
+      await userController.fetchAdmin();
+      await paymentController.fetchTotalPayments();
+      await userController.fetchAdminDetailsByIdAndAssign(
+        Supabase.instance.client.auth.currentUser?.id ?? "",
+      );
+      await claimLineController.fetchTotalClaimLine();
+      await claimLineController.fetchTotalApprovedClaimLine();
+      calculateTotalOutstandingFees();
+
+      Get.snackbar(
+        'Success',
+        'Data telah dikemas kini',
+        backgroundColor: Colors.green,
+        colorText: Colors.white,
+      );
+    } catch (e) {
+      Get.snackbar(
+        'Error',
+        'Gagal mengemas kini data: ${e.toString()}',
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+    } finally {
+      isRefreshing.value = false;
+    }
   }
 
   // Add this method to calculate total outstanding fees
@@ -75,10 +120,32 @@ class _AdminDashboardState extends State<AdminDashboard> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              AppHeader(
-                title: "Ringkasan Papan Pemuka",
-                notificationCount: 3,
-                onNotificationPressed: () {},
+              Row(
+                children: [
+                  Expanded(
+                    child: AppHeader(
+                      title: "Ringkasan Papan Pemuka",
+                      notificationCount: 3,
+                      onNotificationPressed: () {},
+                    ),
+                  ),
+                  Obx(
+                    () => IconButton(
+                      onPressed: isRefreshing.value ? null : refreshAllData,
+                      icon:
+                          isRefreshing.value
+                              ? const SizedBox(
+                                width: 24,
+                                height: 24,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              )
+                              : const Icon(Icons.refresh, color: Colors.blue),
+                      tooltip: "Kemas Kini Data",
+                    ),
+                  ),
+                ],
               ),
               const SizedBox(height: 16),
               SizedBox(
@@ -99,7 +166,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
                         ),
                         MoonBreadcrumbItem(
                           label: Text(
-                            "Dashboard",
+                            "Papan Pemuka",
                             style: const TextStyle(color: Colors.black),
                           ),
                         ),

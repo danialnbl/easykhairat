@@ -27,17 +27,17 @@ class AppHeader extends StatelessWidget {
             color: Colors.black,
           ),
         ),
-        badges.Badge(
-          position: badges.BadgePosition.topEnd(top: 0, end: 5),
-          badgeContent: Text(
-            notificationCount.toString(),
-            style: const TextStyle(color: Colors.white),
-          ),
-          child: IconButton(
-            icon: const Icon(Icons.notifications, color: Colors.grey),
-            onPressed: onNotificationPressed,
-          ),
-        ),
+        // badges.Badge(
+        //   position: badges.BadgePosition.topEnd(top: 0, end: 5),
+        //   badgeContent: Text(
+        //     notificationCount.toString(),
+        //     style: const TextStyle(color: Colors.white),
+        //   ),
+        //   child: IconButton(
+        //     icon: const Icon(Icons.notifications, color: Colors.grey),
+        //     onPressed: onNotificationPressed,
+        //   ),
+        // ),
       ],
     );
   }
