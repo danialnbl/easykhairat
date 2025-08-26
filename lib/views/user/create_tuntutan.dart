@@ -1,9 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:easykhairat/controllers/claimline_controller.dart';
 import 'package:easykhairat/controllers/tuntutan_controller.dart';
-import 'package:easykhairat/models/claimLineModel.dart';
 import 'package:easykhairat/models/tuntutanModel.dart';
 import 'package:easykhairat/views/user/user_tuntutan.dart';
 import 'package:flutter/material.dart';
@@ -29,9 +27,6 @@ class CreateTuntutanPage extends StatefulWidget {
 
 class _CreateTuntutanPageState extends State<CreateTuntutanPage> {
   final TuntutanController tuntutanController = Get.put(TuntutanController());
-  final ClaimLineController claimLineController = Get.put(
-    ClaimLineController(),
-  );
   final supabase = Supabase.instance.client;
 
   // Step tracking
@@ -40,16 +35,10 @@ class _CreateTuntutanPageState extends State<CreateTuntutanPage> {
 
   // Form controllers
   final _formKey = GlobalKey<FormState>();
-  final _claimLineFormKey = GlobalKey<FormState>();
   final _certificateFormKey = GlobalKey<FormState>();
   final TextEditingController _claimTypeController = TextEditingController();
-  final TextEditingController _reasonController = TextEditingController();
-  final TextEditingController _amountController = TextEditingController();
 
   bool isLoading = false;
-
-  // Added temporary claim lines
-  List<ClaimLineModel> _tempClaimLines = [];
 
   // Image upload variables
   File? _certificateImage;
@@ -71,58 +60,6 @@ class _CreateTuntutanPageState extends State<CreateTuntutanPage> {
   String formatDate(DateTime? date) {
     if (date == null) return 'N/A';
     return DateFormat('dd/MM/yyyy').format(date);
-  }
-
-  // Step 1: Create a new base claim
-  Future<void> _createBaseClaimAndContinue() async {
-    if (!_formKey.currentState!.validate()) return;
-
-    setState(() {
-      isLoading = true;
-    });
-
-    try {
-      final userId = supabase.auth.currentUser?.id;
-      if (userId == null) {
-        Get.snackbar('Error', 'Please log in to make a claim');
-        return;
-      }
-
-      // Use the controller to create the claim
-      final createdClaim = await tuntutanController.createTuntutan(
-        userId: userId,
-        claimType: _claimTypeController.text,
-      );
-
-      if (createdClaim != null) {
-        // Store created claim reference for later use
-        _createdClaim = createdClaim;
-
-        setState(() {
-          _currentStep = 1; // Move to next step
-          isLoading = false;
-        });
-
-        Get.snackbar(
-          'Berjaya',
-          'Tuntutan asas telah dicipta. Sila lengkapkan maklumat seterusnya.',
-          backgroundColor: Colors.green.shade100,
-        );
-      }
-    } catch (e) {
-      print('Error creating claim: $e');
-      Get.snackbar(
-        'Error',
-        'Failed to submit claim: ${e.toString()}',
-        backgroundColor: Colors.red.shade100,
-      );
-    } finally {
-      if (mounted) {
-        setState(() {
-          isLoading = false;
-        });
-      }
-    }
   }
 
   // Step 1: Collect basic info (no database operation)
@@ -235,137 +172,6 @@ class _CreateTuntutanPageState extends State<CreateTuntutanPage> {
       setState(() {
         isLoading = false;
       });
-    }
-  }
-
-  // Step 3: Add claim line items
-  Future<void> _addClaimLine() async {
-    if (!_claimLineFormKey.currentState!.validate()) {
-      // Add visual feedback when validation fails
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Row(
-            children: [
-              Icon(Icons.error_outline, color: Colors.white),
-              SizedBox(width: 8),
-              Text('Sila perbaiki kesalahan dalam borang'),
-            ],
-          ),
-          backgroundColor: Colors.red[400],
-          behavior: SnackBarBehavior.floating,
-          margin: EdgeInsets.all(16),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        ),
-      );
-      return;
-    }
-
-    // Validate amount input
-    double? amount;
-    try {
-      amount = double.parse(_amountController.text.trim());
-    } catch (e) {
-      Get.snackbar(
-        'Error',
-        'Jumlah mesti dalam format angka yang betul.',
-        backgroundColor: Colors.red.shade100,
-      );
-      return;
-    }
-
-    if (amount <= 0) {
-      Get.snackbar(
-        'Error',
-        'Jumlah mesti lebih daripada RM0.',
-        backgroundColor: Colors.red.shade100,
-      );
-      return;
-    }
-
-    setState(() {
-      isLoading = true;
-    });
-
-    try {
-      // Create a new claim line
-      final newClaimLine = ClaimLineModel(
-        claimLineReason: _reasonController.text.trim(),
-        claimLineTotalPrice: amount,
-        claimLineCreatedAt: DateTime.now(),
-        claimLineUpdatedAt: DateTime.now(),
-        claimId: _createdClaim!.claimId,
-      );
-
-      // Add to Supabase
-      await claimLineController.addClaimLine(newClaimLine);
-
-      // Add to temp list for UI display
-      setState(() {
-        _tempClaimLines.add(newClaimLine);
-      });
-
-      // Clear the form
-      _reasonController.clear();
-      _amountController.clear();
-
-      Get.snackbar(
-        'Berjaya',
-        'Butiran perbelanjaan telah ditambah',
-        backgroundColor: Colors.green.shade100,
-      );
-    } catch (e) {
-      print('Error adding claim line: $e');
-      Get.snackbar(
-        'Error',
-        'Gagal menambah perbelanjaan: ${e.toString()}',
-        backgroundColor: Colors.red.shade100,
-      );
-    } finally {
-      setState(() {
-        isLoading = false;
-      });
-    }
-  }
-
-  // Step 4: Complete the claiming process
-  void _completeClaimProcess() {
-    if (_tempClaimLines.isEmpty) {
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: Text('Tiada Butiran Perbelanjaan'),
-            content: Text(
-              'Anda belum menambah sebarang butiran perbelanjaan. '
-              'Adakah anda pasti mahu menyerahkan tuntutan tanpa butiran?',
-            ),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop(); // Close dialog
-                },
-                child: Text('BATAL', style: TextStyle(color: Colors.grey[700])),
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.of(context).pop(); // Close dialog
-                  _navigateToFinishedClaim();
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: primaryColor,
-                  foregroundColor: Colors.white,
-                ),
-                child: Text('TERUSKAN'),
-              ),
-            ],
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-          );
-        },
-      );
-    } else {
-      _navigateToFinishedClaim();
     }
   }
 
@@ -558,11 +364,7 @@ class _CreateTuntutanPageState extends State<CreateTuntutanPage> {
                 } else if (_currentStep == 1) {
                   _uploadCertificateAndContinue();
                 } else if (_currentStep == 2) {
-                  setState(() {
-                    _currentStep = 3;
-                  });
-                } else if (_currentStep == 3) {
-                  _completeClaimProcess();
+                  _navigateToFinishedClaim();
                 }
               },
               onStepCancel: () {
@@ -589,18 +391,11 @@ class _CreateTuntutanPageState extends State<CreateTuntutanPage> {
                       _currentStep > 1 ? StepState.complete : StepState.indexed,
                 ),
                 Step(
-                  title: Text('Butiran Perbelanjaan'),
-                  content: _buildClaimLineForm(),
+                  title: Text('Semak & Hantar'),
+                  content: _buildClaimReview(),
                   isActive: _currentStep >= 2,
                   state:
                       _currentStep > 2 ? StepState.complete : StepState.indexed,
-                ),
-                Step(
-                  title: Text('Semak & Hantar'),
-                  content: _buildClaimReview(),
-                  isActive: _currentStep >= 3,
-                  state:
-                      _currentStep > 3 ? StepState.complete : StepState.indexed,
                 ),
               ],
             ),
@@ -815,226 +610,7 @@ class _CreateTuntutanPageState extends State<CreateTuntutanPage> {
     );
   }
 
-  Widget _buildClaimLineForm() {
-    return SingleChildScrollView(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Card to show claim type
-          Card(
-            color: MoonColors.light.beerus,
-            elevation: 0,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(12.0),
-              child: Row(
-                children: [
-                  Icon(Icons.info_outline, color: MoonColors.light.hit),
-                  SizedBox(width: 8),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Tuntutan ID: #${_createdClaim?.claimId ?? ''}',
-                          style: TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        Text(
-                          'Jenis: ${_createdClaim?.claimType ?? _selectedClaimType}',
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        Text(
-                          'Status: ${_createdClaim?.claimOverallStatus ?? 'Baru'}',
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          SizedBox(height: 16),
-          Text(
-            'Tambah Butiran Perbelanjaan',
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-          ),
-          SizedBox(height: 8),
-          Form(
-            key: _claimLineFormKey,
-            child: Column(
-              children: [
-                TextFormField(
-                  controller: _reasonController,
-                  decoration: InputDecoration(
-                    labelText: 'Penerangan Perbelanjaan',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    prefixIcon: Icon(Icons.description),
-                    hintText: 'Cth: Kos pengebumian',
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Sila masukkan penerangan';
-                    }
-                    return null;
-                  },
-                ),
-                SizedBox(height: 16),
-                TextFormField(
-                  controller: _amountController,
-                  keyboardType: TextInputType.numberWithOptions(decimal: true),
-                  decoration: InputDecoration(
-                    labelText: 'Jumlah (RM)',
-                    labelStyle: TextStyle(color: primaryColor),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: primaryColor),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(
-                        color: primaryColor.withOpacity(0.5),
-                      ),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: primaryColor, width: 2),
-                    ),
-                    prefixIcon: Icon(Icons.attach_money, color: primaryColor),
-                    hintText: 'Cth: 1000.00',
-                    fillColor: lightAccentColor.withOpacity(0.1),
-                    filled: true,
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Sila masukkan jumlah';
-                    }
-
-                    try {
-                      double amount = double.parse(value);
-                      if (amount <= 0) {
-                        return 'Jumlah mesti lebih daripada RM0';
-                      }
-                    } catch (e) {
-                      return 'Sila masukkan nilai yang sah';
-                    }
-
-                    return null;
-                  },
-                ),
-                SizedBox(height: 16),
-                ElevatedButton.icon(
-                  onPressed: isLoading ? null : _addClaimLine,
-                  icon: Icon(Icons.add),
-                  label: Text(
-                    'Tambah Perbelanjaan',
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: primaryColor,
-                    foregroundColor: Colors.white,
-                    minimumSize: Size(double.infinity, 50),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    elevation: 2,
-                    shadowColor: primaryColor.withOpacity(0.5),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          SizedBox(height: 20),
-
-          // Show list of added claim lines
-          if (_tempClaimLines.isNotEmpty) ...[
-            Text(
-              'Perbelanjaan yang Ditambah',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-            ),
-            SizedBox(height: 8),
-            ListView.builder(
-              shrinkWrap: true,
-              physics: NeverScrollableScrollPhysics(),
-              itemCount: _tempClaimLines.length,
-              itemBuilder: (context, index) {
-                final claimLine = _tempClaimLines[index];
-                return Card(
-                  margin: EdgeInsets.only(bottom: 8),
-                  child: ListTile(
-                    title: Text(
-                      claimLine.claimLineReason,
-                      overflow:
-                          TextOverflow.ellipsis, // Add ellipsis for long text
-                      maxLines: 2, // Allow up to two lines
-                    ),
-                    subtitle: Text(
-                      'Ditambah pada ${DateFormat('dd/MM/yyyy HH:mm').format(claimLine.claimLineCreatedAt)}',
-                      style: TextStyle(fontSize: 12), // Slightly smaller font
-                    ),
-                    trailing: Text(
-                      'RM ${claimLine.claimLineTotalPrice.toStringAsFixed(2)}',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: MoonColors.light.bulma,
-                      ),
-                    ),
-                  ),
-                );
-              },
-            ),
-            SizedBox(height: 12),
-            // Show total
-            Container(
-              padding: EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: MoonColors.light.beerus,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Jumlah :',
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  Text(
-                    'RM ${_tempClaimLines.fold(0.0, (sum, item) => sum + item.claimLineTotalPrice).toStringAsFixed(2)}',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                      color: MoonColors.light.bulma,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-          SizedBox(height: 16),
-          if (_tempClaimLines.isEmpty)
-            Center(
-              child: Text(
-                'Belum ada perbelanjaan yang ditambah.',
-                style: TextStyle(
-                  fontStyle: FontStyle.italic,
-                  color: Colors.grey[600],
-                ),
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildClaimReview() {
-    final double totalAmount = _tempClaimLines.fold(
-      0.0,
-      (sum, item) => sum + item.claimLineTotalPrice,
-    );
-
     return SingleChildScrollView(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1089,80 +665,11 @@ class _CreateTuntutanPageState extends State<CreateTuntutanPage> {
                     ),
                     Divider(),
                     _buildInfoRow('Nama Si Mati', _createdClaim!.claimReason!),
-
-                    if (_certificateImage != null || _certificateUrl != null)
-                      _buildInfoRow('Sijil Kematian', 'Dimuat naik'),
                   ],
 
-                  // Claim line summary
-                  SizedBox(height: 16),
-                  Text(
-                    'Butiran Perbelanjaan (${_tempClaimLines.length})',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                  ),
-                  Divider(),
-                  if (_tempClaimLines.isEmpty)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 8.0),
-                      child: Text(
-                        'Tiada perbelanjaan ditambah.',
-                        style: TextStyle(fontStyle: FontStyle.italic),
-                      ),
-                    ),
-                  if (_tempClaimLines.isNotEmpty)
-                    ListView.builder(
-                      shrinkWrap: true,
-                      physics: NeverScrollableScrollPhysics(),
-                      itemCount: _tempClaimLines.length,
-                      itemBuilder: (context, index) {
-                        final item = _tempClaimLines[index];
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 4.0),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            crossAxisAlignment:
-                                CrossAxisAlignment
-                                    .start, // Align to top in case of text wrapping
-                            children: [
-                              Flexible(
-                                flex: 3,
-                                child: Text(
-                                  item.claimLineReason,
-                                  style: TextStyle(fontSize: 14),
-                                ),
-                              ),
-                              SizedBox(width: 8),
-                              Text(
-                                'RM ${item.claimLineTotalPrice.toStringAsFixed(2)}',
-                                textAlign: TextAlign.end,
-                                style: TextStyle(fontSize: 14),
-                              ),
-                            ],
-                          ),
-                        );
-                      },
-                    ),
-                  Divider(),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'Jumlah :',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                        ),
-                      ),
-                      Text(
-                        'RM ${totalAmount.toStringAsFixed(2)}',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                          color: MoonColors.light.bulma,
-                        ),
-                      ),
-                    ],
-                  ),
+                  if (_certificateImage != null || _certificateUrl != null)
+                    _buildInfoRow('Sijil Kematian', 'Dimuat naik'),
+
                   SizedBox(height: 24),
                   Text(
                     'Dengan menekan butang "Selesai", anda mengesahkan bahawa semua maklumat yang diberikan adalah benar.',
@@ -1210,8 +717,6 @@ class _CreateTuntutanPageState extends State<CreateTuntutanPage> {
   @override
   void dispose() {
     _claimTypeController.dispose();
-    _reasonController.dispose();
-    _amountController.dispose();
     super.dispose();
   }
 }
