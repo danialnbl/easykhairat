@@ -54,21 +54,6 @@ class _SettingsState extends State<Settings> {
           child: Column(
             children: [
               Padding(
-                padding: const EdgeInsets.only(left: 16.0, top: 16.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Image.asset(
-                      'assets/images/easyKhairatLogo.png',
-                      width: 50.0,
-                      height: 50.0,
-                      fit: BoxFit.fitWidth,
-                    ),
-                  ],
-                ),
-              ),
-              SizedBox(height: 16),
-              Padding(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 16,
                   vertical: 24,

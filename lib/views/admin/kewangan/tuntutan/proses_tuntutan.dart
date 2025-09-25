@@ -2,6 +2,7 @@ import 'package:easykhairat/controllers/claimline_controller.dart';
 import 'package:easykhairat/controllers/navigation_controller.dart';
 import 'package:easykhairat/controllers/tuntutan_controller.dart';
 import 'package:easykhairat/models/tuntutanModel.dart';
+import 'package:easykhairat/utils/random.dart';
 import 'package:easykhairat/widgets/header.dart';
 import 'package:flutter/material.dart';
 import 'package:moon_design/moon_design.dart';
@@ -29,11 +30,6 @@ class ProsesTuntutanState extends State<ProsesTuntutan> {
   void initState() {
     super.initState();
     tuntutanController.fetchTuntutan();
-  }
-
-  String formatDate(DateTime? date) {
-    if (date == null) return 'N/A';
-    return DateFormat('dd/MM/yyyy').format(date);
   }
 
   List<ClaimModel> getFilteredClaims() {

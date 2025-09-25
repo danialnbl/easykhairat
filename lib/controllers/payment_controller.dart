@@ -11,7 +11,6 @@ class PaymentController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    listenForRealTimeUpdates();
   }
 
   // Fetch all payments
@@ -124,15 +123,15 @@ class PaymentController extends GetxController {
   }
 
   // Listen for real-time updates
-  void listenForRealTimeUpdates() {
-    supabase.from('payments').stream(primaryKey: ['payment_id']).listen((
-      List<Map<String, dynamic>> changes,
-    ) {
-      if (changes.isNotEmpty) {
-        fetchPayments();
-      }
-    });
-  }
+  // void listenForRealTimeUpdates() {
+  //   supabase.from('payments').stream(primaryKey: ['payment_id']).listen((
+  //     List<Map<String, dynamic>> changes,
+  //   ) {
+  //     if (changes.isNotEmpty) {
+  //       fetchPayments();
+  //     }
+  //   });
+  // }
 
   // Stream payments by user ID (for real-time updates)
   Stream<List<Map<String, dynamic>>> streamPaymentsByUserId(String userId) {

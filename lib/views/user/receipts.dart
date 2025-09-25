@@ -1,11 +1,10 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
-import 'package:badges/badges.dart' as badges;
+import 'package:easykhairat/utils/random.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:moon_design/moon_design.dart';
 import 'package:easykhairat/controllers/payment_controller.dart';
 import 'package:easykhairat/models/paymentModel.dart';
 import 'package:intl/intl.dart';
@@ -40,105 +39,6 @@ class _ReceiptsState extends State<Receipts> {
     _getCurrentUserAndLoadPayments();
   }
 
-  Future<void> _getCurrentUserAndLoadPayments() async {
-    try {
-      // Get the current user from Supabase session
-      final session = supabase.auth.currentSession;
-      if (session != null) {
-        // Get the user ID from the session
-        final userId = session.user.id;
-        currentUserId.value = userId;
-
-        // Load payments for this user
-        await paymentController.fetchPaymentsByUserId(userId);
-
-        // Subscribe to real-time changes
-        _subscribeToPaymentChanges();
-      } else {
-        // If no session is available, show error
-        Get.snackbar(
-          'Error',
-          'Unable to retrieve user information. Please log in again.',
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
-        );
-        // Optionally redirect to login page
-        // Get.offAllNamed('/login');
-      }
-    } catch (e) {
-      print('Error fetching user data: $e');
-      Get.snackbar(
-        'Error',
-        'An error occurred while retrieving user information',
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
-    }
-  }
-
-  Future<void> _loadUserPayments() async {
-    if (currentUserId.value.isNotEmpty) {
-      await paymentController.fetchPaymentsByUserId(currentUserId.value);
-    } else {
-      // Try to get user ID again if it's not available
-      await _getCurrentUserAndLoadPayments();
-    }
-  }
-
-  String formatDate(DateTime date) {
-    return DateFormat('dd MMM yyyy').format(date);
-  }
-
-  void _subscribeToPaymentChanges() {
-    if (currentUserId.value.isEmpty) return;
-
-    _paymentsSubscription = paymentController
-        .streamPaymentsByUserId(currentUserId.value)
-        .listen((payments) {
-          // This will be called whenever the payments table changes for this user
-          _loadUserPayments();
-        });
-  }
-
-  @override
-  void dispose() {
-    _searchController.dispose();
-    _paymentsSubscription?.cancel();
-    super.dispose();
-  }
-
-  List<PaymentModel> get filteredPayments {
-    List<PaymentModel> result = paymentController.payments;
-
-    // Apply search filter
-    if (_searchQuery.value.isNotEmpty) {
-      result =
-          result
-              .where(
-                (payment) =>
-                    payment.paymentDescription.toLowerCase().contains(
-                      _searchQuery.value.toLowerCase(),
-                    ) ||
-                    payment.paymentId.toString().contains(_searchQuery.value) ||
-                    (payment.paymentType?.toLowerCase().contains(
-                          _searchQuery.value.toLowerCase(),
-                        ) ??
-                        false),
-              )
-              .toList();
-    }
-
-    // Apply type filter
-    if (_filterBy.value != 'All') {
-      result =
-          result
-              .where((payment) => payment.paymentType == _filterBy.value)
-              .toList();
-    }
-
-    return result;
-  }
-
   @override
   Widget build(BuildContext context) {
     final accentColor = Colors.teal;
@@ -158,22 +58,6 @@ class _ReceiptsState extends State<Receipts> {
                 padding: const EdgeInsets.symmetric(
                   horizontal: 16.0,
                   vertical: 16.0,
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Image.asset(
-                      'assets/images/easyKhairatLogo.png',
-                      width: 50.0,
-                      height: 50.0,
-                      fit: BoxFit.fitWidth,
-                    ),
-                    IconButton(
-                      icon: Icon(Icons.refresh, color: accentColor),
-                      onPressed: _loadUserPayments,
-                      tooltip: 'Refresh',
-                    ),
-                  ],
                 ),
               ),
 
@@ -195,21 +79,21 @@ class _ReceiptsState extends State<Receipts> {
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                    Obx(
-                      () => badges.Badge(
-                        badgeContent: Text(
-                          paymentController.payments.length.toString(),
-                          style: TextStyle(color: Colors.white, fontSize: 12),
-                        ),
-                        badgeStyle: badges.BadgeStyle(
-                          badgeColor: accentColor,
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 5,
-                          ),
-                        ),
-                      ),
-                    ),
+                    // Obx(
+                    //   () => badges.Badge(
+                    //     badgeContent: Text(
+                    //       paymentController.payments.length.toString(),
+                    //       style: TextStyle(color: Colors.white, fontSize: 12),
+                    //     ),
+                    //     badgeStyle: badges.BadgeStyle(
+                    //       badgeColor: accentColor,
+                    //       padding: EdgeInsets.symmetric(
+                    //         horizontal: 8,
+                    //         vertical: 5,
+                    //       ),
+                    //     ),
+                    //   ),
+                    // ),
                   ],
                 ),
               ),
@@ -224,26 +108,26 @@ class _ReceiptsState extends State<Receipts> {
                 child: Column(
                   children: [
                     // Search TextField
-                    TextField(
-                      controller: _searchController,
-                      decoration: InputDecoration(
-                        hintText: 'Cari resit...',
-                        prefixIcon: Icon(Icons.search, color: Colors.grey),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: Colors.grey.shade300),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: Colors.grey.shade300),
-                        ),
-                        contentPadding: EdgeInsets.symmetric(vertical: 12),
-                        filled: true,
-                        fillColor: surfaceColor,
-                      ),
-                      onChanged: (value) => _searchQuery.value = value,
-                    ),
-                    SizedBox(height: 12),
+                    // TextField(
+                    //   controller: _searchController,
+                    //   decoration: InputDecoration(
+                    //     hintText: 'Cari resit...',
+                    //     prefixIcon: Icon(Icons.search, color: Colors.grey),
+                    //     border: OutlineInputBorder(
+                    //       borderRadius: BorderRadius.circular(12),
+                    //       borderSide: BorderSide(color: Colors.grey.shade300),
+                    //     ),
+                    //     enabledBorder: OutlineInputBorder(
+                    //       borderRadius: BorderRadius.circular(12),
+                    //       borderSide: BorderSide(color: Colors.grey.shade300),
+                    //     ),
+                    //     contentPadding: EdgeInsets.symmetric(vertical: 12),
+                    //     filled: true,
+                    //     fillColor: surfaceColor,
+                    //   ),
+                    //   onChanged: (value) => _searchQuery.value = value,
+                    // ),
+                    // SizedBox(height: 12),
 
                     // Filter Chips
                     SingleChildScrollView(
@@ -308,6 +192,101 @@ class _ReceiptsState extends State<Receipts> {
     );
   }
 
+  Future<void> _getCurrentUserAndLoadPayments() async {
+    try {
+      // Get the current user from Supabase session
+      final session = supabase.auth.currentSession;
+      if (session != null) {
+        // Get the user ID from the session
+        final userId = session.user.id;
+        currentUserId.value = userId;
+
+        // Load payments for this user
+        await paymentController.fetchPaymentsByUserId(userId);
+
+        // Subscribe to real-time changes
+        _subscribeToPaymentChanges();
+      } else {
+        // If no session is available, show error
+        Get.snackbar(
+          'Error',
+          'Unable to retrieve user information. Please log in again.',
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+        // Optionally redirect to login page
+        // Get.offAllNamed('/login');
+      }
+    } catch (e) {
+      print('Error fetching user data: $e');
+      Get.snackbar(
+        'Error',
+        'An error occurred while retrieving user information',
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+    }
+  }
+
+  Future<void> _loadUserPayments() async {
+    if (currentUserId.value.isNotEmpty) {
+      await paymentController.fetchPaymentsByUserId(currentUserId.value);
+    } else {
+      // Try to get user ID again if it's not available
+      await _getCurrentUserAndLoadPayments();
+    }
+  }
+
+  void _subscribeToPaymentChanges() {
+    if (currentUserId.value.isEmpty) return;
+
+    _paymentsSubscription = paymentController
+        .streamPaymentsByUserId(currentUserId.value)
+        .listen((payments) {
+          // This will be called whenever the payments table changes for this user
+          _loadUserPayments();
+        });
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    _paymentsSubscription?.cancel();
+    super.dispose();
+  }
+
+  List<PaymentModel> get filteredPayments {
+    List<PaymentModel> result = paymentController.payments;
+
+    // Apply search filter
+    if (_searchQuery.value.isNotEmpty) {
+      result =
+          result
+              .where(
+                (payment) =>
+                    payment.paymentDescription.toLowerCase().contains(
+                      _searchQuery.value.toLowerCase(),
+                    ) ||
+                    payment.paymentId.toString().contains(_searchQuery.value) ||
+                    (payment.paymentType?.toLowerCase().contains(
+                          _searchQuery.value.toLowerCase(),
+                        ) ??
+                        false),
+              )
+              .toList();
+    }
+
+    // Apply type filter
+    if (_filterBy.value != 'All') {
+      result =
+          result
+              .where((payment) => payment.paymentType == _filterBy.value)
+              .toList();
+    }
+
+    return result;
+  }
+
   // Updated Empty State Widget
   Widget _buildEmptyState(Color accentColor) {
     return Center(
@@ -370,7 +349,6 @@ class _ReceiptsState extends State<Receipts> {
     );
   }
 
-  // Replace your _buildPaymentCard with this enhanced version
   Widget _buildPaymentCard(
     PaymentModel payment,
     Color accentColor,
@@ -987,7 +965,6 @@ class _ReceiptsState extends State<Receipts> {
     }
   }
 
-  // Add this helper method to your class
   Widget _buildFilterChip(String value, String label, Color accentColor) {
     return Padding(
       padding: const EdgeInsets.only(right: 8.0),

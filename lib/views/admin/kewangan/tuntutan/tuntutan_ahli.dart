@@ -3,6 +3,7 @@ import 'package:easykhairat/controllers/navigation_controller.dart';
 import 'package:easykhairat/controllers/tuntutan_controller.dart';
 import 'package:easykhairat/models/claimLineModel.dart';
 import 'package:easykhairat/models/tuntutanModel.dart';
+import 'package:easykhairat/utils/random.dart';
 import 'package:easykhairat/widgets/header.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -34,12 +35,7 @@ class TuntutanAhliState extends State<TuntutanAhli> {
     super.initState();
     claimController.fetchTuntutan();
   }
-
-  String formatDate(DateTime? date) {
-    if (date == null) return 'N/A';
-    return DateFormat('dd/MM/yyyy').format(date);
-  }
-
+  
   @override
   Widget build(BuildContext context) {
     final tuntutan = claimController.getTuntutan();
