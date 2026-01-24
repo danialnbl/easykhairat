@@ -8,6 +8,7 @@ import 'dart:async';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:easykhairat/controllers/toyyibpay_service.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/services.dart';
 import 'package:app_links/app_links.dart';
 import 'package:universal_html/html.dart' as html;
 
@@ -41,6 +42,7 @@ class _PaymentPageState extends State<PaymentPage> {
   Timer? _statusCheckTimer;
   final AppLinks _appLinks = AppLinks();
   StreamSubscription? _deepLinkSubscription;
+  static const platform = MethodChannel('com.easykhairat.app/browser');
 
   @override
   void initState() {
@@ -49,8 +51,13 @@ class _PaymentPageState extends State<PaymentPage> {
     // Initialize deep link handling
     _initDeepLinkHandling();
 
-    // Launch external browser for both web and mobile
-    _launchExternalBrowser();
+    // Use WebView on mobile, external browser on web
+    if (kIsWeb) {
+      _launchExternalBrowser();
+    } else {
+      // Initialize WebView for mobile - gives us full control
+      _initializeWebView();
+    }
 
     // Start checking payment status immediately
     _startCheckingPaymentStatus();
@@ -79,6 +86,7 @@ class _PaymentPageState extends State<PaymentPage> {
     try {
       final initialUri = await _appLinks.getInitialLink();
       if (initialUri != null) {
+        print('Initial URI detected: $initialUri');
         _handleIncomingLink(initialUri);
       }
     } catch (e) {
@@ -100,11 +108,22 @@ class _PaymentPageState extends State<PaymentPage> {
           uri.queryParameters['status_id'] ??
           '';
 
-      // DON'T navigate to any routes here - just check the payment status
+      print('Deep link status: $status');
+
+      // Check the payment status immediately
       if (status == '1') {
         print('Payment success detected via deep link');
-        // Immediately check payment status and update UI
         _checkPaymentStatus();
+      } else if (status == '3') {
+        print('Payment failure detected via deep link');
+        // Only close browser on web platform
+        if (kIsWeb) {
+          _closeExternalBrowser().then((_) {
+            _handlePaymentFailure('Pembayaran dibatalkan atau gagal.');
+          });
+        } else {
+          _handlePaymentFailure('Pembayaran dibatalkan atau gagal.');
+        }
       }
     }
   }
@@ -141,39 +160,38 @@ class _PaymentPageState extends State<PaymentPage> {
         setState(() => _paymentCompleted = true);
 
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text("Pembayaran berjaya! Rekod telah dikemaskini."),
-              backgroundColor: Colors.green,
-            ),
-          );
-
-          // Instead of just popping, check if we need to handle deep link navigation
-
-          // If opened from deep link and not navigated properly
-          if (Navigator.of(context).canPop()) {
-            // Safe to pop back
-            Get.offAllNamed(AppRoutes.home);
-          } else {
-            // App was likely launched from deep link, navigate to home
-            Get.offAllNamed(AppRoutes.home);
+          // Close external browser only on web
+          if (kIsWeb) {
+            await _closeExternalBrowser();
           }
+
+          // Navigate to success page with payment details
+          Get.offAllNamed(
+            AppRoutes.paymentSuccess,
+            arguments: {
+              'amount': widget.amount.toString(),
+              'description': widget.description,
+              'billCode': widget.billCode,
+              'transactionId': '',
+            },
+          );
         }
       } else if (status == 3) {
         // Failed payment
         _statusCheckTimer?.cancel();
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text("Pembayaran gagal. Sila cuba lagi."),
-              backgroundColor: Colors.red,
-            ),
-          );
+        if (kIsWeb) {
+          await _closeExternalBrowser();
         }
-        Get.offAllNamed(AppRoutes.home);
+        _handlePaymentFailure(
+          'Pembayaran tidak dapat diproses. Sila cuba lagi.',
+        );
       }
     } catch (e) {
       print('Error checking payment status: $e');
+      if (kIsWeb) {
+        await _closeExternalBrowser();
+      }
+      _handlePaymentFailure('Ralat semasa memeriksa status pembayaran: $e');
     }
   }
 
@@ -219,16 +237,62 @@ class _PaymentPageState extends State<PaymentPage> {
     }
   }
 
+  void _handlePaymentFailure(String errorMessage) {
+    _statusCheckTimer?.cancel();
+    if (mounted) {
+      Get.offAllNamed(
+        AppRoutes.paymentFailure,
+        arguments: {
+          'amount': widget.amount.toString(),
+          'description': widget.description,
+          'billCode': widget.billCode,
+          'errorMessage': errorMessage,
+        },
+      );
+    }
+  }
+
+  Future<void> _closeExternalBrowser() async {
+    try {
+      // For web platform
+      if (kIsWeb) {
+        print('Web platform: External browser will close with app navigation');
+      } else {
+        // For mobile platforms, try to close the external browser using platform channel
+        try {
+          await platform.invokeMethod('closeExternalBrowser');
+          print('Mobile platform: Sent close command to external browser');
+        } on PlatformException catch (e) {
+          print(
+            'Mobile platform: Could not close external browser: ${e.message}',
+          );
+          // This is expected as the external browser cannot be closed programmatically
+          // The user will need to close it manually or it will close when the app goes to background
+        }
+      }
+    } catch (e) {
+      print('Error attempting to close browser: $e');
+    }
+  }
+
   void _launchExternalBrowser() async {
-    final url = 'https://dev.toyyibpay.com/${widget.billCode}';
+    // Add redirect URL to payment gateway to trigger deep link on completion
+    final url =
+        'https://dev.toyyibpay.com/${widget.billCode}?redirect_uri=easykhairat://payment-status';
 
     try {
       // Launch URL in external browser
       if (await canLaunchUrl(Uri.parse(url))) {
-        await launchUrl(
-          Uri.parse(url),
-          mode: LaunchMode.externalApplication, // This forces external browser
-        );
+        print('Launching external browser for payment: $url');
+
+        if (kIsWeb) {
+          // On web, use external application
+          await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+        } else {
+          // On mobile, use inAppBrowserView which provides better control
+          // and will use custom tabs on Android/SFSafariViewController on iOS
+          await launchUrl(Uri.parse(url), mode: LaunchMode.inAppBrowserView);
+        }
       } else {
         print('Could not launch $url');
         ScaffoldMessenger.of(context).showSnackBar(
@@ -242,6 +306,12 @@ class _PaymentPageState extends State<PaymentPage> {
       }
     } catch (e) {
       print('Error launching URL: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Ralat meluncurkan pelayar: $e"),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
   }
 
@@ -285,8 +355,21 @@ class _PaymentPageState extends State<PaymentPage> {
                 if ((request.url.contains('payment-status') ||
                         request.url.contains('return_url')) &&
                     !_paymentRecorded) {
+                  // Prevent navigation and check payment status instead
                   _checkPaymentStatus();
+                  return NavigationDecision.prevent;
                 }
+
+                // If URL contains success/failure status, prevent navigation and handle it
+                if ((request.url.contains('status=1') ||
+                        request.url.contains('status_id=1') ||
+                        request.url.contains('status=3') ||
+                        request.url.contains('status_id=3')) &&
+                    !_paymentRecorded) {
+                  _checkPaymentStatus();
+                  return NavigationDecision.prevent;
+                }
+
                 return NavigationDecision.navigate;
               },
               onWebResourceError: (WebResourceError error) {
@@ -411,45 +494,57 @@ class _PaymentPageState extends State<PaymentPage> {
             },
           ),
         ),
-        body: Center(
-          child: Container(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.account_balance_wallet,
-                  size: 80,
-                  color: Colors.blue,
-                ),
-                SizedBox(height: 30),
-                Text(
-                  "Pembayaran Sedang Diproses",
-                  style: TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.blue.shade800,
+        body:
+            kIsWeb
+                ? Center(
+                  child: Container(
+                    padding: const EdgeInsets.all(20),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.account_balance_wallet,
+                          size: 80,
+                          color: Colors.blue,
+                        ),
+                        SizedBox(height: 30),
+                        Text(
+                          "Pembayaran Sedang Diproses",
+                          style: TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.blue.shade800,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        SizedBox(height: 20),
+                        Text(
+                          "Anda telah dialihkan ke laman pembayaran dalam pelayar web. Sila lengkapkan pembayaran anda dan jangan tutup aplikasi ini.",
+                          style: TextStyle(fontSize: 16),
+                          textAlign: TextAlign.center,
+                        ),
+                        SizedBox(height: 30),
+                        CircularProgressIndicator(),
+                        SizedBox(height: 30),
+                        Text(
+                          "Status pembayaran akan dikemaskini secara automatik selepas pembayaran berjaya.",
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.grey.shade600,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                    ),
                   ),
-                  textAlign: TextAlign.center,
+                )
+                : Stack(
+                  children: [
+                    WebViewWidget(controller: _controller),
+                    if (_isLoading)
+                      const Center(child: CircularProgressIndicator()),
+                  ],
                 ),
-                SizedBox(height: 20),
-                Text(
-                  "Anda telah dialihkan ke laman pembayaran dalam pelayar web. Sila lengkapkan pembayaran anda dan jangan tutup aplikasi ini.",
-                  style: TextStyle(fontSize: 16),
-                  textAlign: TextAlign.center,
-                ),
-                SizedBox(height: 30),
-                CircularProgressIndicator(),
-                SizedBox(height: 30),
-                Text(
-                  "Status pembayaran akan dikemaskini secara automatik selepas pembayaran berjaya.",
-                  style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
-                  textAlign: TextAlign.center,
-                ),
-              ],
-            ),
-          ),
-        ),
       ),
     );
   }

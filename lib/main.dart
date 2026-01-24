@@ -45,17 +45,16 @@ class _MyAppState extends State<MyApp> {
   Future<void> _initAppLinks() async {
     _appLinks = AppLinks();
 
-    // Listen for deep link events when the app is opened from a link
     _appLinks.uriLinkStream.listen((Uri? uri) {
       if (uri != null) {
         _handleDeepLink(uri);
       }
     });
 
-    // Handle the case where the app was opened from a link
     try {
       final initialUri = await _appLinks.getInitialLink();
       if (initialUri != null) {
+        print('Initial app link detected: $initialUri');
         _handleDeepLink(initialUri);
       }
     } catch (e) {
@@ -66,15 +65,21 @@ class _MyAppState extends State<MyApp> {
   void _handleDeepLink(Uri uri) {
     print('Received deep link: $uri');
 
+    final path = uri.path;
+    final fragment = uri.fragment;
+    final scheme = uri.scheme;
+
     // Check if this is a password reset link
-    if (uri.path.contains('reset-callback') ||
-        uri.fragment.contains('type=recovery')) {
-      // Extract the access token and refresh token if available from the URL
-      final fragment = uri.fragment;
-      if (fragment.isNotEmpty) {
-        // Navigate to update password page
+    if (path.contains('reset-callback') || fragment.contains('type=recovery')) {
+      print('Password recovery deep link detected');
+      Future.delayed(const Duration(milliseconds: 500), () {
         Get.offAllNamed(AppRoutes.updatePassword);
-      }
+      });
+    }
+    // Check for payment status deep links
+    else if (scheme == 'easykhairat' && uri.host == 'payment-status') {
+      final status = uri.queryParameters['status'] ?? '';
+      print('Payment status deep link detected: $status');
     }
   }
 
@@ -116,14 +121,14 @@ class _MyAppState extends State<MyApp> {
                 } else if (userType == 'user') {
                   Get.offAllNamed(AppRoutes.home);
                 } else {
-                  // Default route or handle unknown user type
+                  // Default route
                   Get.offAllNamed(AppRoutes.initial);
                 }
               });
             })
             .catchError((error) {
               print('Error fetching user type: $error');
-              // Handle error, possibly redirect to login
+              // Handle error
               Future.delayed(Duration.zero, () {
                 Get.offAllNamed(AppRoutes.initial);
               });
@@ -157,7 +162,6 @@ class _MyAppState extends State<MyApp> {
 
   @override
   void dispose() {
-    // No need to dispose AppLinks as it doesn't have a dispose method
     super.dispose();
   }
 }
