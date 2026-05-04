@@ -2,6 +2,7 @@ import 'package:easykhairat/controllers/fee_controller.dart';
 import 'package:easykhairat/controllers/navigation_controller.dart';
 import 'package:easykhairat/controllers/payment_controller.dart';
 import 'package:easykhairat/models/paymentModel.dart';
+import 'package:easykhairat/utils/random.dart';
 import 'package:easykhairat/widgets/header.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -44,11 +45,6 @@ class YuranIndividuState extends State<YuranIndividu> {
     // Auto-fill today's date
     selectedDate = DateTime.now();
     dateController.text = DateFormat('dd/MM/yyyy').format(selectedDate!);
-  }
-
-  String formatDate(DateTime? date) {
-    if (date == null) return 'N/A';
-    return DateFormat('dd/MM/yyyy').format(date);
   }
 
   // Auto-fill amount when fee is selected

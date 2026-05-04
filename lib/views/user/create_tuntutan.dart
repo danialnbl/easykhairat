@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:easykhairat/controllers/tuntutan_controller.dart';
 import 'package:easykhairat/models/tuntutanModel.dart';
+import 'package:easykhairat/utils/random.dart';
 import 'package:easykhairat/views/user/user_tuntutan.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -56,11 +57,6 @@ class _CreateTuntutanPageState extends State<CreateTuntutanPage> {
     _claimTypeController.text = 'Ahli Sendiri'; // Default value
   }
 
-  // Format date for display
-  String formatDate(DateTime? date) {
-    if (date == null) return 'N/A';
-    return DateFormat('dd/MM/yyyy').format(date);
-  }
 
   // Step 1: Collect basic info (no database operation)
   void _validateBasicInfoAndContinue() {

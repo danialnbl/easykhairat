@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:easykhairat/models/tuntutanModel.dart';
+import 'package:easykhairat/utils/random.dart';
 import 'package:easykhairat/views/user/create_tuntutan.dart';
 import 'package:easykhairat/views/user/user_tuntutan.dart';
 import 'package:flutter/material.dart';
@@ -36,12 +37,6 @@ class _ListTuntutanPageState extends State<ListTuntutanPage> {
     super.initState();
     // Initialize the future
     _claimsFuture = _fetchUserTuntutan();
-  }
-
-  // Format date for display
-  String formatDate(DateTime? date) {
-    if (date == null) return 'N/A';
-    return DateFormat('dd/MM/yyyy').format(date);
   }
 
   // Refresh data method - clearer separation of concerns
@@ -179,88 +174,81 @@ class _ListTuntutanPageState extends State<ListTuntutanPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: backgroundColor,
-      appBar: AppBar(
-        title: Text(
-          'Senarai Tuntutan',
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
-        backgroundColor: primaryColor,
-        foregroundColor: Colors.white,
-        elevation: 2,
-        shadowColor: primaryColor.withOpacity(0.5),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(bottom: Radius.circular(16)),
-        ),
-      ),
-      body: RefreshIndicator(
-        onRefresh: () async {
-          _refreshData();
-
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Senarai tuntutan dikemaskini'),
-              backgroundColor: primaryColor,
-              behavior: SnackBarBehavior.floating,
-              margin: EdgeInsets.all(16),
-              duration: Duration(seconds: 1),
-            ),
-          );
-        },
-        color: primaryColor,
-        backgroundColor: Colors.white,
-        child: SingleChildScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Header info card
-                Card(
-                  color: MoonColors.light.bulma.withOpacity(0.1),
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Icon(
-                              MoonIcons.generic_info_16_light,
-                              color: MoonColors.light.bulma,
-                            ),
-                            SizedBox(width: 8),
-                            Text(
-                              'Tuntutan Khairat Kematian',
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: 8),
-                        Text(
-                          'Tuntutan ini adalah untuk ahli yang berdaftar di bawah khairat kematian. '
-                          'Sila lengkapkan maklumat yang diperlukan dan lampirkan dokumen yang berkaitan.',
-                          style: TextStyle(fontSize: 14),
-                        ),
-                      ],
-                    ),
-                  ),
+      // appBar: AppBar(
+      //   title: Text(
+      //     'Senarai Tuntutan',
+      //     style: TextStyle(fontWeight: FontWeight.bold),
+      //   ),
+      //   backgroundColor: primaryColor,
+      //   foregroundColor: Colors.white,
+      //   elevation: 2,
+      //   shadowColor: primaryColor.withOpacity(0.5),
+      //   shape: RoundedRectangleBorder(
+      //     borderRadius: BorderRadius.vertical(bottom: Radius.circular(16)),
+      //   ),
+      // ),
+      body: Column(
+        children: [
+          Container(
+            width: double.infinity,
+            decoration: BoxDecoration(
+              color: Color(0xFF2BAAAD),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 4,
+                  offset: Offset(0, 2),
                 ),
-                SizedBox(height: 16),
-
-                // List of user's tuntutan
-                _buildTuntutanList(),
               ],
             ),
+            child: SafeArea(
+              bottom: false,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16.0,
+                  vertical: 12.0,
+                ),
+                child: Row(
+                  children: [
+                    IconButton(
+                      icon: Icon(Icons.arrow_back, color: Colors.white),
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Senarai Tuntutan',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
           ),
-        ),
+          Expanded(
+            child: RefreshIndicator(
+              onRefresh: () async {
+                _refreshData();
+                await _claimsFuture;
+              },
+              color: MoonColors.light.bulma,
+              backgroundColor: Colors.white,
+              displacement: 20,
+              strokeWidth: 3,
+              child: SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [_buildTuntutanList()],
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
@@ -288,61 +276,54 @@ class _ListTuntutanPageState extends State<ListTuntutanPage> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Padding(
-              padding: const EdgeInsets.only(left: 4.0, bottom: 8.0),
-              child: Text(
-                'Senarai Tuntutan Anda',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-            ),
             // Add refresh button
-            if (_hasLoadedInitially)
-              isLoading
-                  ? SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                  : IconButton(
-                    icon: Icon(Icons.refresh, color: MoonColors.light.bulma),
-                    onPressed: _refreshData,
-                  ),
+            // if (_hasLoadedInitially)
+            //   isLoading
+            //       ? SizedBox(
+            //         width: 20,
+            //         height: 20,
+            //         child: CircularProgressIndicator(strokeWidth: 2),
+            //       )
+            //       : IconButton(
+            //         icon: Icon(Icons.refresh, color: MoonColors.light.bulma),
+            //         onPressed: _refreshData,
+            //       ),
           ],
         ),
         FutureBuilder<List<ClaimModel>>(
           future: _claimsFuture,
           builder: (context, snapshot) {
             // Always show loading state when waiting or when there's an error
-            if (snapshot.connectionState == ConnectionState.waiting ||
-                isLoading ||
-                (snapshot.hasError && _userClaims.isEmpty)) {
-              return Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(32.0),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      SizedBox(
-                        width: 50,
-                        height: 50,
-                        child: CircularProgressIndicator(
-                          color: primaryColor,
-                          strokeWidth: 3,
-                        ),
-                      ),
-                      SizedBox(height: 16),
-                      Text(
-                        'Memuat senarai tuntutan...',
-                        style: TextStyle(
-                          color: primaryColor,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            }
+            // if (snapshot.connectionState == ConnectionState.waiting ||
+            //     isLoading ||
+            //     (snapshot.hasError && _userClaims.isEmpty)) {
+            //   return Center(
+            //     child: Padding(
+            //       padding: const EdgeInsets.all(32.0),
+            //       child: Column(
+            //         mainAxisSize: MainAxisSize.min,
+            //         children: [
+            //           SizedBox(
+            //             width: 50,
+            //             height: 50,
+            //             child: CircularProgressIndicator(
+            //               color: primaryColor,
+            //               strokeWidth: 3,
+            //             ),
+            //           ),
+            //           SizedBox(height: 16),
+            //           Text(
+            //             'Memuat senarai tuntutan...',
+            //             style: TextStyle(
+            //               color: primaryColor,
+            //               fontWeight: FontWeight.w500,
+            //             ),
+            //           ),
+            //         ],
+            //       ),
+            //     ),
+            //   );
+            // }
 
             // Empty state
             List<ClaimModel> claims = snapshot.data ?? _userClaims;
@@ -516,7 +497,6 @@ class _ListTuntutanPageState extends State<ListTuntutanPage> {
   // Helper widget to display status chips with appropriate colors
   Widget _buildStatusChip(String status) {
     Color chipColor;
-    Color textColor = Colors.white;
     IconData statusIcon;
 
     switch (status.toLowerCase()) {
@@ -531,7 +511,7 @@ class _ListTuntutanPageState extends State<ListTuntutanPage> {
       case 'dibatalkan':
         chipColor = Colors.grey[600]!;
         statusIcon = Icons.block;
-        textColor = Colors.white70; // Lighter text for grey
+        // Lighter text for grey
         break;
       case 'dalam proses':
       default:

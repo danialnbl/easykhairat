@@ -1,8 +1,10 @@
 import 'package:easykhairat/views/admin/admin_main.dart';
 import 'package:easykhairat/views/auth/signIn.dart';
-import 'package:easykhairat/views/auth/reset_password.dart'; // Add this import
-import 'package:easykhairat/views/auth/update_password.dart'; // Add this import
+import 'package:easykhairat/views/auth/reset_password.dart';
+import 'package:easykhairat/views/auth/update_password.dart';
 import 'package:easykhairat/views/user/home.dart';
+import 'package:easykhairat/views/user/payment_success.dart';
+import 'package:easykhairat/views/user/payment_failure.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:easykhairat/views/admin/admin_dashboard.dart';
@@ -23,8 +25,10 @@ class AppRoutes {
   static const String prosesYuran = '/proses-yuran';
   static const String adminSettings = '/admin-settings';
   static const String home = '/home';
-  static const String resetPassword = '/reset-password'; // Add this route
-  static const String updatePassword = '/update-password'; // Add this route
+  static const String resetPassword = '/reset-password';
+  static const String updatePassword = '/update-password';
+  static const String paymentSuccess = '/payment-success';
+  static const String paymentFailure = '/payment-failure';
 
   static final List<GetPage> pages = [
     GetPage(
@@ -40,14 +44,30 @@ class AppRoutes {
     GetPage(name: prosesYuran, page: () => ProsesYuran()),
     GetPage(name: adminSettings, page: () => AdminSettings()),
     GetPage(name: home, page: () => HomePageWidget()),
+    GetPage(name: resetPassword, page: () => ResetPasswordPage()),
+    GetPage(name: updatePassword, page: () => UpdatePasswordPage()),
     GetPage(
-      name: resetPassword,
-      page: () => ResetPasswordPage(),
-    ), // Add this route
+      name: paymentSuccess,
+      page:
+          () => PaymentSuccessPage(
+            amount: Get.arguments?['amount'] ?? '0.00',
+            description: Get.arguments?['description'] ?? '',
+            billCode: Get.arguments?['billCode'] ?? '',
+            transactionId: Get.arguments?['transactionId'] ?? '',
+          ),
+    ),
     GetPage(
-      name: updatePassword,
-      page: () => UpdatePasswordPage(),
-    ), // Add this page
+      name: paymentFailure,
+      page:
+          () => PaymentFailurePage(
+            amount: Get.arguments?['amount'] ?? '0.00',
+            description: Get.arguments?['description'] ?? '',
+            billCode: Get.arguments?['billCode'] ?? '',
+            errorMessage:
+                Get.arguments?['errorMessage'] ??
+                'Pembayaran tidak dapat diproses',
+          ),
+    ),
   ];
 }
 
@@ -57,7 +77,6 @@ class AuthMiddleware extends GetMiddleware {
     final isAuthenticated =
         Supabase.instance.client.auth.currentSession != null;
 
-    // If trying to access sign-in page while already authenticated, redirect to home
     if (route == AppRoutes.initial && isAuthenticated) {
       return RouteSettings(name: AppRoutes.home);
     }

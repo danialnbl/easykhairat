@@ -207,13 +207,13 @@ class UserController extends GetxController {
     try {
       isLoading.value = true;
 
-      // Load the environment variables first (in case onInit() is not called at the correct time)
-      // await dotenv.load(fileName: ".env");
+      // Load the environment variables
+      await dotenv.load(fileName: ".env");
       // print(dotenv.env); // To see all loaded environment variables
 
       // Fetch the service role key from .env
-      // var key = dotenv.env['SUPABASE_SERVICE_ROLE_KEY'];
-      var key = String.fromEnvironment('SUPABASE_SERVICE_ROLE_KEY');
+      var key = dotenv.env['SUPABASE_SERVICE_ROLE_KEY'];
+      // var key = String.fromEnvironment('SUPABASE_SERVICE_ROLE_KEY');
 
       if (key == null || key.isEmpty) {
         throw Exception('Service Role Key not found in .env file');
@@ -226,7 +226,7 @@ class UserController extends GetxController {
         Uri.parse(supabaseUrl),
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer $key', // Add the service role key here
+          'Authorization': 'Bearer $key',
         },
         body: json.encode({'user_id': userId}),
       );
@@ -256,7 +256,6 @@ class UserController extends GetxController {
           if (changes.isNotEmpty) {
             // Handle changes (inserts, updates, deletes)
 
-            // You can update users in a more customized way here if needed
             fetchUsers(); // Fetch the latest users from the database
           }
         });
@@ -274,7 +273,6 @@ class UserController extends GetxController {
     await supabase.auth.signOut();
   }
 
-  // Add this method to the UserController class
   Map<int, int> getRegistrationsByYear() {
     Map<int, int> yearCounts = {};
 

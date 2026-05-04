@@ -1,16 +1,12 @@
-import 'dart:math'; // Add this import for the min function
-import 'package:badges/badges.dart' as badges;
 import 'package:easykhairat/controllers/navigation_controller.dart';
 import 'package:easykhairat/controllers/fee_controller.dart';
 import 'package:easykhairat/controllers/announcement_controller.dart';
 import 'package:easykhairat/models/announcementModel.dart';
 import 'package:easykhairat/views/user/announcement_details.dart';
-import 'package:easykhairat/views/user/create_tuntutan.dart';
 import 'package:easykhairat/views/user/list_tuntutan.dart';
 import 'package:easykhairat/views/user/receipts.dart';
 import 'package:easykhairat/views/user/settings.dart';
 import 'package:easykhairat/views/user/userPayment.dart';
-import 'package:easykhairat/views/user/user_tuntutan.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -163,20 +159,18 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                             ),
                           ],
                         ),
-                        const SizedBox(height: 16),
                         // Improve the quick action grid with more visual appeal
                         LayoutBuilder(
                           builder: (context, constraints) {
                             return Container(
                               decoration: ShapeDecoration(
-                                color: Colors.white,
                                 shadows: [
-                                  BoxShadow(
-                                    color: Colors.black.withOpacity(0.05),
-                                    blurRadius: 10,
-                                    spreadRadius: 1,
-                                    offset: Offset(0, 2),
-                                  ),
+                                  // BoxShadow(
+                                  //   color: Colors.black.withOpacity(0.05),
+                                  //   blurRadius: 10,
+                                  //   spreadRadius: 1,
+                                  //   offset: Offset(0, 2),
+                                  // ),
                                 ],
                                 shape: MoonSquircleBorder(
                                   borderRadius: BorderRadius.circular(
@@ -198,12 +192,12 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                                 children: [
                                   _buildQuickActionTile(
                                     icon: MoonIcons.generic_bet_16_light,
-                                    label: "Resit Pembayaran",
+                                    label: "Resit",
                                     onTap: () => navController.changeIndex(1),
                                   ),
                                   _buildQuickActionTile(
                                     icon: Icons.payment,
-                                    label: "Bayar Sekarang",
+                                    label: "Bayar",
                                     onTap: () => Get.to(() => UserPayment()),
                                   ),
                                   _buildQuickActionTile(
@@ -217,7 +211,6 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                             );
                           },
                         ),
-                        const SizedBox(height: 16),
                         Row(
                           children: [
                             Text(
@@ -791,40 +784,6 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                               },
                             ),
                             const SizedBox(height: 16),
-                            // Obx(() {
-                            //   final controller = Get.put(
-                            //     AnnouncementController(),
-                            //   );
-                            //   final generalAnnouncements =
-                            //       controller.announcements
-                            //           .where(
-                            //             (a) =>
-                            //                 a.announcementType.toLowerCase() !=
-                            //                 'kematian',
-                            //           )
-                            //           .toList();
-
-                            //   // Make sure advertisementDot is in valid range
-                            //   if (advertisementDot.value >=
-                            //           generalAnnouncements.length &&
-                            //       generalAnnouncements.isNotEmpty) {
-                            //     advertisementDot.value = 0;
-                            //   }
-
-                            //   return MoonDotIndicator(
-                            //     selectedDot:
-                            //         generalAnnouncements.isEmpty
-                            //             ? 0
-                            //             : min(
-                            //               advertisementDot.value,
-                            //               generalAnnouncements.length - 1,
-                            //             ),
-                            //     dotCount:
-                            //         generalAnnouncements.isEmpty
-                            //             ? 1
-                            //             : generalAnnouncements.length,
-                            //   );
-                            // }),
                           ],
                         ),
                       ],
@@ -963,10 +922,7 @@ class _HomePageWidgetState extends State<HomePageWidget> {
               Container(
                 padding: EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color:
-                      highlight
-                          ? MoonColors.light.bulma.withOpacity(0.2)
-                          : Colors.white,
+                  color: highlight ? Color(0xFF2BAAAD) : Color(0xFF2BAAAD),
                   borderRadius: BorderRadius.circular(14),
                   boxShadow:
                       highlight
@@ -982,22 +938,37 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                 child: Icon(
                   icon,
                   size: 26,
-                  color:
-                      highlight
-                          ? MoonColors.light.bulma
-                          : MoonColors.light.bulma.withOpacity(0.8),
+                  color: highlight ? Colors.white : Colors.white,
                 ),
               ),
               const SizedBox(height: 10),
-              Text(
-                label,
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 13.5,
-                  fontWeight: highlight ? FontWeight.bold : FontWeight.w600,
-                  color: highlight ? MoonColors.light.bulma : Colors.black87,
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                // decoration: BoxDecoration(
+                //   color: Color(0xFF2BAAAD),
+                //   borderRadius: BorderRadius.circular(
+                //     20,
+                //   ),
+                // ),
+                child: Text(
+                  label,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 13.5,
+                    fontWeight: highlight ? FontWeight.bold : FontWeight.w600,
+                    color: highlight ? Colors.black : Colors.black,
+                  ),
                 ),
               ),
+              // Text(
+              //   label,
+              //   textAlign: TextAlign.center,
+              //   style: TextStyle(
+              //     fontSize: 13.5,
+              //     fontWeight: highlight ? FontWeight.bold : FontWeight.w600,
+              //     color: highlight ? MoonColors.light.bulma : Colors.black87,
+              //   ),
+              // ),
             ],
           ),
         ),

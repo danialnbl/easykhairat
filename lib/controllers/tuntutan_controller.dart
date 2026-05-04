@@ -187,7 +187,7 @@ class TuntutanController extends GetxController {
   Future<ClaimModel?> createTuntutan({
     required String userId,
     required String claimType,
-    String? certificateUrl, // Add this parameter
+    String? certificateUrl,
   }) async {
     try {
       final response =
@@ -223,7 +223,7 @@ class TuntutanController extends GetxController {
     }
   }
 
-  // New method to update claim reason
+  // method to update claim reason
   Future<void> updateClaimReason(int claimId, String reason) async {
     try {
       final response =

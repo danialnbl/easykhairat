@@ -2,8 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class ToyyibPayService {
-  final String apiKey =
-      '1y7d1m73-9e3t-tl5d-0i2y-epv6q1zposog'; // Your ToyyibPay secret key
+  final String apiKey = '1y7d1m73-9e3t-tl5d-0i2y-epv6q1zposog';
   final String baseUrl = 'https://dev.toyyibpay.com/';
 
   /// Creates a new bill in ToyyibPay
@@ -37,7 +36,7 @@ class ToyyibPayService {
           'billSplitPaymentArgs': '',
           'billPaymentChannel': '0', // All payment channels
           'billContentEmail': 'Thank you for your payment!',
-          'billChargeToCustomer': '1', // No extra charges to customer
+          'billChargeToCustomer': '1',
         },
       );
 
@@ -73,20 +72,28 @@ class ToyyibPayService {
       );
 
       if (response.statusCode == 200) {
-        final responseData = json.decode(response.body);
+        try {
+          final responseData = json.decode(response.body);
 
-        // Check if we have valid transaction data
-        if (responseData is List && responseData.isNotEmpty) {
-          // Check if there's any transaction for this bill
-          if (responseData.length > 0) {
-            // Check the payment status
-            if (responseData[0]['billpaymentStatus'] != null) {
-              return int.parse(responseData[0]['billpaymentStatus'].toString());
+          // Check if we have valid transaction data
+          if (responseData is List && responseData.isNotEmpty) {
+            // Check if there's any transaction for this bill
+            if (responseData.length > 0) {
+              // Check the payment status
+              if (responseData[0]['billpaymentStatus'] != null) {
+                return int.parse(
+                  responseData[0]['billpaymentStatus'].toString(),
+                );
+              }
             }
+            return 2; // Bill exists but no transaction yet (pending)
           }
-          return 2; // Bill exists but no transaction yet (pending)
+          return 0; // No data found
+        } on FormatException catch (e) {
+          // Handle non-JSON responses
+          print('Non-JSON response from ToyyibPay: ${response.body}');
+          return 2; // Treat as pending
         }
-        return 0; // No data found
       } else {
         print(
           'Error checking bill status: ${response.statusCode}, ${response.body}',
@@ -110,12 +117,18 @@ class ToyyibPayService {
       );
 
       if (response.statusCode == 200) {
-        final responseData = json.decode(response.body);
+        try {
+          final responseData = json.decode(response.body);
 
-        if (responseData is List && responseData.isNotEmpty) {
-          return responseData[0];
+          if (responseData is List && responseData.isNotEmpty) {
+            return responseData[0];
+          }
+          return null;
+        } on FormatException catch (e) {
+          // Handle non-JSON responses
+          print('Non-JSON response from ToyyibPay: ${response.body}');
+          return null;
         }
-        return null;
       } else {
         print(
           'Error getting transaction details: ${response.statusCode}, ${response.body}',

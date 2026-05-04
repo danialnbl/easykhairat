@@ -111,8 +111,7 @@ class AuthService {
 
   static Future<void> signOut() async {
     await supabase.auth.signOut();
-    SessionController()
-        .checkSession(); // This will handle redirection to sign-in page
+    SessionController().checkSession(); // handle redirection to sign-in page
   }
 
   /// Resends verification email to the provided email address

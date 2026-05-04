@@ -3,6 +3,7 @@ import 'package:easykhairat/controllers/payment_controller.dart';
 import 'package:easykhairat/controllers/toyyibpay_service.dart';
 import 'package:easykhairat/controllers/user_controller.dart';
 import 'package:easykhairat/models/feeModel.dart';
+import 'package:easykhairat/utils/random.dart';
 import 'package:easykhairat/views/user/fpxPage.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -55,11 +56,6 @@ class _UserPaymentState extends State<UserPayment> {
     } else {
       Get.snackbar('Error', 'User not authenticated');
     }
-  }
-
-  String formatDate(DateTime? date) {
-    if (date == null) return 'N/A';
-    return DateFormat('dd/MM/yyyy').format(date);
   }
 
   @override

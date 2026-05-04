@@ -1,5 +1,6 @@
 import 'package:easykhairat/controllers/tuntutan_controller.dart';
 import 'package:easykhairat/models/tuntutanModel.dart';
+import 'package:easykhairat/utils/random.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:moon_design/moon_design.dart';
@@ -73,11 +74,6 @@ class _UserTuntutanPageState extends State<UserTuntutanPage> {
         });
       }
     }
-  }
-
-  String formatDate(DateTime? date) {
-    if (date == null) return 'N/A';
-    return DateFormat('dd/MM/yyyy').format(date);
   }
 
   @override

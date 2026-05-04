@@ -1,5 +1,6 @@
 import 'package:easykhairat/controllers/family_controller.dart';
 import 'package:easykhairat/controllers/navigation_controller.dart';
+import 'package:easykhairat/utils/random.dart';
 import 'package:easykhairat/widgets/header.dart';
 import 'package:flutter/material.dart';
 import 'package:moon_design/moon_design.dart';
@@ -31,11 +32,6 @@ class MemberListState extends State<MemberList> {
     }
   }
 
-  // Format date for display
-  String formatDate(DateTime? date) {
-    if (date == null) return 'N/A';
-    return DateFormat('dd/MM/yyyy').format(date);
-  }
 
   // Filter users based on search text and selected filter
   List<dynamic> getFilteredUsers() {

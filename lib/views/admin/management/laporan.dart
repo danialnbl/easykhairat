@@ -1,3 +1,4 @@
+import 'package:easykhairat/utils/random.dart';
 import 'package:universal_html/html.dart' as html;
 import 'dart:typed_data';
 import 'package:easykhairat/widgets/header.dart';
@@ -149,7 +150,7 @@ class _LaporanPageState extends State<LaporanPage> {
                 'No. Kad Pengenalan': u.userIdentification,
                 'Emel': u.userEmail,
                 'Jenis': u.userType,
-                'Tarikh': formatDate(u.userCreatedAt.toString()),
+                'Tarikh': formatDate(u.userCreatedAt),
               },
             )
             .toList();
@@ -401,7 +402,7 @@ class _LaporanPageState extends State<LaporanPage> {
 
     // Add date subtitle row
     final dateRange = sheet.getRangeByIndex(2, 3, 2, columns.length + 2);
-    final currentDate = formatDate(DateTime.now().toString());
+    final currentDate = formatDate(DateTime.now());
     dateRange.setText('Tarikh: $currentDate');
     dateRange.cellStyle.fontSize = 12;
     dateRange.cellStyle.hAlign = xlsio.HAlignType.center;
@@ -421,7 +422,7 @@ class _LaporanPageState extends State<LaporanPage> {
         var cellValue = data[row][columns[col]];
         if (columns[col].toLowerCase().contains('tarikh') &&
             cellValue != null) {
-          cellValue = formatDate(cellValue.toString());
+          cellValue = formatDate(cellValue);
         }
         sheet.getRangeByIndex(row + 5, col + 1).setText('$cellValue');
       }
@@ -482,7 +483,7 @@ class _LaporanPageState extends State<LaporanPage> {
                           ),
                           // Add date
                           pw.Text(
-                            'Tarikh: ${formatDate(DateTime.now().toString())}',
+                            'Tarikh: ${formatDate(DateTime.now())}',
                             style: pw.TextStyle(fontSize: 12),
                           ),
                         ],
@@ -504,9 +505,7 @@ class _LaporanPageState extends State<LaporanPage> {
                                   // Format dates in the data
                                   if (c.toLowerCase().contains('tarikh') &&
                                       cellValue != null) {
-                                    cellValue = formatDate(
-                                      cellValue.toString(),
-                                    );
+                                    cellValue = formatDate(cellValue);
                                   }
                                   return '$cellValue';
                                 }).toList(),
@@ -1075,16 +1074,6 @@ class _LaporanPageState extends State<LaporanPage> {
         'Keterangan': 'Baki bersih kewangan (kutipan - tuntutan diluluskan)',
       },
     ];
-  }
-
-  // Add this helper function to your _LaporanPageState class
-  String formatDate(String dateString) {
-    try {
-      final date = DateTime.parse(dateString);
-      return "${date.day.toString().padLeft(2, '0')}-${date.month.toString().padLeft(2, '0')}-${date.year}";
-    } catch (e) {
-      return dateString; // Return the original string if parsing fails
-    }
   }
 
   @override
