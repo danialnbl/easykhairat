@@ -45,6 +45,21 @@ class _LaporanPageState extends State<LaporanPage> {
   final RxString selectedMonth = 'Semua'.obs;
   final RxInt selectedYear = DateTime.now().year.obs;
 
+  String safeFormatDate(dynamic value) {
+    if (value == null) return '';
+
+    if (value is DateTime) {
+      return formatDate(value);
+    }
+
+    final parsedDate = DateTime.tryParse(value.toString());
+    if (parsedDate != null) {
+      return formatDate(parsedDate);
+    }
+
+    return value.toString();
+  }
+
   @override
   void initState() {
     super.initState();
@@ -372,99 +387,125 @@ class _LaporanPageState extends State<LaporanPage> {
   Future<void> exportToExcel() async {
     isLoading.value = true;
 
-    final data = getCurrentData();
-    final columns = getCurrentColumns();
-    final workbook = xlsio.Workbook();
-    final sheet = workbook.worksheets[0];
+    try {
+      final data = getCurrentData();
+      final columns = getCurrentColumns();
 
-    // Add logo
-    final ByteData logoData = await rootBundle.load(
-      'assets/images/easyKhairatLogo.png',
-    );
-    final List<int> logoBytes = logoData.buffer.asUint8List();
-    final int logoRowIndex = 1;
-    final int logoColIndex = 1;
-    final xlsio.Picture picture = sheet.pictures.addStream(
-      logoRowIndex,
-      logoColIndex,
-      logoBytes,
-    );
-    picture.width = 100;
-    picture.height = 50;
-
-    // Add title row (now at row 1, but with offset for the logo)
-    final titleRange = sheet.getRangeByIndex(1, 3, 1, columns.length + 2);
-    titleRange.setText('Laporan ${selectedDataType.value} - EasyKhairat');
-    titleRange.cellStyle.bold = true;
-    titleRange.cellStyle.fontSize = 14;
-    titleRange.cellStyle.hAlign = xlsio.HAlignType.center;
-    titleRange.merge();
-
-    // Add date subtitle row
-    final dateRange = sheet.getRangeByIndex(2, 3, 2, columns.length + 2);
-    final currentDate = formatDate(DateTime.now());
-    dateRange.setText('Tarikh: $currentDate');
-    dateRange.cellStyle.fontSize = 12;
-    dateRange.cellStyle.hAlign = xlsio.HAlignType.center;
-    dateRange.merge();
-
-    // Header (now at row 4)
-    for (int i = 0; i < columns.length; i++) {
-      sheet.getRangeByIndex(4, i + 1).setText(columns[i]);
-      sheet.getRangeByIndex(4, i + 1).cellStyle.bold = true;
-      sheet.getRangeByIndex(4, i + 1).cellStyle.backColor = '#D3E5F5';
-    }
-
-    // Data (now starting at row 5)
-    for (int row = 0; row < data.length; row++) {
-      for (int col = 0; col < columns.length; col++) {
-        // Format dates in the data
-        var cellValue = data[row][columns[col]];
-        if (columns[col].toLowerCase().contains('tarikh') &&
-            cellValue != null) {
-          cellValue = formatDate(cellValue);
-        }
-        sheet.getRangeByIndex(row + 5, col + 1).setText('$cellValue');
+      if (data.isEmpty || columns.isEmpty) {
+        Get.snackbar(
+          'Tiada Data',
+          'Tiada data untuk dieksport.',
+          snackPosition: SnackPosition.BOTTOM,
+        );
+        return;
       }
+
+      final workbook = xlsio.Workbook();
+      final sheet = workbook.worksheets[0];
+
+      final ByteData logoData = await rootBundle.load(
+        'assets/images/easyKhairatLogo.png',
+      );
+
+      final List<int> logoBytes = logoData.buffer.asUint8List();
+
+      final xlsio.Picture picture = sheet.pictures.addStream(1, 1, logoBytes);
+
+      picture.width = 100;
+      picture.height = 50;
+
+      final titleRange = sheet.getRangeByIndex(1, 3, 1, columns.length + 2);
+      titleRange.setText('Laporan ${selectedDataType.value} - EasyKhairat');
+      titleRange.cellStyle.bold = true;
+      titleRange.cellStyle.fontSize = 14;
+      titleRange.cellStyle.hAlign = xlsio.HAlignType.center;
+      titleRange.merge();
+
+      final dateRange = sheet.getRangeByIndex(2, 3, 2, columns.length + 2);
+      dateRange.setText('Tarikh: ${formatDate(DateTime.now())}');
+      dateRange.cellStyle.fontSize = 12;
+      dateRange.cellStyle.hAlign = xlsio.HAlignType.center;
+      dateRange.merge();
+
+      for (int i = 0; i < columns.length; i++) {
+        sheet.getRangeByIndex(4, i + 1).setText(columns[i]);
+        sheet.getRangeByIndex(4, i + 1).cellStyle.bold = true;
+        sheet.getRangeByIndex(4, i + 1).cellStyle.backColor = '#D3E5F5';
+      }
+
+      for (int row = 0; row < data.length; row++) {
+        for (int col = 0; col < columns.length; col++) {
+          var cellValue = data[row][columns[col]] ?? '';
+
+          if (columns[col].toLowerCase().contains('tarikh')) {
+            cellValue = safeFormatDate(cellValue);
+          }
+
+          sheet.getRangeByIndex(row + 5, col + 1).setText('$cellValue');
+        }
+      }
+
+      for (int i = 1; i <= columns.length; i++) {
+        sheet.autoFitColumn(i);
+      }
+
+      final bytes = workbook.saveAsStream();
+      workbook.dispose();
+
+      final blob = html.Blob([
+        bytes,
+      ], 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+
+      final url = html.Url.createObjectUrlFromBlob(blob);
+
+      html.AnchorElement(href: url)
+        ..setAttribute('download', 'Laporan_${selectedDataType.value}.xlsx')
+        ..click();
+
+      html.Url.revokeObjectUrl(url);
+    } catch (e) {
+      print('Excel export error: $e');
+
+      Get.snackbar(
+        'Ralat Eksport Excel',
+        e.toString(),
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    } finally {
+      isLoading.value = false;
     }
-
-    final bytes = workbook.saveAsStream();
-    workbook.dispose();
-
-    final blob = html.Blob([
-      bytes,
-    ], 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-    final url = html.Url.createObjectUrlFromBlob(blob);
-    final anchor =
-        html.AnchorElement(href: url)
-          ..setAttribute('download', 'Laporan_${selectedDataType.value}.xlsx')
-          ..click();
-    html.Url.revokeObjectUrl(url);
-
-    isLoading.value = false;
   }
 
   Future<void> exportToPDF() async {
     isLoading.value = true;
 
-    final data = getCurrentData();
-    final columns = getCurrentColumns();
-    final pdf = pw.Document();
+    try {
+      final data = getCurrentData();
+      final columns = getCurrentColumns();
 
-    // Load the logo image
-    final ByteData logoData = await rootBundle.load(
-      'assets/images/easyKhairatLogo.png',
-    );
-    final Uint8List logoBytes = logoData.buffer.asUint8List();
-    final logoImage = pw.MemoryImage(logoBytes);
+      if (data.isEmpty || columns.isEmpty) {
+        Get.snackbar(
+          'Tiada Data',
+          'Tiada data untuk dieksport.',
+          snackPosition: SnackPosition.BOTTOM,
+        );
+        return;
+      }
 
-    pdf.addPage(
-      pw.Page(
-        build:
-            (context) => pw.Column(
-              crossAxisAlignment: pw.CrossAxisAlignment.start,
-              children: [
-                // Add logo and title in a row
+      final pdf = pw.Document();
+
+      final ByteData logoData = await rootBundle.load(
+        'assets/images/easyKhairatLogo.png',
+      );
+
+      final Uint8List logoBytes = logoData.buffer.asUint8List();
+      final logoImage = pw.MemoryImage(logoBytes);
+
+      pdf.addPage(
+        pw.MultiPage(
+          pageFormat: PdfPageFormat.a4.landscape,
+          build:
+              (context) => [
                 pw.Row(
                   mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                   children: [
@@ -473,7 +514,6 @@ class _LaporanPageState extends State<LaporanPage> {
                       child: pw.Column(
                         crossAxisAlignment: pw.CrossAxisAlignment.center,
                         children: [
-                          // Add title
                           pw.Text(
                             'Laporan ${selectedDataType.value} - EasyKhairat',
                             style: pw.TextStyle(
@@ -481,59 +521,65 @@ class _LaporanPageState extends State<LaporanPage> {
                               fontWeight: pw.FontWeight.bold,
                             ),
                           ),
-                          // Add date
                           pw.Text(
                             'Tarikh: ${formatDate(DateTime.now())}',
-                            style: pw.TextStyle(fontSize: 12),
+                            style: const pw.TextStyle(fontSize: 12),
                           ),
                         ],
                       ),
                     ),
-                    pw.SizedBox(width: 100), // Balance the layout
+                    pw.SizedBox(width: 100),
                   ],
                 ),
+
                 pw.SizedBox(height: 20),
-                // Add data table
+
                 pw.Table.fromTextArray(
                   headers: columns,
                   data:
-                      data
-                          .map(
-                            (row) =>
-                                columns.map((c) {
-                                  var cellValue = row[c];
-                                  // Format dates in the data
-                                  if (c.toLowerCase().contains('tarikh') &&
-                                      cellValue != null) {
-                                    cellValue = formatDate(cellValue);
-                                  }
-                                  return '$cellValue';
-                                }).toList(),
-                          )
-                          .toList(),
+                      data.map((row) {
+                        return columns.map((c) {
+                          var cellValue = row[c] ?? '';
+
+                          if (c.toLowerCase().contains('tarikh')) {
+                            cellValue = safeFormatDate(cellValue);
+                          }
+
+                          return '$cellValue';
+                        }).toList();
+                      }).toList(),
                   headerStyle: pw.TextStyle(fontWeight: pw.FontWeight.bold),
-                  headerDecoration: pw.BoxDecoration(color: PdfColors.grey300),
-                  cellHeight: 30,
-                  cellAlignments: {
-                    for (var i = 0; i < columns.length; i++)
-                      i: pw.Alignment.centerLeft,
-                  },
+                  headerDecoration: const pw.BoxDecoration(
+                    color: PdfColors.grey300,
+                  ),
+                  cellStyle: const pw.TextStyle(fontSize: 8),
+                  cellAlignment: pw.Alignment.centerLeft,
                 ),
               ],
-            ),
-      ),
-    );
+        ),
+      );
 
-    final bytes = await pdf.save();
-    final blob = html.Blob([bytes], 'application/pdf');
-    final url = html.Url.createObjectUrlFromBlob(blob);
-    final anchor =
-        html.AnchorElement(href: url)
-          ..setAttribute('download', 'Laporan_${selectedDataType.value}.pdf')
-          ..click();
-    html.Url.revokeObjectUrl(url);
+      final bytes = await pdf.save();
 
-    isLoading.value = false;
+      final blob = html.Blob([bytes], 'application/pdf');
+      final url = html.Url.createObjectUrlFromBlob(blob);
+
+      html.AnchorElement(href: url)
+        ..setAttribute('download', 'Laporan_${selectedDataType.value}.pdf')
+        ..click();
+
+      html.Url.revokeObjectUrl(url);
+    } catch (e) {
+      print('PDF export error: $e');
+
+      Get.snackbar(
+        'Ralat Eksport PDF',
+        e.toString(),
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    } finally {
+      isLoading.value = false;
+    }
   }
 
   // Enhanced search widget similar to manage_announce
