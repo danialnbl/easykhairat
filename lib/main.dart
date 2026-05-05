@@ -7,9 +7,9 @@ import 'package:app_links/app_links.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  const supabaseUrl = 'https://djeeipnokclsjabwadoq.supabase.co';
+  const supabaseUrl = 'https://cgtamipggfmgcarluttm.supabase.co';
   const supabaseKey =
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRqZWVpcG5va2Nsc2phYndhZG9xIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDA0MTE4NDUsImV4cCI6MjA1NTk4Nzg0NX0.sk1UM2xXnUmk6N0jV5UCytHNmWgX9CA6f1uI102uijg';
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNndGFtaXBnZ2ZtZ2Nhcmx1dHRtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc4MDMwNzgsImV4cCI6MjA5MzM3OTA3OH0.mQ851adx9aNChOBHWv5VdnNGn_POST6QlWVonbp2i-o';
 
   await Supabase.initialize(
     url: supabaseUrl,
