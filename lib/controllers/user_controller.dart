@@ -202,7 +202,7 @@ class UserController extends GetxController {
   // Delete a user
   Future<void> deleteUser(String userId) async {
     final String supabaseUrl =
-        'https://djeeipnokclsjabwadoq.supabase.co/functions/v1/delete-user'; // Replace with your Supabase function URL
+        'https://cgtamipggfmgcarluttm.supabase.co/functions/v1/delete-user'; // Replace with your Supabase function URL
 
     try {
       isLoading.value = true;
